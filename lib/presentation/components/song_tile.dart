@@ -7,6 +7,7 @@ class SongTile extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onTap;
   final VoidCallback? onMoreTap;
+  final bool isFavorite;
 
   const SongTile({
     super.key,
@@ -14,6 +15,7 @@ class SongTile extends StatelessWidget {
     this.isPlaying = false,
     required this.onTap,
     this.onMoreTap,
+    this.isFavorite = false,
   });
 
   @override
@@ -49,7 +51,10 @@ class SongTile extends StatelessWidget {
           ),
           if (onMoreTap != null)
             IconButton(
-              icon: const Icon(Icons.more_vert),
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? const Color(0xFFFF4D8B) : null,
+              ),
               onPressed: onMoreTap,
             ),
         ],

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 import '../hooks/use_audio.dart';
+import '../providers/favorites_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
 
@@ -72,7 +75,25 @@ class PlayerPage extends HookWidget {
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 8),
+                      // Botón de favorito
+                      Builder(builder: (context) {
+                        final favs = context.watch<FavoritesProvider>();
+                        final userId =
+                            context.read<AuthProvider>().currentUser?.id ?? '';
+                        final isFav =
+                            favs.isFavorite(audio.currentSong!.id);
+                        return IconButton(
+                          icon: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            color: const Color(0xFFFF4D8B),
+                            size: 28,
+                          ),
+                          onPressed: () =>
+                              favs.toggleFavorite(userId, audio.currentSong!),
+                        );
+                      }),
+                      const SizedBox(height: 16),
                       // Seek bar
                       Slider(
                         value: playbackProgress(

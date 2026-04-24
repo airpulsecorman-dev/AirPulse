@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 import '../hooks/use_library.dart';
 import '../hooks/use_audio.dart';
 import '../components/song_tile.dart';
 import '../components/player_bar.dart';
+import '../providers/auth_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../../domain/entities/song.dart';
 
 class LibraryPage extends HookWidget {
@@ -17,7 +20,9 @@ class LibraryPage extends HookWidget {
     final searchController = useTextEditingController();
 
     useEffect(() {
-      library.loadLibrary();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        library.loadLibrary();
+      });
       return null;
     }, const []);
 
@@ -60,13 +65,54 @@ class LibraryPage extends HookWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.favorite_border),
+            tooltip: 'Favoritos',
+            onPressed: () => Navigator.pushNamed(context, '/favorites'),
+          ),
+          IconButton(
             icon: const Icon(Icons.wifi_tethering),
             tooltip: 'Servidor local',
             onPressed: () => Navigator.pushNamed(context, '/server'),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle_outlined),
+            onSelected: (value) {
+              if (value == 'logout') {
+                context.read<AuthProvider>().logout();
+              }
+            },
+            itemBuilder: (_) {
+              final user = context.read<AuthProvider>().currentUser;
+              return [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.username ?? '',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        user?.email ?? '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, size: 18),
+                      SizedBox(width: 8),
+                      Text('Cerrar sesión'),
+                    ],
+                  ),
+                ),
+              ];
+            },
           ),
         ],
       ),
@@ -125,12 +171,17 @@ class _SongsList extends StatelessWidget {
     if (songs.isEmpty) {
       return const Center(child: Text('No hay canciones en la biblioteca'));
     }
+    final favs = context.watch<FavoritesProvider>();
+    final userId = context.read<AuthProvider>().currentUser?.id ?? '';
+
     return ListView.builder(
       itemCount: songs.length,
       itemBuilder: (_, i) => SongTile(
         song: songs[i],
         isPlaying: songs[i].id == currentSong?.id,
         onTap: () => onSongTap(songs[i]),
+        onMoreTap: () => favs.toggleFavorite(userId, songs[i]),
+        isFavorite: favs.isFavorite(songs[i].id),
       ),
     );
   }
