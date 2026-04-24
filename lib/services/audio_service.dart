@@ -42,6 +42,7 @@ class AudioService {
       _currentIndex = index ?? 0;
       _queueController.add(_queue);
       await _repository.setQueue(queue, startIndex: _currentIndex);
+      await _repository.resume();
     } else {
       await _repository.play(song);
     }

@@ -36,6 +36,7 @@ class LocalServerService {
     final sessionId = _uuid.v4();
 
     final router = Router()
+      ..get('/', (Request req) => _handleRoot(req, ip, port, sessionId))
       ..get('/health', _handleHealth)
       ..get('/songs', (Request req) => _handleSongs(req, songs))
       ..get('/songs/<id>/stream', (Request req, String id) =>
@@ -77,6 +78,74 @@ class LocalServerService {
 
   void broadcastPlayerState(Map<String, dynamic> state) {
     _wsSource.broadcast(state);
+  }
+
+  Response _handleRoot(Request req, String ip, int port, String sessionId) {
+    final serverUrl = 'http://$ip:$port';
+    final connectUrl = '$serverUrl/?session=$sessionId';
+    final html = '''<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirPulse – Conectar</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0D1B2A;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 32px 16px;
+    }
+    h1 { font-size: 1.6rem; letter-spacing: 1px; }
+    p { color: #8899AA; font-size: 0.95rem; text-align: center; max-width: 360px; }
+    #qr-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 40px rgba(103,80,164,0.4);
+    }
+    .url {
+      font-size: 0.8rem;
+      color: #A78BFA;
+      word-break: break-all;
+      text-align: center;
+      max-width: 360px;
+    }
+    .badge {
+      background: #1A2D42;
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      color: #8899AA;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 AirPulse</h1>
+  <p>Escanea el código QR con tu móvil para conectarte al servidor de música.</p>
+  <div id="qr-box">
+    <canvas id="qr"></canvas>
+  </div>
+  <span class="url">$connectUrl</span>
+  <span class="badge">Servidor activo · $ip:$port</span>
+  <script>
+    QRCode.toCanvas(document.getElementById('qr'), '$connectUrl', {
+      width: 240,
+      margin: 1,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+  </script>
+</body>
+</html>''';
+    return Response.ok(html, headers: {'content-type': 'text/html; charset=utf-8'});
   }
 
   Response _handleHealth(Request req) {

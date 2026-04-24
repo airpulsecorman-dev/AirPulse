@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/auth_provider.dart';
@@ -171,16 +172,30 @@ class _FavoriteTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFF1A2D42),
-        ),
-        child: Icon(
-          isPlaying ? Icons.equalizer_rounded : Icons.music_note_rounded,
-          color: isPlaying ? const Color(0xFFFF4D8B) : const Color(0xFF8899AA),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: QueryArtworkWidget(
+          id: int.tryParse(song.id) ?? 0,
+          type: ArtworkType.AUDIO,
+          artworkWidth: 48,
+          artworkHeight: 48,
+          artworkFit: BoxFit.cover,
+          artworkBorder: BorderRadius.circular(10),
+          keepOldArtwork: true,
+          nullArtworkWidget: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: const Color(0xFF1A2D42),
+            ),
+            child: Icon(
+              isPlaying ? Icons.equalizer_rounded : Icons.music_note_rounded,
+              color: isPlaying
+                  ? const Color(0xFFFF4D8B)
+                  : const Color(0xFF8899AA),
+            ),
+          ),
         ),
       ),
       title: Text(

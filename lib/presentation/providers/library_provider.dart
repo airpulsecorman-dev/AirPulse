@@ -13,6 +13,7 @@ class LibraryProvider extends ChangeNotifier {
   List<Artist> _artists = [];
   List<Playlist> _playlists = [];
   bool _isLoading = false;
+  bool _permissionsRequested = false;
   String? _error;
   String _searchQuery = '';
 
@@ -33,11 +34,15 @@ class LibraryProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   Future<void> loadLibrary() async {
+    if (_isLoading) return;
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      await _libraryService.requestPermissions();
+      if (!_permissionsRequested) {
+        _permissionsRequested = true;
+        await _libraryService.requestPermissions();
+      }
       _songs = await _libraryService.getAllSongs();
       _albums = await _libraryService.getAllAlbums();
       _artists = await _libraryService.getAllArtists();

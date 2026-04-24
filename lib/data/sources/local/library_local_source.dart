@@ -11,12 +11,27 @@ class LibraryLocalSource {
   }
 
   Future<List<Song>> fetchSongs() async {
+    final hasPermission = await _audioQuery.permissionsStatus();
+    if (!hasPermission) {
+      return [];
+    }
     final songs = await _audioQuery.querySongs(
       sortType: SongSortType.TITLE,
       orderType: OrderType.ASC_OR_SMALLER,
       uriType: UriType.EXTERNAL,
     );
-    return songs.map(_mapToSong).toList();
+    return songs
+        .where(_isRealMusic)
+        .map(_mapToSong)
+        .toList();
+  }
+
+  bool _isRealMusic(SongModel song) {
+    final path = song.data.toLowerCase();
+    // Excluir audios de WhatsApp que no sean MP3 reales
+    final isWhatsAppAudio = path.contains('whatsapp') &&
+        !path.endsWith('.mp3');
+    return !isWhatsAppAudio;
   }
 
   Future<List<Song>> searchSongs(String query) async {

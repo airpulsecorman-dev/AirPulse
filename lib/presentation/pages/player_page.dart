@@ -1,11 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 import '../hooks/use_audio.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/auth_provider.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
+
+void showQueueSheet(BuildContext context, AudioHookResult audio) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) {
+      final queue = audio.queue;
+      final current = audio.currentSong;
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.5,
+        maxChildSize: 0.9,
+        builder: (_, controller) => Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text('Cola de reproducción',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                controller: controller,
+                itemCount: queue.length,
+                itemBuilder: (_, i) {
+                  final song = queue[i];
+                  final isCurrentSong = song.id == current?.id;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      child: isCurrentSong
+                          ? const Icon(Icons.equalizer)
+                          : Text('${i + 1}'),
+                    ),
+                    title: Text(
+                      song.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: isCurrentSong
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isCurrentSong
+                            ? Theme.of(ctx).colorScheme.primary
+                            : null,
+                      ),
+                    ),
+                    subtitle: Text(
+                      song.artist,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      audio.play(song, q: queue, index: i);
+                      Navigator.pop(ctx);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
 class PlayerPage extends HookWidget {
   const PlayerPage({super.key});
@@ -20,6 +96,13 @@ class PlayerPage extends HookWidget {
         title: const Text('Ahora suena'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.queue_music),
+            tooltip: 'Cola de reproducción',
+            onPressed: () => showQueueSheet(context, audio),
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: audio.currentSong == null
@@ -42,7 +125,7 @@ class PlayerPage extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 16),
-                      // Album art placeholder
+                      // Album art
                       Container(
                         width: 260,
                         height: 260,
@@ -56,7 +139,21 @@ class PlayerPage extends HookWidget {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.music_note, size: 100),
+                        clipBehavior: Clip.antiAlias,
+                        child: QueryArtworkWidget(
+                          id: int.tryParse(audio.currentSong!.id) ?? 0,
+                          type: ArtworkType.AUDIO,
+                          artworkWidth: 260,
+                          artworkHeight: 260,
+                          artworkFit: BoxFit.cover,
+                          artworkBorder: BorderRadius.circular(16),
+                          keepOldArtwork: true,
+                          nullArtworkWidget: Icon(
+                            Icons.music_note,
+                            size: 100,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 32),
                       // Song info
