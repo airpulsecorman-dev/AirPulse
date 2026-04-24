@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6750A4" />
+  <meta name="description" content="AirPulse - Reproduce tu música desde el navegador" />
+  <link rel="manifest" href="pwa/manifest.json" />
+  <link rel="stylesheet" href="pwa/style.css" />
+  <title>AirPulse PWA</title>
+</head>
+<body>
+  <div id="app">
+    <!-- Connect Screen -->
+    <div id="screen-connect" class="screen active">
+      <div class="logo">
+        <span class="logo-icon">🎵</span>
+        <h1>AirPulse</h1>
+        <p class="subtitle">Conecta con tu teléfono para reproducir música</p>
+      </div>
+      <div class="connect-card">
+        <h2>Conectarse</h2>
+        <div class="input-group">
+          <label for="server-url">URL del servidor</label>
+          <input
+            type="url"
+            id="server-url"
+            placeholder="http://192.168.x.x:8765"
+            autocomplete="off"
+          />
+        </div>
+        <button id="btn-connect" class="btn-primary">
+          <span>Conectar</span>
+        </button>
+        <p class="hint">O escanea el QR desde la app AirPulse en tu teléfono</p>
+      </div>
+      <div id="connect-error" class="error-banner hidden"></div>
+    </div>
+
+    <!-- Player Screen -->
+    <div id="screen-player" class="screen hidden">
+      <header class="top-bar">
+        <button id="btn-disconnect" class="btn-icon" title="Desconectar">⬅</button>
+        <span class="server-info" id="server-info-label"></span>
+        <span class="connection-dot" id="conn-dot"></span>
+      </header>
+
+      <div class="artwork-wrap">
+        <div class="artwork" id="artwork">
+          <span class="artwork-icon">🎵</span>
+        </div>
+      </div>
+
+      <div class="song-info">
+        <div class="song-title" id="song-title">—</div>
+        <div class="song-artist" id="song-artist">—</div>
+        <div class="song-album" id="song-album">—</div>
+      </div>
+
+      <div class="progress-wrap">
+        <span class="time" id="time-current">0:00</span>
+        <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1" />
+        <span class="time" id="time-total">0:00</span>
+      </div>
+
+      <div class="controls">
+        <button id="btn-shuffle" class="btn-icon control-btn" title="Aleatorio">🔀</button>
+        <button id="btn-prev" class="btn-icon control-btn" title="Anterior">⏮</button>
+        <button id="btn-play-pause" class="btn-play" title="Play/Pause">▶</button>
+        <button id="btn-next" class="btn-icon control-btn" title="Siguiente">⏭</button>
+        <button id="btn-repeat" class="btn-icon control-btn" title="Repetir">🔁</button>
+      </div>
+
+      <div class="volume-wrap">
+        <span>🔈</span>
+        <input type="range" id="volume-bar" min="0" max="1" step="0.01" value="1" />
+        <span>🔊</span>
+      </div>
+
+      <!-- Song list -->
+      <div class="library-panel">
+        <div class="library-header">
+          <h3>Biblioteca</h3>
+          <input type="search" id="search-input" placeholder="Buscar…" />
+        </div>
+        <ul id="song-list" class="song-list"></ul>
+      </div>
+
+      <!-- Offline banner -->
+      <div id="offline-banner" class="offline-banner hidden">
+        📵 Sin conexión — modo offline
+      </div>
+    </div>
+  </div>
+
+  <script src="pwa/app.js" type="module"></script>
+</body>
+</html>
