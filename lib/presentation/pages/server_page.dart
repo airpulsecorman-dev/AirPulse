@@ -14,12 +14,13 @@ class ServerPage extends HookWidget {
     final server = useServer(context);
     final library = useLibrary(context);
 
-    // En móvil (Android/iOS): mostrar escáner QR para conectarse a la web
-    final isMobile = defaultTargetPlatform == TargetPlatform.android ||
+    // En móvil (Android/iOS): mostrar servidor local para que la web se conecte
+    final isMobile =
+        defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
 
     if (isMobile) {
-      return const _QRScannerPage();
+      return _MobileServerPage();
     }
 
     // En desktop/web: flujo normal de servidor
@@ -40,8 +41,7 @@ class ServerPage extends HookWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (server.error != null)
-              _ErrorBanner(error: server.error!),
+            if (server.error != null) _ErrorBanner(error: server.error!),
             if (!server.isRunning && !server.isStarting)
               _StartServerCard(
                 onStart: () => server.startServer(songs: library.songs),
@@ -74,6 +74,122 @@ class ServerPage extends HookWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Página de servidor para móvil: inicia el servidor local y muestra el QR
+/// para que la web se conecte y use las canciones del móvil.
+class _MobileServerPage extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final server = useServer(context);
+    final library = useLibrary(context);
+    final tabController = useTabController(initialLength: 2);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('AirPulse - Móvil'),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.wifi_tethering), text: 'Compartir música'),
+            Tab(icon: Icon(Icons.qr_code_scanner), text: 'Escanear web'),
+          ],
+        ),
+        actions: [
+          if (server.isRunning)
+            IconButton(
+              icon: const Icon(Icons.stop_circle_outlined),
+              tooltip: 'Detener servidor',
+              onPressed: server.stopServer,
+            ),
+        ],
+      ),
+      body: TabBarView(
+        controller: tabController,
+        children: [
+          // TAB 1: Iniciar servidor para compartir canciones a la web
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (server.error != null) _ErrorBanner(error: server.error!),
+                if (!server.isRunning && !server.isStarting)
+                  _StartServerCard(
+                    onStart: () => server.startServer(songs: library.songs),
+                  ),
+                if (server.isStarting)
+                  const Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Iniciando servidor…'),
+                      ],
+                    ),
+                  ),
+                if (server.isRunning && server.qrPayload != null)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          QRWidget(
+                            payload: server.qrPayload!,
+                            serverUrl: server.serverUrl ?? '',
+                            clientCount: server.connectedClients.length,
+                          ),
+                          const SizedBox(height: 16),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Icon(Icons.info_outline, size: 18),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Cómo conectar desde la web',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    '1. Abre AirPulse en el navegador web.\n'
+                                    '2. En la pantalla de inicio de sesión ingresa la URL de abajo.\n'
+                                    '3. Toca "Conectar" para ver y reproducir tus canciones desde la web.',
+                                    style: TextStyle(height: 1.6),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  if (server.serverUrl != null)
+                                    SelectableText(
+                                      server.serverUrl!,
+                                      style: const TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // TAB 2: Escanear QR de la web para conectarse como cliente
+          const _QRScannerPage(),
+        ],
       ),
     );
   }
@@ -232,16 +348,26 @@ class _ConnectedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, size: 80, color: theme.colorScheme.primary),
+            Icon(
+              Icons.check_circle,
+              size: 80,
+              color: theme.colorScheme.primary,
+            ),
             const SizedBox(height: 24),
-            Text('¡Conectado!',
-                style: theme.textTheme.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              '¡Conectado!',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 12),
-            Text(url,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.primary)),
+            Text(
+              url,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
             const SizedBox(height: 32),
             OutlinedButton.icon(
               icon: const Icon(Icons.qr_code_scanner),
@@ -318,7 +444,10 @@ class _InstructionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            Text('Cómo conectarse:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Cómo conectarse:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 8),
             Text('1. Conecta el navegador a la misma red WiFi'),
             Text('2. Escanea el QR con la cámara o abre la URL'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../presentation/providers/audio_provider.dart';
 import '../presentation/providers/library_provider.dart';
@@ -84,6 +85,10 @@ class _AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // En web siempre mostrar LoginPage (que contiene el panel de conexión con móvil).
+    // Las APIs de audio/biblioteca local no están disponibles en web.
+    if (kIsWeb) return const LoginPage();
+
     final auth = context.watch<AuthProvider>();
 
     switch (auth.status) {
