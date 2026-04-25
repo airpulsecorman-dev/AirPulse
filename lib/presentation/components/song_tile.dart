@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
+import 'song_artwork.dart';
 
 class SongTile extends StatelessWidget {
   final Song song;
@@ -26,23 +26,17 @@ class SongTile extends StatelessWidget {
       leading: SizedBox(
         width: 48,
         height: 48,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: QueryArtworkWidget(
-            id: int.tryParse(song.id) ?? 0,
-            type: ArtworkType.AUDIO,
-            artworkWidth: 48,
-            artworkHeight: 48,
-            artworkFit: BoxFit.cover,
-            artworkBorder: BorderRadius.circular(24),
-            keepOldArtwork: true,
-            nullArtworkWidget: CircleAvatar(
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: isPlaying
-                  ? Icon(Icons.equalizer, color: theme.colorScheme.primary)
-                  : Icon(Icons.music_note,
-                      color: theme.colorScheme.onPrimaryContainer),
-            ),
+        child: SongArtwork(
+          songId: song.id,
+          artworkPath: song.artworkPath,
+          size: 48,
+          borderRadius: 24,
+          nullWidget: CircleAvatar(
+            backgroundColor: theme.colorScheme.primaryContainer,
+            child: isPlaying
+                ? Icon(Icons.equalizer, color: theme.colorScheme.primary)
+                : Icon(Icons.music_note,
+                    color: theme.colorScheme.onPrimaryContainer),
           ),
         ),
       ),

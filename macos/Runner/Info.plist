@@ -36,5 +36,7 @@
 	<string>Esta aplicación necesita acceso a tu biblioteca de fotos para guardar y seleccionar imágenes.</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Esta aplicación necesita acceso a tu biblioteca de música.</string>
+	<key>NSMusicFolderUsageDescription</key>
+	<string>Esta aplicación necesita acceso a tu carpeta de Música para detectar y reproducir tus canciones.</string>
 </dict>
 </plist>

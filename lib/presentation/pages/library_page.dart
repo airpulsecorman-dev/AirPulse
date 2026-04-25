@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -5,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../hooks/use_library.dart';
 import '../hooks/use_audio.dart';
 import '../components/song_tile.dart';
+import '../components/song_artwork.dart';
 import '../components/player_bar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favorites_provider.dart';
@@ -255,8 +257,9 @@ class _AlbumsList extends StatelessWidget {
       itemCount: albums.length,
       itemBuilder: (_, i) {
         final album = albums[i];
-        final artId = album.songs.isNotEmpty
-            ? (int.tryParse(album.songs.first.id) ?? 0)
+        final firstSong = album.songs.isNotEmpty ? album.songs.first : null;
+        final artId = firstSong != null
+            ? (int.tryParse(firstSong.id) ?? 0)
             : (int.tryParse(album.id) ?? 0);
         return GestureDetector(
           onTap: () => Navigator.push(
@@ -272,24 +275,39 @@ class _AlbumsList extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    child: QueryArtworkWidget(
-                      id: artId,
-                      type: ArtworkType.AUDIO,
-                      artworkFit: BoxFit.cover,
-                      artworkWidth: double.infinity,
-                      artworkBorder: BorderRadius.zero,
-                      keepOldArtwork: true,
-                      nullArtworkWidget: Container(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.album,
-                          size: 48,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
+                    child: Platform.isMacOS
+                        ? SongArtwork(
+                            songId: firstSong?.id ?? album.id,
+                            artworkPath: firstSong?.artworkPath ?? album.artworkPath,
+                            size: double.infinity,
+                            borderRadius: 0,
+                            nullWidget: Container(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              child: Icon(
+                                Icons.album,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          )
+                        : QueryArtworkWidget(
+                            id: artId,
+                            type: ArtworkType.AUDIO,
+                            artworkFit: BoxFit.cover,
+                            artworkWidth: double.infinity,
+                            artworkBorder: BorderRadius.zero,
+                            keepOldArtwork: true,
+                            nullArtworkWidget: Container(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              child: Icon(
+                                Icons.album,
+                                size: 48,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
                 Padding(
@@ -335,23 +353,32 @@ class _ArtistsList extends StatelessWidget {
       itemCount: artists.length,
       itemBuilder: (_, i) {
         final artist = artists[i];
-        final artId = artist.songs.isNotEmpty
-            ? (int.tryParse(artist.songs.first.id) ?? 0)
+        final firstSong = artist.songs.isNotEmpty ? artist.songs.first : null;
+        final artId = firstSong != null
+            ? (int.tryParse(firstSong.id) ?? 0)
             : (int.tryParse(artist.id) ?? 0);
         return ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: QueryArtworkWidget(
-              id: artId,
-              type: ArtworkType.AUDIO,
-              artworkWidth: 48,
-              artworkHeight: 48,
-              artworkFit: BoxFit.cover,
-              artworkBorder: BorderRadius.circular(24),
-              keepOldArtwork: true,
-              nullArtworkWidget: const CircleAvatar(child: Icon(Icons.person)),
-            ),
-          ),
+          leading: Platform.isMacOS
+              ? SongArtwork(
+                  songId: firstSong?.id ?? artist.id,
+                  artworkPath: firstSong?.artworkPath ?? artist.artworkPath,
+                  size: 48,
+                  borderRadius: 24,
+                  nullWidget: const CircleAvatar(child: Icon(Icons.person)),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: QueryArtworkWidget(
+                    id: artId,
+                    type: ArtworkType.AUDIO,
+                    artworkWidth: 48,
+                    artworkHeight: 48,
+                    artworkFit: BoxFit.cover,
+                    artworkBorder: BorderRadius.circular(24),
+                    keepOldArtwork: true,
+                    nullArtworkWidget: const CircleAvatar(child: Icon(Icons.person)),
+                  ),
+                ),
           title: Text(artist.name),
           subtitle: Text('${artist.songs.length} canciones'),
           trailing: const Icon(Icons.chevron_right),
