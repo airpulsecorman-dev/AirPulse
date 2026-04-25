@@ -20,6 +20,28 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePass = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Si la web se abrió con ?serverUrl= (enviado por el móvil tras escanear el QR),
+    // auto-navegar directamente a WebLibraryPage.
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final serverUrl = Uri.base.queryParameters['serverUrl'];
+        if (serverUrl != null && serverUrl.isNotEmpty && mounted) {
+          final normalized = serverUrl.endsWith('/')
+              ? serverUrl.substring(0, serverUrl.length - 1)
+              : serverUrl;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => WebLibraryPage(serverUrl: normalized),
+            ),
+          );
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
@@ -237,9 +259,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildMobileConnectPanel(BuildContext context) {
-    // QR que contiene la URL actual de la web app para que el móvil la identifique
-    final webUrl = Uri.base.toString();
-    final qrData = webUrl;
+    // QR con la URL actual de la web para que el móvil la escanee
+    final webUrl = Uri.base.toString().split('?').first; // sin params previos
 
     return Container(
       decoration: BoxDecoration(
@@ -256,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
           const Icon(Icons.smartphone, color: Color(0xFFFF4D8B), size: 32),
           const SizedBox(height: 12),
           const Text(
-            'Reproducir desde el móvil',
+            'Conectar con el móvil',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -266,12 +287,12 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Escucha tu música del móvil directamente desde el navegador.',
+            'Escanea este QR desde la app móvil para conectarse automáticamente.',
             style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          // QR de la web app
+          // QR con la URL de la web para que el móvil lo escanee
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -279,17 +300,17 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: QrImageView(
-              data: qrData,
+              data: webUrl,
               version: QrVersions.auto,
               size: 160,
               foregroundColor: const Color(0xFF0D1B2A),
               backgroundColor: Colors.white,
             ),
           ),
-          const SizedBox(height: 12),
-          const Text(
-            '← Escanea desde el móvil para abrir esta URL',
-            style: TextStyle(color: Color(0xFF8899AA), fontSize: 11),
+          const SizedBox(height: 8),
+          Text(
+            webUrl,
+            style: const TextStyle(color: Color(0xFF8899AA), fontSize: 10),
             textAlign: TextAlign.center,
           ),
           const Padding(
@@ -322,15 +343,18 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 6),
                 _StepItem(
                   number: '2',
-                  text: 'Ve a Servidor → Iniciar servidor',
+                  text: 'Ve a Servidor → Escanear web',
                 ),
                 SizedBox(height: 6),
                 _StepItem(
                   number: '3',
-                  text: 'Copia la URL que aparece en tu móvil',
+                  text: 'Apunta la cámara al QR de arriba',
                 ),
                 SizedBox(height: 6),
-                _StepItem(number: '4', text: 'Pégala abajo y toca Conectar'),
+                _StepItem(
+                  number: '4',
+                  text: '¡Las canciones aparecerán automáticamente!',
+                ),
               ],
             ),
           ),

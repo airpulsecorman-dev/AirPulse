@@ -41,8 +41,8 @@ class AudioService {
       _queue = queue;
       _currentIndex = index ?? 0;
       _queueController.add(_queue);
+      // setQueue ya inicia la reproducción internamente
       await _repository.setQueue(queue, startIndex: _currentIndex);
-      await _repository.resume();
     } else {
       await _repository.play(song);
     }

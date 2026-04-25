@@ -1,9 +1,24 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 import '../../../domain/entities/song.dart';
 
 class AudioLocalSource {
   final AudioPlayer _player = AudioPlayer();
+  bool _sessionConfigured = false;
+
+  AudioLocalSource() {
+    _configureAudioSession();
+  }
+
+  Future<void> _configureAudioSession() async {
+    if (_sessionConfigured) return;
+    _sessionConfigured = true;
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+    // Solicitar foco de audio al sistema Android/iOS
+    await session.setActive(true);
+  }
 
   Stream<bool> get isPlayingStream => _player.playingStream;
   Stream<Duration> get positionStream => _player.positionStream;
@@ -11,6 +26,7 @@ class AudioLocalSource {
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
 
   Future<void> playSong(Song song) async {
+    await _configureAudioSession();
     await _player.setFilePath(song.filePath);
     await _player.play();
   }
@@ -24,13 +40,17 @@ class AudioLocalSource {
   Future<void> previous() => _player.seekToPrevious();
 
   Future<void> setQueue(List<Song> songs, {int startIndex = 0}) async {
+    await _configureAudioSession();
     final sources = songs
         .map((s) => AudioSource.uri(Uri.file(s.filePath)))
         .toList();
     await _player.setAudioSource(
       ConcatenatingAudioSource(children: sources),
       initialIndex: startIndex,
+      preload: true,
     );
+    // Iniciar reproducción inmediatamente tras cargar la cola
+    await _player.play();
   }
 
   Future<void> setLoopMode(LoopMode mode) => _player.setLoopMode(mode);

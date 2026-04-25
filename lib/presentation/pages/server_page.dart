@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../hooks/use_server.dart';
 import '../hooks/use_library.dart';
+import '../providers/server_provider.dart';
+import '../providers/library_provider.dart';
 import '../components/qr_widget.dart';
 
 class ServerPage extends HookWidget {
@@ -204,9 +208,11 @@ class _QRScannerPage extends StatefulWidget {
 }
 
 class _QRScannerPageState extends State<_QRScannerPage> {
-  final MobileScannerController _scannerController = MobileScannerController();
+  MobileScannerController _scannerController = MobileScannerController();
   bool _scanned = false;
   String? _connectedUrl;
+  bool _isConnecting = false;
+  String? _connectError;
 
   @override
   void dispose() {
@@ -214,48 +220,62 @@ class _QRScannerPageState extends State<_QRScannerPage> {
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) {
+  void _onDetect(BarcodeCapture capture) async {
     if (_scanned) return;
     final raw = capture.barcodes.firstOrNull?.rawValue;
     if (raw == null) return;
 
-    // Intentar parsear payload JSON de AirPulse
-    String? url;
-    try {
-      final data = Map<String, dynamic>.from(
-        (raw.startsWith('{'))
-            ? (raw as dynamic)
-            : throw FormatException('not json'),
-      );
-      if (data['type'] == 'airpulse_connect') {
-        url = data['url'] as String?;
-      }
-    } catch (_) {
-      // Si no es JSON, tratar el valor directo como URL
-      if (raw.startsWith('http')) url = raw;
+    // La web envía su URL directamente como QR
+    String? webUrl;
+    if (raw.startsWith('http')) {
+      webUrl = raw.split('?').first; // ignorar params previos
+    } else {
+      return; // QR no reconocido
     }
-
-    if (url == null) return;
 
     setState(() {
       _scanned = true;
-      _connectedUrl = url;
+      _connectedUrl = webUrl;
+      _isConnecting = true;
+      _connectError = null;
     });
     _scannerController.stop();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Conectado a $url'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      // 1. Iniciar el servidor móvil
+      final serverProvider = context.read<ServerProvider>();
+      final libraryProvider = context.read<LibraryProvider>();
+      await serverProvider.startServer(songs: libraryProvider.songs);
+
+      final mobileServerUrl = serverProvider.serverUrl;
+      if (mobileServerUrl == null) {
+        setState(() {
+          _connectError = 'No se pudo iniciar el servidor';
+          _isConnecting = false;
+        });
+        return;
+      }
+
+      // 2. Abrir la web con el parámetro serverUrl para auto-conectar
+      final targetUri = Uri.parse(webUrl).replace(
+        queryParameters: {'serverUrl': mobileServerUrl},
+      );
+      await launchUrl(targetUri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      setState(() => _connectError = e.toString());
+    } finally {
+      setState(() => _isConnecting = false);
+    }
   }
 
   void _reset() {
     setState(() {
       _scanned = false;
       _connectedUrl = null;
+      _isConnecting = false;
+      _connectError = null;
     });
+    _scannerController = MobileScannerController();
     _scannerController.start();
   }
 
@@ -282,7 +302,23 @@ class _QRScannerPageState extends State<_QRScannerPage> {
         ],
       ),
       body: _scanned
-          ? _ConnectedView(url: _connectedUrl!, onRescan: _reset)
+          ? (_isConnecting
+              ? const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+                      SizedBox(height: 16),
+                      Text('Iniciando servidor y abriendo la web…'),
+                    ],
+                  ),
+                )
+              : _connectError != null
+                  ? _ErrorConnectView(
+                      error: _connectError!,
+                      onRetry: _reset,
+                    )
+                  : _ConnectedView(url: _connectedUrl!, onRescan: _reset))
           : Column(
               children: [
                 Expanded(
@@ -319,7 +355,7 @@ class _QRScannerPageState extends State<_QRScannerPage> {
                         const Icon(Icons.computer, size: 32),
                         const SizedBox(height: 12),
                         Text(
-                          'Abre la URL del servidor en tu PC o Smart TV y escanea el código QR que aparece en pantalla.',
+                          'Abre AirPulse web, ve al panel de conexión y escanea el QR que aparece en la pantalla de la web.',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium,
                         ),
@@ -348,17 +384,22 @@ class _ConnectedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle,
               size: 80,
-              color: theme.colorScheme.primary,
+              color: Colors.green,
             ),
             const SizedBox(height: 24),
             Text(
-              '¡Conectado!',
+              '¡Servidor iniciado!',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'La web se abre automáticamente con las canciones listas.',
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
@@ -371,8 +412,47 @@ class _ConnectedView extends StatelessWidget {
             const SizedBox(height: 32),
             OutlinedButton.icon(
               icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Escanear otro servidor'),
+              label: const Text('Conectar otra web'),
               onPressed: onRescan,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorConnectView extends StatelessWidget {
+  final String error;
+  final VoidCallback onRetry;
+
+  const _ErrorConnectView({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text(
+              'Error al conectar',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
             ),
           ],
         ),
