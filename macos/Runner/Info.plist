@@ -34,5 +34,7 @@
 	<string>Esta aplicación necesita acceso al micrófono para grabar audio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceso a tu biblioteca de fotos para guardar y seleccionar imágenes.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Esta aplicación necesita acceso a tu biblioteca de música.</string>
 </dict>
 </plist>

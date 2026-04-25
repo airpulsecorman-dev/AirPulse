@@ -132,6 +132,7 @@ class LibraryPage extends HookWidget {
                 _SongsList(
                   songs: library.songs,
                   currentSong: audio.currentSong,
+                  onAddSongs: library.addSongsFromFiles,
                   onSongTap: (song) async {
                     await audio.play(
                       song,
@@ -174,16 +175,50 @@ class _SongsList extends StatelessWidget {
   final List<Song> songs;
   final Song? currentSong;
   final ValueChanged<Song> onSongTap;
+  final VoidCallback onAddSongs;
   const _SongsList({
     required this.songs,
     required this.currentSong,
     required this.onSongTap,
+    required this.onAddSongs,
   });
 
   @override
   Widget build(BuildContext context) {
     if (songs.isEmpty) {
-      return const Center(child: Text('No hay canciones en la biblioteca'));
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.library_music_outlined,
+                size: 72, color: Color(0xFF8899AA)),
+            const SizedBox(height: 16),
+            const Text(
+              'No hay canciones en la biblioteca',
+              style: TextStyle(fontSize: 16, color: Color(0xFF8899AA)),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Agrega archivos de audio desde tu dispositivo',
+              style: TextStyle(fontSize: 13, color: Color(0xFF566D80)),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onAddSongs,
+              icon: const Icon(Icons.add),
+              label: const Text('Agregar canciones'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF4D8B),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
+              ),
+            ),
+          ],
+        ),
+      );
     }
     final favs = context.watch<FavoritesProvider>();
     final userId = context.read<AuthProvider>().currentUser?.id ?? '';
