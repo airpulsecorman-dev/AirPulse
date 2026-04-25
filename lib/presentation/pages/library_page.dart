@@ -10,6 +10,7 @@ import '../providers/auth_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../../domain/entities/song.dart';
 import 'album_detail_page.dart';
+import 'artist_detail_page.dart';
 
 class LibraryPage extends HookWidget {
   const LibraryPage({super.key});
@@ -241,6 +242,7 @@ class _AlbumsList extends StatelessWidget {
                       type: ArtworkType.AUDIO,
                       artworkFit: BoxFit.cover,
                       artworkWidth: double.infinity,
+                      artworkBorder: BorderRadius.zero,
                       keepOldArtwork: true,
                       nullArtworkWidget: Container(
                         color: Theme.of(context).colorScheme.primaryContainer,
@@ -317,6 +319,11 @@ class _ArtistsList extends StatelessWidget {
           ),
           title: Text(artist.name),
           subtitle: Text('${artist.songs.length} canciones'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ArtistDetailPage(artist: artist)),
+          ),
         );
       },
     );

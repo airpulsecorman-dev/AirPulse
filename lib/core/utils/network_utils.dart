@@ -18,4 +18,4 @@ String buildStreamUrl(String serverUrl, String songId) =>
 
 /// Construye la URL del WebSocket del servidor local.
 String buildWebSocketUrl(String serverUrl) =>
-    serverUrl.replaceFirst('http://', 'ws://') + '/ws';
+    '${serverUrl.replaceFirst('http://', 'ws://')}/ws';

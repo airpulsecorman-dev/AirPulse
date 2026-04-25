@@ -21,6 +21,7 @@ class AudioService {
   AudioService() {
     _repository = PlayerRepositoryImpl(_source);
     _listenToPlayerState();
+    _listenToCurrentIndex();
   }
 
   Stream<Song?> get currentSongStream => _currentSongController.stream;
@@ -37,6 +38,11 @@ class AudioService {
   bool get shuffleEnabled => _shuffleEnabled;
 
   Future<void> playSong(Song song, {List<Song>? queue, int? index}) async {
+    // Notificar la canción actual ANTES del await para que la navegación
+    // a /player la encuentre disponible de inmediato en AudioProvider.
+    _currentSong = song;
+    _currentSongController.add(_currentSong);
+
     if (queue != null) {
       _queue = queue;
       _currentIndex = index ?? 0;
@@ -46,8 +52,6 @@ class AudioService {
     } else {
       await _repository.play(song);
     }
-    _currentSong = song;
-    _currentSongController.add(_currentSong);
   }
 
   Future<void> pause() => _repository.pause();
@@ -78,6 +82,16 @@ class AudioService {
     _source.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
         _handleTrackCompletion();
+      }
+    });
+  }
+
+  void _listenToCurrentIndex() {
+    _source.currentIndexStream.listen((index) {
+      if (index != null && index < _queue.length && index != _currentIndex) {
+        _currentIndex = index;
+        _currentSong = _queue[index];
+        _currentSongController.add(_currentSong);
       }
     });
   }

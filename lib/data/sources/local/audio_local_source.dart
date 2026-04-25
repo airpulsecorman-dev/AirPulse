@@ -24,6 +24,7 @@ class AudioLocalSource {
   Stream<Duration> get positionStream => _player.positionStream;
   Stream<double> get volumeStream => _player.volumeStream;
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
+  Stream<int?> get currentIndexStream => _player.currentIndexStream;
 
   Future<void> playSong(Song song) async {
     await _configureAudioSession();

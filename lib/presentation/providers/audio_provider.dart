@@ -26,6 +26,9 @@ class AudioProvider extends ChangeNotifier {
   bool get shuffleEnabled => _shuffleEnabled;
   List<Song> get queue => _queue;
 
+  /// Stream de posición para suscripción directa (no pasa por notifyListeners).
+  Stream<Duration> get positionStream => _audioService.positionStream;
+
   void _listenToStreams() {
     _audioService.currentSongStream.listen((song) {
       _currentSong = song;
@@ -36,8 +39,7 @@ class AudioProvider extends ChangeNotifier {
       notifyListeners();
     });
     _audioService.positionStream.listen((pos) {
-      _position = pos;
-      notifyListeners();
+      _position = pos; // actualiza para lectura inicial; sin notifyListeners para no reconstruir toda la UI
     });
     _audioService.volumeStream.listen((vol) {
       _volume = vol;
@@ -57,9 +59,17 @@ class AudioProvider extends ChangeNotifier {
   Future<void> previous() => _audioService.previous();
   Future<void> seek(Duration position) => _audioService.seek(position);
   Future<void> setVolume(double vol) => _audioService.setVolume(vol);
-  Future<void> setRepeatMode(RepeatMode mode) =>
-      _audioService.setRepeatMode(mode);
-  Future<void> toggleShuffle() => _audioService.toggleShuffle();
+  Future<void> setRepeatMode(RepeatMode mode) async {
+    _repeatMode = mode;
+    notifyListeners();
+    await _audioService.setRepeatMode(mode);
+  }
+
+  Future<void> toggleShuffle() async {
+    _shuffleEnabled = !_shuffleEnabled;
+    notifyListeners();
+    await _audioService.toggleShuffle();
+  }
 
   @override
   void dispose() {

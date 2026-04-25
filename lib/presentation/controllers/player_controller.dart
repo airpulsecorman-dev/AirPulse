@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../services/audio_service.dart';
@@ -14,8 +15,8 @@ class PlayerController extends ChangeNotifier {
   bool _isPlaying = false;
   Duration _position = Duration.zero;
   double _volume = 1.0;
-  RepeatMode _repeatMode = RepeatMode.none;
-  bool _shuffleEnabled = false;
+  final RepeatMode _repeatMode = RepeatMode.none;
+  final bool _shuffleEnabled = false;
   List<Song> _queue = [];
 
   Song? get currentSong => _currentSong;
@@ -35,10 +36,12 @@ class PlayerController extends ChangeNotifier {
       _isPlaying = p;
       notifyListeners();
     });
-    _audioService.positionStream.listen((pos) {
-      _position = pos;
-      notifyListeners();
-    });
+    _audioService.positionStream
+        .throttleTime(const Duration(milliseconds: 500))
+        .listen((pos) {
+          _position = pos;
+          notifyListeners();
+        });
     _audioService.volumeStream.listen((v) {
       _volume = v;
       notifyListeners();
