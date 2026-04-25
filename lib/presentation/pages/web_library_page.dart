@@ -33,6 +33,7 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _playSub;
+  int _wsRetryDelay = 1;
 
   @override
   void initState() {
@@ -90,9 +91,25 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
           .replaceFirst('http://', 'ws://')
           .replaceFirst('https://', 'wss://');
       _ws = WebSocketChannel.connect(Uri.parse('$wsUrl/ws'));
+      _ws!.stream.listen(
+        (_) {},
+        onDone: _scheduleWsReconnect,
+        onError: (_) => _scheduleWsReconnect(),
+      );
+      _wsRetryDelay = 1;
     } catch (_) {
-      // WebSocket opcional para control remoto
+      _scheduleWsReconnect();
     }
+  }
+
+  void _scheduleWsReconnect() {
+    if (!mounted) return;
+    Future.delayed(Duration(seconds: _wsRetryDelay), () {
+      if (!mounted) return;
+      _ws?.sink.close();
+      _wsRetryDelay = (_wsRetryDelay * 2).clamp(1, 30);
+      _connectWebSocket();
+    });
   }
 
   Future<void> _playSong(Song song, int index) async {
