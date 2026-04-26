@@ -1,6 +1,6 @@
 package corman.air.pulse.airpulse;
 
-import io.flutter.embedding.android.FlutterActivity;
+import com.ryanheise.audioservice.AudioServiceActivity;
 
-public class MainActivity extends FlutterActivity {
+public class MainActivity extends AudioServiceActivity {
 }

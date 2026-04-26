@@ -2,8 +2,82 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
+import 'song_artwork.dart';
 
 class PlayerBar extends StatelessWidget {
+  final Song? currentSong;
+  final bool isPlaying;
+  final Duration position;
+  final Stream<Duration>? positionStream;
+  final RepeatMode repeatMode;
+  final bool shuffleEnabled;
+  final VoidCallback onPlay;
+  final VoidCallback onPause;
+  final VoidCallback onNext;
+  final VoidCallback onPrevious;
+  final ValueChanged<Duration> onSeek;
+  final ValueChanged<RepeatMode> onRepeatMode;
+  final VoidCallback onShuffle;
+
+  const PlayerBar({
+    super.key,
+    required this.currentSong,
+    required this.isPlaying,
+    required this.position,
+    this.positionStream,
+    required this.repeatMode,
+    required this.shuffleEnabled,
+    required this.onPlay,
+    required this.onPause,
+    required this.onNext,
+    required this.onPrevious,
+    required this.onSeek,
+    required this.onRepeatMode,
+    required this.onShuffle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (positionStream != null) {
+      return StreamBuilder<Duration>(
+        stream: positionStream,
+        initialData: position,
+        builder: (context, snapshot) {
+          return _PlayerBarContent(
+            currentSong: currentSong,
+            isPlaying: isPlaying,
+            position: snapshot.data ?? position,
+            repeatMode: repeatMode,
+            shuffleEnabled: shuffleEnabled,
+            onPlay: onPlay,
+            onPause: onPause,
+            onNext: onNext,
+            onPrevious: onPrevious,
+            onSeek: onSeek,
+            onRepeatMode: onRepeatMode,
+            onShuffle: onShuffle,
+          );
+        },
+      );
+    }
+    return _PlayerBarContent(
+      currentSong: currentSong,
+      isPlaying: isPlaying,
+      position: position,
+      repeatMode: repeatMode,
+      shuffleEnabled: shuffleEnabled,
+      onPlay: onPlay,
+      onPause: onPause,
+      onNext: onNext,
+      onPrevious: onPrevious,
+      onSeek: onSeek,
+      onRepeatMode: onRepeatMode,
+      onShuffle: onShuffle,
+    );
+  }
+}
+
+class _PlayerBarContent extends StatelessWidget {
   final Song? currentSong;
   final bool isPlaying;
   final Duration position;
@@ -17,8 +91,7 @@ class PlayerBar extends StatelessWidget {
   final ValueChanged<RepeatMode> onRepeatMode;
   final VoidCallback onShuffle;
 
-  const PlayerBar({
-    super.key,
+  const _PlayerBarContent({
     required this.currentSong,
     required this.isPlaying,
     required this.position,
@@ -47,6 +120,44 @@ class PlayerBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Artwork circular
+                SongArtwork(
+                  songId: currentSong?.id ?? '',
+                  artworkPath: currentSong?.artworkPath,
+                  size: 40,
+                  borderRadius: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentSong?.title ?? '—',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        currentSong?.artist ?? '—',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Progress bar
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -65,8 +176,10 @@ class PlayerBar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(formatDuration(position),
-                    style: theme.textTheme.bodySmall),
+                Text(
+                  formatDuration(position),
+                  style: theme.textTheme.bodySmall,
+                ),
                 Text(formatDuration(total), style: theme.textTheme.bodySmall),
               ],
             ),
@@ -75,27 +188,8 @@ class PlayerBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        currentSong?.title ?? '—',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        currentSong?.artist ?? '—',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
                 // Shuffle
                 IconButton(
                   icon: Icon(
@@ -112,7 +206,9 @@ class PlayerBar extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(
-                    isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                    isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
                     size: 40,
                   ),
                   color: theme.colorScheme.primary,

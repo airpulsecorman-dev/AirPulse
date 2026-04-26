@@ -20,6 +20,7 @@ AudioHookResult useAudio(BuildContext context) {
     currentSong: currentSong,
     isPlaying: isPlaying,
     position: position,
+    positionStream: provider.positionStream,
     volume: volume,
     queue: queue,
     repeatMode: repeatMode,
@@ -40,6 +41,7 @@ class AudioHookResult {
   final Song? currentSong;
   final bool isPlaying;
   final Duration position;
+  final Stream<Duration> positionStream;
   final double volume;
   final List<Song> queue;
   final RepeatMode repeatMode;
@@ -58,6 +60,7 @@ class AudioHookResult {
     required this.currentSong,
     required this.isPlaying,
     required this.position,
+    required this.positionStream,
     required this.volume,
     required this.queue,
     required this.repeatMode,

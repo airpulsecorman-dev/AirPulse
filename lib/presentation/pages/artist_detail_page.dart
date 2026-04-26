@@ -125,6 +125,7 @@ class ArtistDetailPage extends HookWidget {
                 currentSong: audio.currentSong,
                 isPlaying: audio.isPlaying,
                 position: audio.position,
+                positionStream: audio.positionStream,
                 repeatMode: audio.repeatMode,
                 shuffleEnabled: audio.shuffleEnabled,
                 onPlay: audio.resume,

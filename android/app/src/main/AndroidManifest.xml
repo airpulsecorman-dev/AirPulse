@@ -44,7 +44,7 @@
         </activity>
         <!-- Servicio en background para audio_service (pantalla de bloqueo + BT) -->
         <service
-            android:name="com.ryanheise.audioservice.AudioServiceService"
+            android:name="com.ryanheise.audioservice.AudioService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
