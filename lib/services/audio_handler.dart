@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,11 +12,28 @@ class AirPulseAudioHandler extends BaseAudioHandler
     with QueueHandler, SeekHandler {
   final AudioPlayer _player = AudioPlayer();
   bool _sessionConfigured = false;
+  Timer? _positionTimer;
 
   AirPulseAudioHandler() {
     _configureAudioSession();
     _listenToPlaybackEvents();
     _listenToIndexChanges();
+    _startPositionTimer();
+  }
+
+  // ─── Timer periódico para actualizar posición en la notificación ──────────
+
+  void _startPositionTimer() {
+    _positionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_player.playing) {
+        playbackState.add(
+          playbackState.value.copyWith(
+            updatePosition: _player.position,
+            bufferedPosition: _player.bufferedPosition,
+          ),
+        );
+      }
+    });
   }
 
   // ─── Configuración de sesión de audio ───────────────────────────────────
@@ -74,15 +93,31 @@ class AirPulseAudioHandler extends BaseAudioHandler
 
   // ─── Conversión Song → MediaItem ────────────────────────────────────────
 
-  static MediaItem songToMediaItem(Song song) {
+  static Future<Uri?> _resolveArtUri(String? artworkPath) async {
+    if (artworkPath == null) return null;
+    try {
+      final src = File(artworkPath);
+      if (!src.existsSync()) return null;
+      // Copia el artwork a un archivo en caché accesible por el proceso de
+      // notificaciones de Android, evitando el límite de 1 MB de Binder.
+      final cacheDir = await getTemporaryDirectory();
+      final dest = File('${cacheDir.path}/airpulse_art.jpg');
+      await src.copy(dest.path);
+      return Uri.file(dest.path);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<MediaItem> songToMediaItem(Song song) async {
+    final artUri = await _resolveArtUri(song.artworkPath);
     return MediaItem(
       id: song.id,
       title: song.title,
       artist: song.artist,
       album: song.album,
       duration: song.duration,
-      artUri:
-          song.artworkPath != null ? Uri.file(song.artworkPath!) : null,
+      artUri: artUri,
       extras: {'filePath': song.filePath},
     );
   }
@@ -91,7 +126,7 @@ class AirPulseAudioHandler extends BaseAudioHandler
 
   Future<void> playSongDirect(Song song) async {
     await _configureAudioSession();
-    final item = songToMediaItem(song);
+    final item = await songToMediaItem(song);
     mediaItem.add(item);
     queue.add([item]);
     await _player.setFilePath(song.filePath);
@@ -103,7 +138,7 @@ class AirPulseAudioHandler extends BaseAudioHandler
     int startIndex = 0,
   }) async {
     await _configureAudioSession();
-    final items = songs.map(songToMediaItem).toList();
+    final items = await Future.wait(songs.map(songToMediaItem));
     queue.add(items);
     mediaItem.add(items[startIndex]);
     final sources =
@@ -147,6 +182,7 @@ class AirPulseAudioHandler extends BaseAudioHandler
   @override
   Future<void> stop() async {
     await _player.stop();
+    _positionTimer?.cancel();
     await super.stop();
   }
 
@@ -179,5 +215,8 @@ class AirPulseAudioHandler extends BaseAudioHandler
     );
   }
 
-  void disposePlayer() => _player.dispose();
+  void disposePlayer() {
+    _positionTimer?.cancel();
+    _player.dispose();
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:developer' show log;
+import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,6 +44,8 @@ class LibraryLocalSource {
           status = await Permission.storage.request();
         }
       }
+      // Android 13+: solicitar permiso de notificaciones
+      await Permission.notification.request();
     }
     return status.isGranted;
   }
@@ -188,7 +191,8 @@ class LibraryLocalSource {
       orderType: OrderType.ASC_OR_SMALLER,
       uriType: UriType.EXTERNAL,
     );
-    return songs.where(_isRealMusic).map(_mapToSong).toList();
+    final filtered = songs.where(_isRealMusic).toList();
+    return Future.wait(filtered.map(_mapToSong));
   }
 
   bool _isRealMusic(SongModel song) {
@@ -211,7 +215,25 @@ class LibraryLocalSource {
         .toList();
   }
 
-  Song _mapToSong(SongModel audioSong) {
+  Future<Song> _mapToSong(SongModel audioSong) async {
+    String? artworkPath;
+    try {
+      final Uint8List? bytes = await _audioQuery.queryArtwork(
+        audioSong.id,
+        ArtworkType.AUDIO,
+        quality: 100,
+      );
+      if (bytes != null && bytes.isNotEmpty) {
+        final cacheDir = await getTemporaryDirectory();
+        final artFile = File('${cacheDir.path}/artwork_${audioSong.id}.jpg');
+        if (!await artFile.exists()) {
+          await artFile.writeAsBytes(bytes);
+        }
+        artworkPath = artFile.path;
+      }
+    } catch (_) {
+      // Sin artwork disponible
+    }
     return app_models.SongModel(
       id: audioSong.id.toString(),
       title: audioSong.title,
@@ -220,6 +242,7 @@ class LibraryLocalSource {
       filePath: audioSong.data,
       duration: Duration(milliseconds: audioSong.duration ?? 0),
       trackNumber: audioSong.track ?? 0,
+      artworkPath: artworkPath,
     );
   }
 }
