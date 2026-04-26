@@ -124,25 +124,40 @@ class AirPulseAudioHandler extends BaseAudioHandler
 
   // ─── API pública usada por AudioLocalSource ──────────────────────────────
 
+  void _emitPlayingState() {
+    playbackState.add(
+      playbackState.value.copyWith(
+        controls: [
+          MediaControl.skipToPrevious,
+          MediaControl.pause,
+          MediaControl.skipToNext,
+        ],
+        androidCompactActionIndices: const [0, 1, 2],
+        processingState: AudioProcessingState.loading,
+        playing: true,
+      ),
+    );
+  }
+
   Future<void> playSongDirect(Song song) async {
     await _configureAudioSession();
     final item = await songToMediaItem(song);
     mediaItem.add(item);
     queue.add([item]);
+    _emitPlayingState(); // arranca el foreground service antes del stream
     await _player.setFilePath(song.filePath);
     await _player.play();
   }
 
-  Future<void> setQueueFromSongs(
-    List<Song> songs, {
-    int startIndex = 0,
-  }) async {
+  Future<void> setQueueFromSongs(List<Song> songs, {int startIndex = 0}) async {
     await _configureAudioSession();
     final items = await Future.wait(songs.map(songToMediaItem));
     queue.add(items);
     mediaItem.add(items[startIndex]);
-    final sources =
-        songs.map((s) => AudioSource.uri(Uri.file(s.filePath))).toList();
+    _emitPlayingState(); // arranca el foreground service antes del stream
+    final sources = songs
+        .map((s) => AudioSource.uri(Uri.file(s.filePath)))
+        .toList();
     await _player.setAudioSource(
       ConcatenatingAudioSource(children: sources),
       initialIndex: startIndex,

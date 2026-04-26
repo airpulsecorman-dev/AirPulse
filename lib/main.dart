@@ -11,13 +11,13 @@ Future<void> main() async {
   // bloqueo, controles de Bluetooth/auriculares y reproducción en background.
   final audioHandler = await AudioService.init<AirPulseAudioHandler>(
     builder: () => AirPulseAudioHandler(),
-    config: const AudioServiceConfig(
+    config: AudioServiceConfig(
       androidNotificationChannelId: 'com.airpulse.channel.audio',
       androidNotificationChannelName: 'AirPulse',
       androidNotificationIcon: 'mipmap/ic_launcher',
       androidShowNotificationBadge: true,
       androidNotificationOngoing: true,
-      androidStopForegroundOnPause: true,
+      androidStopForegroundOnPause: false,
       notificationColor: Color(0xFF1A1A2E),
     ),
   );
