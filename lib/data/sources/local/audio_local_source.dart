@@ -1,62 +1,36 @@
-import 'dart:async';
 import 'package:just_audio/just_audio.dart';
-import 'package:audio_session/audio_session.dart';
 import '../../../domain/entities/song.dart';
+import '../../../services/audio_handler.dart';
 
+/// Fuente de audio local que delega toda la reproducción al
+/// [AirPulseAudioHandler], el cual expone controles al SO (pantalla de
+/// bloqueo, notificación, Bluetooth/auriculares).
 class AudioLocalSource {
-  final AudioPlayer _player = AudioPlayer();
-  bool _sessionConfigured = false;
+  final AirPulseAudioHandler _handler;
 
-  AudioLocalSource() {
-    _configureAudioSession();
-  }
+  AudioLocalSource(this._handler);
 
-  Future<void> _configureAudioSession() async {
-    if (_sessionConfigured) return;
-    _sessionConfigured = true;
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.music());
-    // Solicitar foco de audio al sistema Android/iOS
-    await session.setActive(true);
-  }
+  Stream<bool> get isPlayingStream => _handler.isPlayingStream;
+  Stream<Duration> get positionStream => _handler.positionStream;
+  Stream<double> get volumeStream => _handler.volumeStream;
+  Stream<PlayerState> get playerStateStream => _handler.playerStateStream;
+  Stream<int?> get currentIndexStream => _handler.currentIndexStream;
 
-  Stream<bool> get isPlayingStream => _player.playingStream;
-  Stream<Duration> get positionStream => _player.positionStream;
-  Stream<double> get volumeStream => _player.volumeStream;
-  Stream<PlayerState> get playerStateStream => _player.playerStateStream;
-  Stream<int?> get currentIndexStream => _player.currentIndexStream;
+  Future<void> playSong(Song song) => _handler.playSongDirect(song);
+  Future<void> pause() => _handler.pausePlayer();
+  Future<void> resume() => _handler.resumePlayer();
+  Future<void> stop() => _handler.stopPlayer();
+  Future<void> seek(Duration position) => _handler.seekTo(position);
+  Future<void> setVolume(double volume) => _handler.setVolume(volume);
+  Future<void> next() => _handler.nextTrack();
+  Future<void> previous() => _handler.previousTrack();
 
-  Future<void> playSong(Song song) async {
-    await _configureAudioSession();
-    await _player.setFilePath(song.filePath);
-    await _player.play();
-  }
+  Future<void> setQueue(List<Song> songs, {int startIndex = 0}) =>
+      _handler.setQueueFromSongs(songs, startIndex: startIndex);
 
-  Future<void> pause() => _player.pause();
-  Future<void> resume() => _player.play();
-  Future<void> stop() => _player.stop();
-  Future<void> seek(Duration position) => _player.seek(position);
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
-  Future<void> next() => _player.seekToNext();
-  Future<void> previous() => _player.seekToPrevious();
-
-  Future<void> setQueue(List<Song> songs, {int startIndex = 0}) async {
-    await _configureAudioSession();
-    final sources = songs
-        .map((s) => AudioSource.uri(Uri.file(s.filePath)))
-        .toList();
-    await _player.setAudioSource(
-      ConcatenatingAudioSource(children: sources),
-      initialIndex: startIndex,
-      preload: true,
-    );
-    // Iniciar reproducción inmediatamente tras cargar la cola
-    await _player.play();
-  }
-
-  Future<void> setLoopMode(LoopMode mode) => _player.setLoopMode(mode);
+  Future<void> setLoopMode(LoopMode mode) => _handler.setLoopMode(mode);
   Future<void> setShuffleModeEnabled(bool enabled) =>
-      _player.setShuffleModeEnabled(enabled);
+      _handler.setShuffleModeEnabled(enabled);
 
-  void dispose() => _player.dispose();
+  void dispose() => _handler.disposePlayer();
 }

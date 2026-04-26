@@ -16,6 +16,7 @@ import '../services/audio_service.dart';
 import '../services/library_service.dart';
 import '../services/local_server_service.dart';
 import '../services/qr_service.dart';
+import '../core/di/service_locator.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/favorites_repository_impl.dart';
 
@@ -33,13 +34,13 @@ class AirPulseApp extends StatelessWidget {
           create: (_) => FavoritesProvider(FavoritesRepositoryImpl()),
         ),
         ChangeNotifierProvider(
-          create: (_) => AudioProvider(AudioService()),
+          create: (_) => AudioProvider(sl<AudioService>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => LibraryProvider(LibraryService()),
+          create: (_) => LibraryProvider(sl<LibraryService>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => ServerProvider(LocalServerService(), QRService()),
+          create: (_) => ServerProvider(sl<LocalServerService>(), sl<QRService>()),
         ),
       ],
       child: MaterialApp(

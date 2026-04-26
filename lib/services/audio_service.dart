@@ -4,9 +4,10 @@ import '../domain/entities/song.dart';
 import '../domain/repositories/player_repository.dart';
 import '../data/sources/local/audio_local_source.dart';
 import '../data/repositories/player_repository_impl.dart';
+import 'audio_handler.dart';
 
 class AudioService {
-  final AudioLocalSource _source = AudioLocalSource();
+  final AudioLocalSource _source;
   late final PlayerRepository _repository;
 
   Song? _currentSong;
@@ -18,7 +19,8 @@ class AudioService {
   final _currentSongController = StreamController<Song?>.broadcast();
   final _queueController = StreamController<List<Song>>.broadcast();
 
-  AudioService() {
+  AudioService(AirPulseAudioHandler handler)
+      : _source = AudioLocalSource(handler) {
     _repository = PlayerRepositoryImpl(_source);
     _listenToPlayerState();
     _listenToCurrentIndex();

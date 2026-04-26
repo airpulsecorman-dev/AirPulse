@@ -57,6 +57,11 @@
 	<true/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<!-- Reproducción en background: pantalla de bloqueo, Bluetooth y Control Center -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -2,6 +2,7 @@ import 'package:redux/redux.dart';
 import 'package:airpulse/services/audio_service.dart' as svc;
 import 'package:airpulse/services/library_service.dart';
 import 'package:airpulse/services/local_server_service.dart';
+import 'package:airpulse/core/di/service_locator.dart';
 import '../app_state.dart';
 import '../actions/app_actions.dart';
 
@@ -46,11 +47,14 @@ void libraryMiddleware(
 ) {
   if (action is LoadLibraryAction) {
     next(action);
-    _librarySvc.getAllSongs().then((songs) {
-      store.dispatch(LibraryLoadedAction(songs));
-    }).catchError((e) {
-      store.dispatch(LibraryErrorAction(e.toString()));
-    });
+    _librarySvc
+        .getAllSongs()
+        .then((songs) {
+          store.dispatch(LibraryLoadedAction(songs));
+        })
+        .catchError((e) {
+          store.dispatch(LibraryErrorAction(e.toString()));
+        });
     return;
   }
   if (action is CreatePlaylistAction) {
@@ -89,14 +93,14 @@ void serverMiddleware(
   next(action);
 }
 
-// ─── Lazy service getters (replaced by DI in real app) ───────────────────────
-svc.AudioService get _audioSvc => svc.AudioService();
-LibraryService get _librarySvc => LibraryService();
-LocalServerService get _serverSvc => LocalServerService();
+// ─── Lazy service getters via DI ─────────────────────────────────────────────
+svc.AudioService get _audioSvc => sl<svc.AudioService>();
+LibraryService get _librarySvc => sl<LibraryService>();
+LocalServerService get _serverSvc => sl<LocalServerService>();
 
 // ─── Combined middleware list ─────────────────────────────────────────────────
 List<Middleware<AppState>> get appMiddleware => [
-      TypedMiddleware<AppState, dynamic>(playerMiddleware),
-      TypedMiddleware<AppState, dynamic>(libraryMiddleware),
-      TypedMiddleware<AppState, dynamic>(serverMiddleware),
-    ];
+  TypedMiddleware<AppState, dynamic>(playerMiddleware).call,
+  TypedMiddleware<AppState, dynamic>(libraryMiddleware).call,
+  TypedMiddleware<AppState, dynamic>(serverMiddleware).call,
+];
