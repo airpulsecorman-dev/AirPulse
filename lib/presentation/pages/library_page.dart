@@ -21,6 +21,24 @@ Color _randomPastel() {
   return HSLColor.fromAHSL(1.0, hue, 0.5, 0.80).toColor();
 }
 
+void _showDialog(BuildContext context, String title, String content) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(title),
+      content: SingleChildScrollView(
+        child: Text(content),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+      ],
+    ),
+  );
+}
+
 class LibraryPage extends HookWidget {
   const LibraryPage({super.key});
 
@@ -96,8 +114,30 @@ class LibraryPage extends HookWidget {
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle_outlined),
             onSelected: (value) {
-              if (value == 'logout') {
-                context.read<AuthProvider>().logout();
+              switch (value) {
+                case 'profile':
+                  Navigator.pushNamed(context, '/profile');
+                  break;
+                case 'settings':
+                  Navigator.pushNamed(context, '/settings');
+                  break;
+                case 'terms':
+                  _showDialog(
+                    context,
+                    'Términos y Condiciones',
+                    'Aquí van los términos y condiciones de AirPulse.',
+                  );
+                  break;
+                case 'privacy':
+                  _showDialog(
+                    context,
+                    'Política de Privacidad',
+                    'Aquí va la política de privacidad de AirPulse.',
+                  );
+                  break;
+                case 'logout':
+                  context.read<AuthProvider>().logout();
+                  break;
               }
             },
             itemBuilder: (_) {
@@ -121,12 +161,54 @@ class LibraryPage extends HookWidget {
                 ),
                 const PopupMenuDivider(),
                 const PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                    children: [
+                      Icon(Icons.person, size: 18),
+                      SizedBox(width: 8),
+                      Text('Mi Perfil'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: Row(
+                    children: [
+                      Icon(Icons.settings, size: 18),
+                      SizedBox(width: 8),
+                      Text('Ajustes'),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'terms',
+                  child: Row(
+                    children: [
+                      Icon(Icons.description, size: 18),
+                      SizedBox(width: 8),
+                      Text('Términos y Condiciones'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'privacy',
+                  child: Row(
+                    children: [
+                      Icon(Icons.privacy_tip, size: 18),
+                      SizedBox(width: 8),
+                      Text('Privacidad y Servicios'),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
                   value: 'logout',
                   child: Row(
                     children: [
-                      Icon(Icons.logout, size: 18),
+                      Icon(Icons.logout, size: 18, color: Colors.red),
                       SizedBox(width: 8),
-                      Text('Cerrar sesión'),
+                      Text('Cerrar sesión', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),

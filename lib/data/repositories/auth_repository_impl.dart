@@ -111,4 +111,90 @@ class AuthRepositoryImpl implements AuthRepository {
 
     return UserModel.fromJson(Map<String, dynamic>.from(entry as Map));
   }
+
+  @override
+  Future<User> updateProfile({
+    required String userId,
+    required String username,
+    required String email,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentEmail = prefs.getString(_sessionKey);
+    if (currentEmail == null) {
+      throw Exception('Usuario no autenticado.');
+    }
+
+    final users = await _loadUsers();
+    final emailLower = email.trim().toLowerCase();
+
+    // Si el email cambió, verificar que no esté registrado
+    if (currentEmail != emailLower && users.containsKey(emailLower)) {
+      throw Exception('El correo ya está registrado.');
+    }
+
+    // Obtener datos actuales
+    final currentEntry = users[currentEmail];
+    if (currentEntry == null) {
+      throw Exception('Usuario no encontrado.');
+    }
+
+    final stored = Map<String, dynamic>.from(currentEntry as Map);
+
+    // Actualizar datos
+    final updatedUser = UserModel(
+      id: stored['id'] as String,
+      username: username.trim(),
+      email: emailLower,
+      avatarPath: stored['avatarPath'] as String?,
+      createdAt: DateTime.parse(stored['createdAt'] as String),
+    );
+
+    // Si el email cambió, eliminar entrada antigua
+    if (currentEmail != emailLower) {
+      users.remove(currentEmail);
+    }
+
+    // Guardar entrada actualizada
+    users[emailLower] = {
+      ...updatedUser.toJson(),
+      'passwordHash': stored['passwordHash'],
+    };
+
+    await _saveUsers(users);
+
+    // Actualizar sesión si el email cambió
+    if (currentEmail != emailLower) {
+      await prefs.setString(_sessionKey, emailLower);
+    }
+
+    return updatedUser;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String email,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final users = await _loadUsers();
+    final emailLower = email.trim().toLowerCase();
+    final entry = users[emailLower];
+
+    if (entry == null) {
+      throw Exception('Usuario no encontrado.');
+    }
+
+    final stored = Map<String, dynamic>.from(entry as Map);
+
+    // Verificar contraseña actual
+    if (stored['passwordHash'] != _hashPassword(currentPassword)) {
+      throw Exception('Contraseña actual incorrecta.');
+    }
+
+    // Actualizar con nueva contraseña
+    stored['passwordHash'] = _hashPassword(newPassword);
+    users[emailLower] = stored;
+
+    await _saveUsers(users);
+  }
 }

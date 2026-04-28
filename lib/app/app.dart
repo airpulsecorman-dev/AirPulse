@@ -12,6 +12,9 @@ import '../presentation/pages/server_page.dart';
 import '../presentation/pages/login_page.dart';
 import '../presentation/pages/register_page.dart';
 import '../presentation/pages/favorites_page.dart';
+import '../presentation/pages/profile_page.dart';
+import '../presentation/pages/edit_profile_page.dart';
+import '../presentation/pages/change_password_page.dart';
 import '../services/audio_service.dart';
 import '../services/library_service.dart';
 import '../services/local_server_service.dart';
@@ -74,6 +77,9 @@ class AirPulseApp extends StatelessWidget {
           '/login': (_) => const LoginPage(),
           '/register': (_) => const RegisterPage(),
           '/favorites': (_) => const FavoritesPage(),
+          '/profile': (_) => const ProfilePage(),
+          '/edit-profile': (_) => const EditProfilePage(),
+          '/change-password': (_) => const ChangePasswordPage(),
         },
       ),
     );

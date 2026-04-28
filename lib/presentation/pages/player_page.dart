@@ -232,9 +232,13 @@ class PlayerPage extends HookWidget {
                     children: [
                       const SizedBox(height: 16),
                       // Album art / Lyrics swipeable
-                      SizedBox(
+                      Container(
                         width: 260,
                         height: 260,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        clipBehavior: Clip.antiAlias,
                         child: PageView(
                           onPageChanged: (page) async {
                             if (page != 1) return;

@@ -10,4 +10,14 @@ abstract class AuthRepository {
   Future<User> login({required String email, required String password});
   Future<void> logout();
   Future<bool> isLoggedIn();
+  Future<User> updateProfile({
+    required String userId,
+    required String username,
+    required String email,
+  });
+  Future<void> changePassword({
+    required String email,
+    required String currentPassword,
+    required String newPassword,
+  });
 }
