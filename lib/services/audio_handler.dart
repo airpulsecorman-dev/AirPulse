@@ -5,6 +5,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 import '../domain/entities/song.dart';
+import 'system_volume_service.dart';
 
 /// Handler que expone los controles del reproductor al sistema operativo:
 /// pantalla de bloqueo, notificación de reproducción, Bluetooth y auriculares.
@@ -13,12 +14,21 @@ class AirPulseAudioHandler extends BaseAudioHandler
   final AudioPlayer _player = AudioPlayer();
   bool _sessionConfigured = false;
   Timer? _positionTimer;
+  Timer? _volumeSyncTimer;
+  late final StreamController<double> _volumeController;
+  double _lastKnownVolume = 1.0;
+  late final SystemVolumeService _systemVolumeService;
+  StreamSubscription? _systemVolumeSub;
 
   AirPulseAudioHandler() {
+    _volumeController = StreamController<double>.broadcast();
+    _systemVolumeService = SystemVolumeService();
     _configureAudioSession();
     _listenToPlaybackEvents();
     _listenToIndexChanges();
     _startPositionTimer();
+    _startVolumeSyncTimer();
+    _listenToSystemVolume();
   }
 
   // ─── Timer periódico para actualizar posición en la notificación ──────────
@@ -36,6 +46,26 @@ class AirPulseAudioHandler extends BaseAudioHandler
     });
   }
 
+  // ─── Timer periódico para sincronizar volumen del sistema ────────────────
+
+  void _startVolumeSyncTimer() {
+    // Polling cada 100ms para detectar cambios de volumen del sistema
+    _volumeSyncTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      _,
+    ) async {
+      try {
+        final currentVolume = _player.volume;
+        // Usar un threshold pequeño para detectar cambios
+        if ((currentVolume - _lastKnownVolume).abs() > 0.005) {
+          _lastKnownVolume = currentVolume;
+          _volumeController.add(currentVolume);
+        }
+      } catch (_) {
+        // Ignorar errores en polling
+      }
+    });
+  }
+
   // ─── Configuración de sesión de audio ───────────────────────────────────
 
   Future<void> _configureAudioSession() async {
@@ -46,7 +76,19 @@ class AirPulseAudioHandler extends BaseAudioHandler
     await session.setActive(true);
   }
 
-  // ─── Sincronización del estado de reproducción con el SO ────────────────
+  // ─── Sincronización con volumen del sistema ──────────────────────────────
+
+  void _listenToSystemVolume() {
+    if (Platform.isAndroid) {
+      _systemVolumeService.startListening();
+      _systemVolumeSub = _systemVolumeService.volumeStream.listen((volume) {
+        // Cuando el sistema cambia el volumen, actualizar el reproductor
+        _lastKnownVolume = volume;
+        _player.setVolume(volume);
+        _volumeController.add(volume);
+      });
+    }
+  }
 
   void _listenToPlaybackEvents() {
     _player.playbackEventStream.listen((event) {
@@ -172,11 +214,22 @@ class AirPulseAudioHandler extends BaseAudioHandler
 
   Stream<bool> get isPlayingStream => _player.playingStream;
   Stream<Duration> get positionStream => _player.positionStream;
-  Stream<double> get volumeStream => _player.volumeStream;
+  Stream<double> get volumeStream => _volumeController.stream;
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
   Stream<int?> get currentIndexStream => _player.currentIndexStream;
 
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
+  Future<void> setVolume(double volume) async {
+    _lastKnownVolume = volume;
+    _volumeController.add(volume);
+
+    // Actualizar el volumen del sistema en Android
+    if (Platform.isAndroid) {
+      _systemVolumeService.setVolume(volume);
+    }
+
+    return _player.setVolume(volume);
+  }
+
   Future<void> seekTo(Duration position) => _player.seek(position);
   Future<void> pausePlayer() => _player.pause();
   Future<void> resumePlayer() => _player.play();
@@ -234,6 +287,11 @@ class AirPulseAudioHandler extends BaseAudioHandler
 
   void disposePlayer() {
     _positionTimer?.cancel();
+    _volumeSyncTimer?.cancel();
+    _systemVolumeSub?.cancel();
+    _systemVolumeService.stopListening();
+    _systemVolumeService.dispose();
+    _volumeController.close();
     _player.dispose();
   }
 }

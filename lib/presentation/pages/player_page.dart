@@ -537,7 +537,9 @@ class PlayerPage extends HookWidget {
                           const Icon(Icons.volume_down),
                           Expanded(
                             child: Slider(
-                              value: audio.volume,
+                              min: 0.0,
+                              max: 1.0,
+                              value: audio.volume.clamp(0.0, 1.0),
                               onChanged: audio.setVolume,
                             ),
                           ),
