@@ -1,8 +1,15 @@
+import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
 import 'song_artwork.dart';
+
+Color _randomPastel() {
+  final rng = Random();
+  final hue = rng.nextDouble() * 360;
+  return HSLColor.fromAHSL(1.0, hue, 0.5, 0.80).toColor();
+}
 
 class PlayerBar extends StatelessWidget {
   final Song? currentSong;
@@ -18,6 +25,7 @@ class PlayerBar extends StatelessWidget {
   final ValueChanged<Duration> onSeek;
   final ValueChanged<RepeatMode> onRepeatMode;
   final VoidCallback onShuffle;
+  final ValueChanged<Color>? onAccentColorChanged;
 
   const PlayerBar({
     super.key,
@@ -34,6 +42,7 @@ class PlayerBar extends StatelessWidget {
     required this.onSeek,
     required this.onRepeatMode,
     required this.onShuffle,
+    this.onAccentColorChanged,
   });
 
   @override
@@ -73,11 +82,12 @@ class PlayerBar extends StatelessWidget {
       onSeek: onSeek,
       onRepeatMode: onRepeatMode,
       onShuffle: onShuffle,
+      onAccentColorChanged: onAccentColorChanged,
     );
   }
 }
 
-class _PlayerBarContent extends StatelessWidget {
+class _PlayerBarContent extends StatefulWidget {
   final Song? currentSong;
   final bool isPlaying;
   final Duration position;
@@ -90,6 +100,7 @@ class _PlayerBarContent extends StatelessWidget {
   final ValueChanged<Duration> onSeek;
   final ValueChanged<RepeatMode> onRepeatMode;
   final VoidCallback onShuffle;
+  final ValueChanged<Color>? onAccentColorChanged;
 
   const _PlayerBarContent({
     required this.currentSong,
@@ -104,13 +115,27 @@ class _PlayerBarContent extends StatelessWidget {
     required this.onSeek,
     required this.onRepeatMode,
     required this.onShuffle,
+    this.onAccentColorChanged,
   });
+
+  @override
+  State<_PlayerBarContent> createState() => _PlayerBarContentState();
+}
+
+class _PlayerBarContentState extends State<_PlayerBarContent> {
+  late Color accentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    accentColor = _randomPastel();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final total = currentSong?.duration ?? Duration.zero;
-    final progress = playbackProgress(position, total);
+    final total = widget.currentSong?.duration ?? Duration.zero;
+    final progress = playbackProgress(widget.position, total);
 
     return Container(
       decoration: BoxDecoration(
@@ -128,8 +153,8 @@ class _PlayerBarContent extends StatelessWidget {
               children: [
                 // Artwork circular
                 SongArtwork(
-                  songId: currentSong?.id ?? '',
-                  artworkPath: currentSong?.artworkPath,
+                  songId: widget.currentSong?.id ?? '',
+                  artworkPath: widget.currentSong?.artworkPath,
                   size: 40,
                   borderRadius: 20,
                 ),
@@ -139,7 +164,7 @@ class _PlayerBarContent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        currentSong?.title ?? '—',
+                        widget.currentSong?.title ?? '—',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -147,7 +172,7 @@ class _PlayerBarContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        currentSong?.artist ?? '—',
+                        widget.currentSong?.artist ?? '—',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall,
@@ -166,7 +191,7 @@ class _PlayerBarContent extends StatelessWidget {
             ),
             child: Slider(
               value: progress,
-              onChanged: (v) => onSeek(
+              onChanged: (v) => widget.onSeek(
                 Duration(milliseconds: (v * total.inMilliseconds).round()),
               ),
             ),
@@ -177,7 +202,7 @@ class _PlayerBarContent extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  formatDuration(position),
+                  formatDuration(widget.position),
                   style: theme.textTheme.bodySmall,
                 ),
                 Text(formatDuration(total), style: theme.textTheme.bodySmall),
@@ -190,51 +215,104 @@ class _PlayerBarContent extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Shuffle
-                IconButton(
-                  icon: Icon(
-                    Icons.shuffle,
-                    color: shuffleEnabled
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                // Botón de tema pastel
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  onPressed: onShuffle,
+                  child: IconButton(
+                    tooltip: 'Cambiar color',
+                    icon: Icon(
+                      Icons.palette,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                    onPressed: () {
+                      final newColor = _randomPastel();
+                      setState(() {
+                        accentColor = newColor;
+                      });
+                      widget.onAccentColorChanged?.call(newColor);
+                    },
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_previous),
-                  onPressed: onPrevious,
+                  onPressed: widget.onPrevious,
                 ),
                 IconButton(
                   icon: Icon(
-                    isPlaying
+                    widget.isPlaying
                         ? Icons.pause_circle_filled
                         : Icons.play_circle_filled,
                     size: 40,
                   ),
                   color: theme.colorScheme.primary,
-                  onPressed: isPlaying ? onPause : onPlay,
+                  onPressed: widget.isPlaying ? widget.onPause : widget.onPlay,
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_next),
-                  onPressed: onNext,
+                  onPressed: widget.onNext,
                 ),
-                // Repeat
-                IconButton(
-                  icon: Icon(
-                    repeatMode == RepeatMode.one
-                        ? Icons.repeat_one
-                        : Icons.repeat,
-                    color: repeatMode != RepeatMode.none
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                  ),
-                  onPressed: () {
-                    final next = switch (repeatMode) {
-                      RepeatMode.none => RepeatMode.all,
-                      RepeatMode.all => RepeatMode.one,
-                      RepeatMode.one => RepeatMode.none,
-                    };
-                    onRepeatMode(next);
+                Builder(
+                  builder: (context) {
+                    // Determina el modo actual combinando shuffle + repeatMode
+                    // 0=en orden, 1=aleatorio, 2=repetir todo, 3=repetir una
+                    final int currentMode;
+                    if (widget.shuffleEnabled) {
+                      currentMode = 1;
+                    } else if (widget.repeatMode == RepeatMode.all) {
+                      currentMode = 2;
+                    } else if (widget.repeatMode == RepeatMode.one) {
+                      currentMode = 3;
+                    } else {
+                      currentMode = 0;
+                    }
+
+                    final icons = [
+                      Icons.last_page_rounded,
+                      Icons.shuffle,
+                      Icons.repeat,
+                      Icons.repeat_one,
+                    ];
+                    final tooltips = [
+                      'En orden',
+                      'Aleatorio',
+                      'Repetir todo',
+                      'Repetir una',
+                    ];
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        tooltip: tooltips[currentMode],
+                        icon: Icon(
+                          icons[currentMode],
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        onPressed: () {
+                          final next = (currentMode + 1) % 4;
+                          // Desactivar shuffle si vamos a modo no-shuffle
+                          if (widget.shuffleEnabled && next != 1) {
+                            widget.onShuffle();
+                          }
+                          switch (next) {
+                            case 0:
+                              widget.onRepeatMode(RepeatMode.none);
+                            case 1:
+                              widget.onRepeatMode(RepeatMode.none);
+                              widget.onShuffle();
+                            case 2:
+                              widget.onRepeatMode(RepeatMode.all);
+                            case 3:
+                              widget.onRepeatMode(RepeatMode.one);
+                          }
+                        },
+                      ),
+                    );
                   },
                 ),
               ],

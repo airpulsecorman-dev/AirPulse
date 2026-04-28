@@ -5,7 +5,16 @@ String fileExtension(String path) => path.split('.').last.toLowerCase();
 
 /// Verifica si un archivo de audio es soportado.
 bool isSupportedAudio(String path) {
-  const supported = {'mp3', 'flac', 'aac', 'ogg', 'wav', 'm4a', 'opus'};
+  const supported = {
+    '.mpeg',
+    'mp3',
+    'flac',
+    'aac',
+    'ogg',
+    'wav',
+    'm4a',
+    'opus',
+  };
   return supported.contains(fileExtension(path));
 }
 

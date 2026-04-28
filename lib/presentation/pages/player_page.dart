@@ -12,6 +12,7 @@ import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
+import '../components/song_artwork.dart';
 
 enum _LyricsState { idle, loading, loaded, error }
 
@@ -86,10 +87,44 @@ void showQueueSheet(BuildContext context, AudioHookResult audio) {
                   final song = queue[i];
                   final isCurrentSong = song.id == current?.id;
                   return ListTile(
-                    leading: CircleAvatar(
-                      child: isCurrentSong
-                          ? const Icon(Icons.equalizer)
-                          : Text('${i + 1}'),
+                    leading: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SongArtwork(
+                          songId: song.id,
+                          artworkPath: song.artworkPath,
+                          size: 48,
+                          borderRadius: 8,
+                          nullWidget: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Theme.of(ctx).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.music_note,
+                              color: Theme.of(
+                                ctx,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        if (isCurrentSong)
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.equalizer,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                      ],
                     ),
                     title: Text(
                       song.title,
@@ -109,6 +144,9 @@ void showQueueSheet(BuildContext context, AudioHookResult audio) {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    tileColor: isCurrentSong
+                        ? Theme.of(ctx).colorScheme.primary.withOpacity(0.12)
+                        : null,
                     onTap: () {
                       audio.play(song, q: queue, index: i);
                       Navigator.pop(ctx);
@@ -304,7 +342,8 @@ class PlayerPage extends HookWidget {
                                   syncedLines.value.isNotEmpty
                                       ? _LyricsView(
                                           lines: syncedLines.value,
-                                          positionStream: audioProvider.positionStream,
+                                          positionStream:
+                                              audioProvider.positionStream,
                                         )
                                       : SingleChildScrollView(
                                           child: Text(
@@ -352,8 +391,8 @@ class PlayerPage extends HookWidget {
                                 value: playbackProgress(pos, total),
                                 onChanged: (v) => audio.seek(
                                   Duration(
-                                    milliseconds:
-                                        (v * total.inMilliseconds).round(),
+                                    milliseconds: (v * total.inMilliseconds)
+                                        .round(),
                                   ),
                                 ),
                               ),
@@ -434,7 +473,7 @@ class PlayerPage extends HookWidget {
                               }
 
                               final icons = [
-                                Icons.format_list_numbered,
+                                Icons.last_page_rounded,
                                 Icons.shuffle,
                                 Icons.repeat,
                                 Icons.repeat_one,

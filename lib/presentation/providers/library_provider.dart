@@ -24,12 +24,32 @@ class LibraryProvider extends ChangeNotifier {
   List<Song> get songs => _searchQuery.isEmpty
       ? _songs
       : _songs
-          .where((s) =>
-              s.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              s.artist.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-  List<Album> get albums => _albums;
-  List<Artist> get artists => _artists;
+            .where(
+              (s) =>
+                  s.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                  s.artist.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                  s.album.toLowerCase().contains(_searchQuery.toLowerCase()),
+            )
+            .toList();
+
+  List<Album> get albums {
+    if (_searchQuery.isEmpty) return _albums;
+    final q = _searchQuery.toLowerCase();
+    return _albums
+        .where(
+          (a) =>
+              a.title.toLowerCase().contains(q) ||
+              a.artist.toLowerCase().contains(q),
+        )
+        .toList();
+  }
+
+  List<Artist> get artists {
+    if (_searchQuery.isEmpty) return _artists;
+    final q = _searchQuery.toLowerCase();
+    return _artists.where((a) => a.name.toLowerCase().contains(q)).toList();
+  }
+
   List<Playlist> get playlists => _playlists;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -81,22 +101,19 @@ class LibraryProvider extends ChangeNotifier {
     if (result == null || result.files.isEmpty) return;
 
     const uuid = Uuid();
-    final newSongs = result.files
-        .where((f) => f.path != null)
-        .map((f) {
-          final path = f.path!;
-          final name = f.name.replaceAll(RegExp(r'\.[^.]+$'), '');
-          return Song(
-            id: uuid.v4(),
-            title: name,
-            artist: 'Desconocido',
-            album: 'Desconocido',
-            filePath: path,
-            duration: Duration.zero,
-            dateAdded: DateTime.now(),
-          );
-        })
-        .toList();
+    final newSongs = result.files.where((f) => f.path != null).map((f) {
+      final path = f.path!;
+      final name = f.name.replaceAll(RegExp(r'\.[^.]+$'), '');
+      return Song(
+        id: uuid.v4(),
+        title: name,
+        artist: 'Desconocido',
+        album: 'Desconocido',
+        filePath: path,
+        duration: Duration.zero,
+        dateAdded: DateTime.now(),
+      );
+    }).toList();
 
     _songs = [..._songs, ...newSongs];
     notifyListeners();

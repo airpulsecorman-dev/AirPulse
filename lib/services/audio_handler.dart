@@ -100,8 +100,10 @@ class AirPulseAudioHandler extends BaseAudioHandler
       if (!src.existsSync()) return null;
       // Copia el artwork a un archivo en caché accesible por el proceso de
       // notificaciones de Android, evitando el límite de 1 MB de Binder.
+      // Usa un hash único del path para evitar que Android cachee la imagen anterior.
       final cacheDir = await getTemporaryDirectory();
-      final dest = File('${cacheDir.path}/airpulse_art.jpg');
+      final hashCode = artworkPath.hashCode.toUnsigned(32).toRadixString(16);
+      final dest = File('${cacheDir.path}/airpulse_art_$hashCode.jpg');
       await src.copy(dest.path);
       return Uri.file(dest.path);
     } catch (_) {
