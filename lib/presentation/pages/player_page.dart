@@ -421,7 +421,7 @@ class PlayerPage extends HookWidget {
                           // Botón de tema pastel
                           Container(
                             decoration: BoxDecoration(
-                              color: accentColor.value,
+                              color: theme.colorScheme.primary,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: IconButton(

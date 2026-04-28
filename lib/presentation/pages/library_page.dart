@@ -28,6 +28,7 @@ class LibraryPage extends HookWidget {
   Widget build(BuildContext context) {
     final library = useLibrary(context);
     final audio = useAudio(context);
+    final theme = Theme.of(context);
     final tabController = useTabController(initialLength: 3);
     final searchController = useTextEditingController();
     final accentColor = useState<Color>(_randomPastel());
@@ -70,8 +71,8 @@ class LibraryPage extends HookWidget {
               ),
               TabBar(
                 controller: tabController,
-                labelColor: accentColor.value,
-                indicatorColor: accentColor.value,
+                labelColor: theme.colorScheme.primary,
+                indicatorColor: theme.colorScheme.primary,
                 tabs: const [
                   Tab(text: 'Canciones'),
                   Tab(text: 'Álbumes'),
@@ -83,7 +84,7 @@ class LibraryPage extends HookWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
+            icon: const Icon(Icons.favorite_border, color: Color(0xFFFF4D8B)),
             tooltip: 'Favoritos',
             onPressed: () => Navigator.pushNamed(context, '/favorites'),
           ),
@@ -225,8 +226,11 @@ class _SongsList extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.library_music_outlined,
-                    size: 72, color: Color(0xFF8899AA)),
+                const Icon(
+                  Icons.library_music_outlined,
+                  size: 72,
+                  color: Color(0xFF8899AA),
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'No hay canciones en la biblioteca',
@@ -246,9 +250,12 @@ class _SongsList extends StatelessWidget {
                     backgroundColor: const Color(0xFFFF4D8B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24)),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                 ),
               ],
@@ -322,7 +329,9 @@ class _AlbumsList extends StatelessWidget {
             return GestureDetector(
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => AlbumDetailPage(album: album)),
+                MaterialPageRoute(
+                  builder: (_) => AlbumDetailPage(album: album),
+                ),
               ),
               child: Card(
                 child: Column(
@@ -336,15 +345,20 @@ class _AlbumsList extends StatelessWidget {
                         child: Platform.isMacOS
                             ? SongArtwork(
                                 songId: firstSong?.id ?? album.id,
-                                artworkPath: firstSong?.artworkPath ?? album.artworkPath,
+                                artworkPath:
+                                    firstSong?.artworkPath ?? album.artworkPath,
                                 size: double.infinity,
                                 borderRadius: 0,
                                 nullWidget: Container(
-                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
                                   child: Icon(
                                     Icons.album,
                                     size: 48,
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
                                   ),
                                 ),
                               )
@@ -356,7 +370,9 @@ class _AlbumsList extends StatelessWidget {
                                 artworkBorder: BorderRadius.zero,
                                 keepOldArtwork: true,
                                 nullArtworkWidget: Container(
-                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
                                   child: Icon(
                                     Icons.album,
                                     size: 48,
@@ -430,7 +446,9 @@ class _ArtistsList extends StatelessWidget {
           itemCount: artists.length,
           itemBuilder: (_, i) {
             final artist = artists[i];
-            final firstSong = artist.songs.isNotEmpty ? artist.songs.first : null;
+            final firstSong = artist.songs.isNotEmpty
+                ? artist.songs.first
+                : null;
             final artId = firstSong != null
                 ? (int.tryParse(firstSong.id) ?? 0)
                 : (int.tryParse(artist.id) ?? 0);
@@ -453,7 +471,9 @@ class _ArtistsList extends StatelessWidget {
                         artworkFit: BoxFit.cover,
                         artworkBorder: BorderRadius.circular(24),
                         keepOldArtwork: true,
-                        nullArtworkWidget: const CircleAvatar(child: Icon(Icons.person)),
+                        nullArtworkWidget: const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
                       ),
                     ),
               title: Text(artist.name),
@@ -461,7 +481,9 @@ class _ArtistsList extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => ArtistDetailPage(artist: artist)),
+                MaterialPageRoute(
+                  builder: (_) => ArtistDetailPage(artist: artist),
+                ),
               ),
             );
           },
