@@ -22,6 +22,6 @@ Future<void> main() async {
     ),
   );
 
-  setupDependencies(audioHandler);
+  await setupDependencies(audioHandler);
   runApp(const AirPulseApp());
 }

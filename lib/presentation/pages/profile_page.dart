@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../hooks/use_subscription.dart';
+import './pricing_page.dart';
+import '../../domain/entities/subscription_plan.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends HookWidget {
   const ProfilePage({super.key});
-
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final user = auth.currentUser;
     final theme = Theme.of(context);
+
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 600),
+    );
+
+    useEffect(() {
+      animationController.forward();
+      return null;
+    }, [animationController]);
 
     if (user == null) {
       return Scaffold(
@@ -55,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage>
       ),
       body: SingleChildScrollView(
         child: FadeTransition(
-          opacity: _animationController,
+          opacity: animationController,
           child: Column(
             children: [
               // Header con avatar y nombre
@@ -70,12 +60,12 @@ class _ProfilePageState extends State<ProfilePage>
                     _UserInfoCard(user: user),
                     const SizedBox(height: 24),
 
-                    // Suscripción
-                    _SubscriptionCard(user: user),
+                    // Suscripción - Integrada con el hook
+                    _SubscriptionCard(userId: user.id),
                     const SizedBox(height: 24),
 
-                    // Métodos de pago
-                    _PaymentMethodsCard(user: user),
+                    // Métodos de pago - Integrada
+                    _PaymentMethodsCard(userId: user.id),
                     const SizedBox(height: 24),
 
                     // Opciones y preferencias
@@ -105,9 +95,7 @@ class _HeaderProfile extends StatelessWidget {
 
   String _getInitials() {
     final username = user?.username ?? '';
-    return username.isNotEmpty
-        ? username.substring(0, 1).toUpperCase()
-        : '?';
+    return username.isNotEmpty ? username.substring(0, 1).toUpperCase() : '?';
   }
 
   @override
@@ -226,15 +214,31 @@ class _UserInfoCard extends StatelessWidget {
   }
 }
 
-// Tarjeta de suscripción
-class _SubscriptionCard extends StatelessWidget {
-  final dynamic user;
+// Tarjeta de suscripción - INTEGRADA CON HOOK
+class _SubscriptionCard extends HookWidget {
+  final String userId;
 
-  const _SubscriptionCard({required this.user});
+  const _SubscriptionCard({required this.userId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final subscription = useSubscription(userId);
+
+    if (subscription.isLoading) {
+      return Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: CircularProgressIndicator(color: theme.colorScheme.primary),
+          ),
+        ),
+      );
+    }
+
+    final currentPlan = subscription.currentPlan;
+    final isFreePlan = currentPlan?.type == PlanType.free;
 
     return Card(
       elevation: 2,
@@ -245,13 +249,10 @@ class _SubscriptionCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.card_giftcard,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.card_giftcard, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Suscripción',
+                  'Suscripción Actual',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -259,47 +260,149 @@ class _SubscriptionCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+            // Mostrar plan actual
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.secondary,
+                    theme.colorScheme.secondary.withValues(alpha: 0.7),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Plan Gratuito',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSecondary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentPlan?.name ?? 'Cargando...',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSecondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        currentPlan?.price == 0
+                            ? 'Gratuito'
+                            : '\$${currentPlan?.price.toStringAsFixed(2)}/mes',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSecondary.withValues(
+                            alpha: 0.9,
+                          ),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                   Icon(
-                    Icons.info,
+                    isFreePlan ? Icons.lock_outline : Icons.verified,
                     color: theme.colorScheme.onSecondary,
+                    size: 28,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
+            // Características del plan
+            if (currentPlan != null) ...[
+              Text(
+                'Características:',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...currentPlan.features.take(3).map((feature) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.secondary,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          feature,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              if (currentPlan.features.length > 3)
+                Text(
+                  '+ ${currentPlan.features.length - 3} más',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              const SizedBox(height: 12),
+            ],
+            // Descripción
             Text(
-              'Actualiza a Premium para acceder a todas las funciones exclusivas',
+              isFreePlan
+                  ? 'Actualiza a un plan premium para acceder a todas las funciones exclusivas'
+                  : currentPlan?.description ?? '',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navegar a suscripciones
-                },
-                child: const Text('Actualizar Plan'),
+            // Botón de acción
+            if (isFreePlan)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PricingPage(userId: userId),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.upgrade),
+                  label: const Text('Actualizar Plan'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondary,
+                    foregroundColor: theme.colorScheme.onSecondary,
+                  ),
+                ),
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PricingPage(userId: userId),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.change_circle),
+                  label: const Text('Cambiar Plan'),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -307,11 +410,11 @@ class _SubscriptionCard extends StatelessWidget {
   }
 }
 
-// Tarjeta de métodos de pago
-class _PaymentMethodsCard extends StatelessWidget {
-  final dynamic user;
+// Tarjeta de métodos de pago - INTEGRADA
+class _PaymentMethodsCard extends HookWidget {
+  final String userId;
 
-  const _PaymentMethodsCard({required this.user});
+  const _PaymentMethodsCard({required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -329,10 +432,7 @@ class _PaymentMethodsCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.payment,
-                      color: theme.colorScheme.primary,
-                    ),
+                    Icon(Icons.payment, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       'Métodos de Pago',
@@ -344,7 +444,12 @@ class _PaymentMethodsCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    // Agregar método de pago
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Agregar nuevo método de pago'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.add),
                   iconSize: 20,
@@ -352,18 +457,50 @@ class _PaymentMethodsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            // Métodos disponibles
             _PaymentMethodItem(
-              cardType: 'Visa',
-              lastDigits: '4242',
-              expiryDate: '12/25',
+              method: PaymentMethod.creditCard,
+              title: 'Tarjeta de Crédito',
+              icon: Icons.credit_card,
               isDefault: true,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tarjeta de crédito seleccionada'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             _PaymentMethodItem(
-              cardType: 'Mastercard',
-              lastDigits: '5555',
-              expiryDate: '08/26',
+              method: PaymentMethod.paypal,
+              title: 'PayPal',
+              icon: Icons.payment,
               isDefault: false,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('PayPal seleccionado'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _PaymentMethodItem(
+              method: PaymentMethod.debitCard,
+              title: 'Tarjeta de Débito',
+              icon: Icons.credit_card,
+              isDefault: false,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tarjeta de débito seleccionada'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -374,111 +511,86 @@ class _PaymentMethodsCard extends StatelessWidget {
 
 // Elemento de método de pago
 class _PaymentMethodItem extends StatelessWidget {
-  final String cardType;
-  final String lastDigits;
-  final String expiryDate;
+  final PaymentMethod method;
+  final String title;
+  final IconData icon;
   final bool isDefault;
+  final VoidCallback onTap;
 
   const _PaymentMethodItem({
-    required this.cardType,
-    required this.lastDigits,
-    required this.expiryDate,
+    required this.method,
+    required this.title,
+    required this.icon,
     required this.isDefault,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isDefault
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
+            width: isDefault ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
           color: isDefault
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline,
+              ? theme.colorScheme.primary.withValues(alpha: 0.05)
+              : null,
         ),
-        borderRadius: BorderRadius.circular(8),
-        color: isDefault
-            ? theme.colorScheme.primary.withValues(alpha: 0.05)
-            : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    cardType == 'Visa' ? Icons.credit_card : Icons.credit_card,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$cardType • $lastDigits',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Expira: $expiryDate',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isDefault
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
+                  color: isDefault
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
               ),
-            ],
-          ),
-          Row(
-            children: [
-              if (isDefault)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Por defecto',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+            ),
+            const SizedBox(width: 8),
+            if (isDefault)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'Predeterminado',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              const SizedBox(width: 12),
-              PopupMenuButton(
-                itemBuilder: (context) => [
-                  if (!isDefault)
-                    const PopupMenuItem(
-                      value: 'default',
-                      child: Text('Establecer como predeterminada'),
-                    ),
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Text('Editar'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Eliminar'),
-                  ),
-                ],
-                onSelected: (value) {
-                  // Manejar acciones
-                },
+              )
+            else
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -506,28 +618,36 @@ class _SettingsSection extends StatelessWidget {
           icon: Icons.lock,
           title: 'Cambiar Contraseña',
           onTap: () {
-            Navigator.pushNamed(context, '/change-password');
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Cambiar contraseña')));
           },
         ),
         _SettingsTile(
           icon: Icons.notifications,
           title: 'Notificaciones',
           onTap: () {
-            // Navegar a notificaciones
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Configuración de notificaciones')),
+            );
           },
         ),
         _SettingsTile(
           icon: Icons.privacy_tip,
           title: 'Privacidad',
           onTap: () {
-            // Navegar a privacidad
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Configuración de privacidad')),
+            );
           },
         ),
         _SettingsTile(
           icon: Icons.help,
           title: 'Ayuda y Soporte',
           onTap: () {
-            // Abrir ayuda
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Centro de ayuda')));
           },
         ),
       ],
@@ -555,10 +675,7 @@ class _SettingsTile extends StatelessWidget {
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: theme.colorScheme.primary,
-        ),
+        leading: Icon(icon, color: theme.colorScheme.primary),
         title: Text(title),
         trailing: Icon(
           Icons.arrow_forward_ios,
@@ -586,7 +703,9 @@ class _ActionButtons extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: () {
-              Navigator.pushNamed(context, '/edit-profile');
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Editar perfil')));
             },
             icon: const Icon(Icons.edit),
             label: const Text('Editar Perfil'),
@@ -610,18 +729,18 @@ class _ActionButtons extends StatelessWidget {
   void _showLogoutDialog(BuildContext context, AuthProvider auth) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Cerrar Sesión'),
         content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
               auth.logout();
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',
@@ -642,11 +761,7 @@ class _InfoRow extends StatelessWidget {
   final String value;
   final IconData? icon;
 
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.icon,
-  });
+  const _InfoRow({required this.label, required this.value, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -655,11 +770,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       children: [
         if (icon != null) ...[
-          Icon(
-            icon,
-            size: 20,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(icon, size: 20, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
         ],
         Expanded(
