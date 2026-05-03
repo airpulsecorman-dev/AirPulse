@@ -41,7 +41,7 @@ class PaymentService {
   // static const String _stripeSecretKey = 'sk_test_YOUR_STRIPE_SECRET_HERE';
   // static const String _paypalClientId = 'YOUR_PAYPAL_CLIENT_ID_HERE';
   // static const String _paypalSecret = 'YOUR_PAYPAL_SECRET_HERE';
-  
+
   final SharedPreferences _prefs;
 
   PaymentService(this._prefs);
@@ -67,16 +67,13 @@ class PaymentService {
       }
 
       if (!_validateCVV(cvv)) {
-        return PaymentResult.failure(
-          'CVV inválido',
-          errorCode: 'invalid_cvv',
-        );
+        return PaymentResult.failure('CVV inválido', errorCode: 'invalid_cvv');
       }
 
       // Simular procesamiento de Stripe
       // En producción, esto usaría la API de Stripe
       final transactionId = _generateTransactionId('stripe');
-      
+
       // Guardar en SharedPreferences
       await _saveTransaction(
         transactionId: transactionId,
@@ -177,9 +174,11 @@ class PaymentService {
   Future<List<Map<String, dynamic>>> getTransactionHistory() async {
     final transactions = _prefs.getStringList('transactions') ?? [];
     return transactions
-        .map((t) => Map<String, dynamic>.from(
-          {'transactionData': t}, // Simplificado para este ejemplo
-        ))
+        .map(
+          (t) => Map<String, dynamic>.from(
+            {'transactionData': t}, // Simplificado para este ejemplo
+          ),
+        )
         .toList();
   }
 
@@ -195,7 +194,9 @@ class PaymentService {
 
   /// Valida un número de tarjeta usando el algoritmo de Luhn
   bool _validateCardNumber(String cardNumber) {
-    if (cardNumber.isEmpty || cardNumber.length < 13 || cardNumber.length > 19) {
+    if (cardNumber.isEmpty ||
+        cardNumber.length < 13 ||
+        cardNumber.length > 19) {
       return false;
     }
 
@@ -247,7 +248,7 @@ class PaymentService {
     required String status,
   }) async {
     final transactions = _prefs.getStringList('transactions') ?? [];
-    
+
     final transactionData = {
       'id': transactionId,
       'amount': amount,

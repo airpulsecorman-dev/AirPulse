@@ -126,7 +126,7 @@ class FeatureGuard extends HookWidget {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF16213E),
         title: Text(
-          '$featureDisplayName',
+          featureDisplayName,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Colors.white,
               ),
@@ -174,12 +174,12 @@ class FeatureBlocker extends StatelessWidget {
   final Widget child;
 
   const FeatureBlocker({
-    Key? key,
+    super.key,
     required this.featureDisplayName,
     required this.onUpgrade,
     required this.isBlocked,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
