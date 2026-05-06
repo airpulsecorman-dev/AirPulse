@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'intellectual_property_page.dart';
+import 'privacy_policy_page.dart';
+import 'terms_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -15,10 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ajustes'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Ajustes'), centerTitle: true),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -90,6 +90,43 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: const Text('Desarrollador'),
                   subtitle: const Text('AirPulse Dev Team'),
                 ),
+                ListTile(
+                  title: const Text('Términos y Condiciones'),
+                  subtitle: const Text('Leer los términos de uso'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TermsPage()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: const Text('Propiedad Intelectual'),
+                  subtitle: const Text('Política de propiedad intelectual'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const IntellectualPropertyPage(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: const Text('Política de Privacidad'),
+                  subtitle: const Text('Cómo gestionamos tus datos personales'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PrivacyPolicyPage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
 
@@ -146,7 +183,9 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Limpiar caché'),
-        content: const Text('¿Estás seguro de que deseas limpiar el caché? Esto liberará espacio en tu dispositivo.'),
+        content: const Text(
+          '¿Estás seguro de que deseas limpiar el caché? Esto liberará espacio en tu dispositivo.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -171,10 +210,7 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingsSection({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +222,9 @@ class _SettingsSection extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         ...children,

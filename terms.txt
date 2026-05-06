@@ -1,0 +1,267 @@
+Términos de uso de AirPulse
+Última actualización: 06/05/2026
+
+1. Introducción
+
+2. El Servicio AirPulse que proporcionamos
+
+3. El uso del Servicio AirPulse
+
+4. Derechos de propiedad intelectual y contenido
+
+5. Atención al cliente, información, preguntas y quejas
+
+6. Problemas y disputas
+
+7. Acerca de estos Términos
+
+1. Introducción
+Lea atentamente los Términos de uso (los "Términos") ya que rigen el uso de (incluido el acceso a) los servicios personalizados de AirPulse para escuchar música y otros contenidos, incluidos todos nuestros sitios web y aplicaciones de software que incorporan o se vinculan a estos Términos (colectivamente, el "Servicio AirPulse") y toda la música, los videos, podcasts, audiolibros u otros materiales disponibles a través del Servicio AirPulse (el "Contenido").
+
+El uso del Servicio AirPulse está sujeto a otros términos y condiciones proporcionados por AirPulse, que se incorporan a estos Términos mediante esta referencia (colectivamente, "Acuerdos"). Consulte la Sección 7 a continuación para obtener información acerca de los términos adicionales y cómo podemos cambiar estos Términos o los términos adicionales incorporados como referencia. Para obtener más información acerca de cómo AirPulse recopila, utiliza, comparte y protege sus datos personales, consulte la Política de Privacidad de AirPulse.
+
+Si se registra para el Servicio AirPulse, o si lo utiliza, acepta estos Términos. Si no está de acuerdo con estos Términos, entonces no debe usar el Servicio AirPulse ni acceder a ningún contenido.
+
+Proveedor de servicios
+Estos Términos son entre usted y AirPulse AB, Regeringsgatan 19, 111 53, Estocolmo, Suecia.
+
+Requisitos de idoneidad y edad
+Para utilizar el Servicio AirPulse y acceder a cualquier contenido, debe (1) tener 13 años (o la edad mínima equivalente en su país de origen) o más, (2) tener el consentimiento de sus padres o tutores si es menor de edad en su país de origen, (3) tener el poder de celebrar un contrato vinculante con nosotros y no estar excluido de hacerlo según las leyes aplicables, y (4) residir en el país del servicio. También declara que cualquier información de registro que envíe a AirPulse es verdadera, precisa y completa, y acepta mantenerla de esa manera en todo momento. Si es menor de edad en su país de residencia, su padre, madre o tutor deberá suscribir estos Términos en su nombre. Si no cumple con los requisitos de edad mínima para utilizar el Servicio AirPulse y acceder al contenido, entonces no debe registrarse como usuario. En algunos mercados, AirPulse puede ofrecer a los titulares de cuentas principales la oportunidad de permitir el acceso a una experiencia infantil como parte de una suscripción familiar. Al habilitar dicho acceso, el titular principal de la cuenta confirma que es el tutor legal de cualquier usuario que acceda a la experiencia y que otorga permiso para que el usuario más joven utilice AirPulse.
+
+2. El Servicio AirPulse que proporcionamos
+Opciones de Servicio AirPulse
+Ofrecemos numerosas opciones de Servicio AirPulse. Ciertas opciones de Servicio AirPulse se ofrecen de sin costo, mientras que otras opciones deben pagarse antes de poder acceder a ellas (las "Suscripciones pagadas"). También podemos ofrecer planes, membresías o servicios promocionales especiales, incluidas ofertas de productos y servicios de terceros. No somos responsables de los productos o servicios proporcionados por dichos terceros.
+
+Pruebas
+De vez en cuando, es posible que nosotros o terceros en nuestro nombre le ofrezcan pruebas de Suscripciones pagadas durante un período específico, sin costo o a una tarifa reducida (una "Prueba"). Mediante el uso de un Servicio AirPulse a través de una prueba, debes aceptar los Términos de la oferta promocional de AirPulse Premium.
+
+Aplicaciones, dispositivos y software de código abierto de terceros
+El Servicio AirPulse puede integrarse con aplicaciones, sitios web y servicios de terceros ("Aplicaciones de terceros") o interactuar de otro modo con ellos, así como con computadoras personales, teléfonos móviles, tabletas, dispositivos portátiles, altavoces y otros dispositivos de terceros ("Dispositivos"). El uso de tales dispositivos y aplicaciones de terceros puede estar sujeto a términos, condiciones y políticas adicionales que le proporcione el tercero correspondiente. AirPulse no garantiza que las aplicaciones y dispositivos de terceros sean compatibles con el Servicio AirPulse.
+
+Limitaciones y modificaciones del servicio
+Utilizamos una atención y habilidad razonables para mantener el Servicio AirPulse operativo y brindarle una experiencia de audio personalizada y envolvente. Sin embargo, nuestras ofertas de servicios y su disponibilidad pueden cambiar de vez en cuando y estar sujetas a las leyes aplicables, sin responsabilidad para usted; por ejemplo:
+
+El Servicio AirPulse puede experimentar interrupciones temporales debido a dificultades técnicas, mantenimiento o pruebas, o actualizaciones, incluidas aquellas requeridas para reflejar los cambios en las leyes pertinentes y los requisitos regulatorios.
+Nuestro objetivo es evolucionar y mejorar nuestros Servicios constantemente, y podemos modificar, suspender o detener (de forma permanente o temporal) la prestación total o parcial del Servicio AirPulse (incluidas funciones, características, planes de suscripción y ofertas promocionales en particular).
+Nuestra oferta de contenido dinámico evoluciona constantemente y se adapta a las necesidades de la comunidad de AirPulse. AirPulse no tiene la obligación de proporcionar ningún contenido específico a través del Servicio AirPulse, y AirPulse o los propietarios correspondientes pueden eliminar el acceso a determinadas canciones, videos, podcasts, audiolibros y otros contenidos sin previo aviso.
+Su derecho a rescindir estos Términos si ya no desea utilizar el Servicio AirPulse se establece en la Sección 6 que figura a continuación.
+
+Si tiene tarifas pagadas por adelantado directamente a AirPulse por una Suscripción pagada que AirPulse interrumpa antes del final de su Período de prepago (tal como se define dicho término en la sección Pagos y cancelaciones a continuación), AirPulse le reembolsará las tarifas pagadas por adelantado correspondientes al Período de prepago por cualquier parte no utilizada de su Suscripción pagada vigente en el momento de dicha interrupción. La información de su cuenta y facturación debe estar actualizada para que podamos reembolsarle.
+
+AirPulse no es responsable ante usted ni tiene ninguna obligación de proporcionarle un reembolso, en relación con interrupciones o fallas de servicios por Internet u otros motivos causados por las acciones de las autoridades gubernamentales, de terceros o de eventos fuera de nuestro control.
+
+3. El uso del Servicio AirPulse
+Crear una cuenta de AirPulse
+Es posible que necesite crear una cuenta de AirPulse para usar todo o parte del Servicio AirPulse, y esta cuenta debe estar en su país de residencia. Su nombre de usuario y contraseña son solo para uso personal y deben mantenerse confidenciales. Usted entiende que es responsable de todo uso (incluido cualquier uso no autorizado) de su nombre de usuario y contraseña. Notifique de inmediato a nuestro equipo de atención al cliente si pierde o le roban su nombre de usuario o contraseña, o si cree que hubo acceso no autorizado a su cuenta.
+
+AirPulse puede recuperar su nombre de usuario o pedirle que lo cambie por cualquier motivo.
+
+Sus derechos para utilizar el Servicio AirPulse
+Acceso al Servicio AirPulse
+
+Sujeto a su cumplimiento de los presentes Términos (incluidos otros términos y condiciones aplicables), le otorgamos un permiso limitado, no exclusivo y revocable para hacer uso personal y no comercial del Servicio AirPulse y del contenido (colectivamente, "Acceso"). Solo debe acceder a la versión del Servicio AirPulse que se ofrece en su país de residencia. Este Acceso permanecerá en vigencia, a menos que y hasta que usted o AirPulse lo finalicen. Usted acepta que no redistribuirá, venderá ni transferirá el Servicio AirPulse ni el contenido.
+
+Las aplicaciones de software de AirPulse y el Contenido tienen licencia, no se venden ni transfieren a usted, y AirPulse y sus licenciatarios conservan la propiedad de todas las copias de las aplicaciones de software de AirPulse el Contenido, incluso después de la instalación en sus Dispositivos.
+
+Derechos de propiedad de AirPulse
+
+El Servicio AirPulse y el contenido son propiedad de AirPulse o de los licenciatarios de AirPulse. Todas las marcas comerciales, marcas de servicio, nombres comerciales, logotipos, nombres de dominio y cualquier otra característica de la marca AirPulse ("Funciones de la marca AirPulse") es propiedad exclusiva de AirPulse o sus licenciatarios. Estos Términos no le otorgan ningún derecho a utilizar las Funciones de la marca AirPulse, ya sea para uso comercial o no comercial.
+
+Acepta cumplir las Pautas del usuario de AirPulse y las Reglas de la plataforma y no utilizar el Servicio AirPulse, el contenido ni ninguna parte de este de ninguna manera que no esté expresamente permitida por los acuerdos.
+
+Pagos y cancelación
+Suscripciones pagadas
+
+Puede comprar una suscripción pagada directamente desde AirPulse o a través de un tercero, ya sea mediante:
+
+el pago de una tarifa de suscripción por adelantado mensualmente o en algún otro intervalo recurrente que se le haya informado antes de su compra; o
+el pago anticipado que le brinda acceso al Servicio AirPulse durante un período específico ("Período de prepago").
+Las tasas impositivas se calculan según la información que proporcione y la tasa aplicable en el momento de su cargo mensual.
+
+Si adquiere acceso a una suscripción pagada a través de un tercero, es posible que se apliquen términos y condiciones adicionales a su uso del Servicio AirPulse, además de los presentes Términos. Si adquiere una suscripción pagada mediante un código, una tarjeta de regalo, una oferta prepagada u otra oferta proporcionada o vendida por AirPulse o en su nombre para acceder a una suscripción pagada ("Códigos"), debe aceptar los Términos de la tarjeta de AirPulse.
+
+Cambios de precio e impuestos
+
+AirPulse puede modificar periódicamente el precio de las suscripciones pagadas, incluidas las tarifas de suscripción recurrentes, el período de prepago (para períodos aún no pagados) o los códigos (definidos anteriormente), y le comunicará cualquier cambio de precio con anticipación mediante notificación razonable. Los cambios de precio comenzarán a tener vigencia a principios del próximo período de suscripción, después de la fecha del cambio de precio. Sujeto a la ley aplicable, si continúa utilizando el Servicio AirPulse después de que el cambio de precio entre en vigencia, habrá aceptado el nuevo precio. Si no está de acuerdo con un cambio de precio, puede rechazarlo mediante la cancelación de la Suscripción pagada correspondiente antes de que el cambio de precio entre en vigencia.
+
+Las tasas impositivas se basan en las tasas aplicables en el momento del cargo mensual. Estos montos pueden cambiar con el tiempo según los requisitos fiscales locales de su país, estado, territorio o incluso ciudad. Cualquier cambio en la tasa impositiva se aplicará automáticamente según la información de cuenta que proporcione.
+
+El precio de una Prueba o una Suscripción pagada es específico de la versión del Servicio AirPulse que se ofrece en su país de residencia, y usted acepta no recurrir a ningún medio para acceder a la Prueba o Suscripción pagada sin abonar el precio correspondiente ni para frustrar los intentos legítimos de AirPulse de cobrar el pago por dicho Acceso.
+
+Facturación y cancelación
+
+A menos que se indique lo contrario (por ejemplo, si se suscribió a un Período de pago anticipado) las Suscripciones pagadas continúan indefinidamente hasta que se cancelen. Se le cobrará de manera recurrente el primer día de cada período de facturación y usted pagará y nos autorizará (o al tercero correspondiente, si se registra a través de un tercero) a cargar en su método de pago la tarifa de su suscripción vigente en ese momento.
+
+Puede cancelar su Suscripción pagada en cualquier momento iniciando sesión en su cuenta de AirPulse y siguiendo las indicaciones en la página Cuenta o haciendo clic aquí y siguiendo las instrucciones. A menos que se indique lo contrario, la cancelación entrará en vigencia desde el final del período de facturación en el que cancela y pasará a tener la versión gratuita del Servicio AirPulse. No proporcionamos reembolsos ni créditos por períodos de suscripción parcial, salvo que se indique expresamente en estos Términos.
+
+Si adquirió una suscripción pagada con un Código, su suscripción finalizará automáticamente al final del período indicado en el Código o cuando haya un saldo prepagado insuficiente para pagar por el Servicio AirPulse.
+
+Además de cualquier otro derecho que podamos tener en virtud de estos Términos, nos reservamos el derecho de cancelar una suscripción pagada en cualquier momento, con no menos de 14 días de anticipación. A menos que le indiquemos lo contrario, le permitiremos conservar el acceso a la suscripción pagada durante el resto del período de facturación vigente, tras lo cual cambiaremos su cuenta a la versión gratuita del Servicio AirPulse.
+
+Derecho de retiro
+Si se registra en una Prueba, acepta que el derecho de retiro de la Suscripción pagada por la cual recibe la Prueba finaliza catorce (14) días después de iniciar la Prueba. Si no cancela la Suscripción pagada antes de que finalice la Prueba, perderá su derecho de retiro y autoriza a AirPulse a cobrarle automáticamente el precio acordado cada mes hasta que cancele la Suscripción pagada. En el caso de las pruebas de menos de catorce (14) días, usted acepta expresamente que le proporcionemos el servicio pagado de forma inmediata después del final de la Prueba y que, a partir de ese momento, pierde el derecho de retiro.
+
+Si compra una Suscripción pagada sin Prueba, acepta que tiene catorce (14) días después de su compra para retirarse por cualquier motivo y que debe pagarnos por los servicios prestados hasta el momento en que nos informa que ha cambiado de opinión. Usted expresamente da su consentimiento para que le proporcionemos el servicio de forma inmediata después de su compra, que pierde su derecho de retiro, y autoriza a AirPulse a cobrarle automáticamente cada mes hasta que cancele.
+
+Pautas del usuario
+Hemos establecido pautas para el uso del Servicio AirPulse, a fin de garantizar que el Servicio AirPulse siga siendo agradable para todos ("Pautas del usuario de AirPulse"). Al utilizar el Servicio AirPulse, debes cumplir con las Pautas del usuario de AirPulse y las Reglas de la plataforma, así como con todas las leyes, reglas y regulaciones aplicables, y respetar la propiedad intelectual, la privacidad y otros derechos de terceros.
+
+Cuentas de marca
+Si establece una cuenta de AirPulse en nombre de una empresa, organización, entidad o marca (una "Marca" y dicha cuenta una "Cuenta de marca"), los términos "usted" y "su", tal como se usan en estos Términos (incluidos otros términos y condiciones de AirPulse incorporados en el presente documento) se aplican tanto a usted como a la Marca.
+
+Si crea una Cuenta de marca, usted declara y garantiza que está autorizado para otorgar todos los permisos y las licencias que se establecen en estos Términos (incluidos otros términos y condiciones aplicables de AirPulse) y para obligar a la marca a cumplir con estos Términos.
+
+Una Marca puede seguir a los usuarios y crear y compartir playlists, siempre que no tome ninguna medida que implique un respaldo o una relación comercial entre la Marca y el usuario, artista, compositor o cualquier otra persona seguida, a menos que la Marca haya obtenido de forma independiente los derechos para dar a entender dicho respaldo. Además, las marcas deben ser transparentes con nuestros usuarios respecto de la divulgación de cualquier respaldo o consideración que se les proporcione a artistas, compositores, usuarios o cualquier otra parte, y deben cumplir con todas las leyes, regulaciones y códigos de práctica aplicables cuando participen en las prácticas anteriores.
+
+Control de exportaciones y sanciones
+Usted declara y garantiza que (1) no se encuentra en, no está constituido conforme a las leyes de, ni reside habitualmente en ningún país o territorio sujeto a Sanciones territoriales (en conjunto, "Países sancionados"); asimismo, que no es propiedad ni actúa en nombre de un gobierno sujeto a sanciones de bloqueo de activos, ni de ninguna persona o entidad constituida, ubicada o residente habitual en un País sancionado; y (2) no es una persona identificada en, ni posee directa o indirectamente más del 50 % de propiedad o control, ni actúa en nombre o bajo la dirección de ninguna entidad identificada en las listas de partes restringidas del Gobierno de la UE, Reino Unido, Estados Unidos u otro gobierno aplicable, tales como la lista consolidada de personas, grupos y entidades sujetas a sanciones financieras de la UE, la Lista Consolidada del Reino Unido o la lista de Nacionales Especialmente Designados del Gobierno de los Estados Unidos.
+
+Los productos de AirPulse pueden estar sujetos a las leyes de control de exportaciones y sanciones económicas de la Unión Europea, el Reino Unido, los Estados Unidos, entre las que se encuentran la Regulación 2021/821 en su texto enmendado (Regulación de doble uso de la UE), la Ley de Control de Exportaciones del Reino Unido del 2002, la Ley de Control de Exportaciones del Reino Unido del 2002 y la Orden de Control de Exportaciones del Reino Unido del 2008, las Regulaciones de Administración de Exportaciones del Departamento de Comercio de los EE. UU., sanciones comerciales y económicas que mantiene la Oficina de Control de Activos Extranjeros del Departamento del Tesoro y las Regulaciones de Tráfico Internacional de Armas que mantiene el Departamento de Estado, (colectivamente, "Leyes de control comercial").
+
+Acepta cumplir con todas las Leyes de control comercial aplicables en el uso de los productos o servicios de AirPulse. Específicamente, usted se compromete a no usar, directa o indirectamente, vender, exportar, reexportar, transferir, desviar, liberar o disponer de cualquier otro modo de productos, software o tecnología (incluidos los productos derivados o basados en dicha tecnología) recibidos de AirPulse en virtud de estos Términos, hacia cualquier destino, entidad o persona, ni para ningún uso final prohibido por las Leyes de control comercial. AirPulse no deberá actuar de ninguna manera que esté prohibida en virtud de las Leyes de control comercial aplicables, y deberá, a exclusivo criterio de AirPulse, abstenerse de estar involucrado directa o indirectamente en la provisión de productos o servicios que puedan estar prohibidos en virtud de las Leyes de control comercial aplicables.
+
+4. Derechos de propiedad intelectual y contenido
+Contenido de usuario
+El contenido que publica en el servicio
+
+Los usuarios de AirPulse pueden publicar, cargar o de otro modo aportar contenido al Servicio AirPulse ("Contenido de usuario"). Para evitar dudas, "Contenido del usuario" incluye toda la información, los materiales, los mensajes u otras comunicaciones y cualquier otro contenido que los usuarios agreguen, creen, carguen, envíen, distribuyan o publiquen en el Servicio AirPulse. Para obtener más información acerca del Contenido de usuario u otro contenido de terceros y su moderación, consulte nuestras Reglas de la plataforma, la información sobre las Acciones de contenido, nuestro Centro de seguridad y privacidad y nuestra Política de propiedad intelectual.
+
+Usted es el único responsable de todo el Contenido de usuario que publique
+
+Usted garantiza que, con respecto a cualquier Contenido de usuario que publique en AirPulse, (1) es propietario o tiene derecho a publicar dicho Contenido de usuario; y (2) dicho Contenido de usuario, o su uso por parte de AirPulse de acuerdo con la licencia otorgada a continuación, no: (i) incumple con estos Términos, la ley aplicable o la propiedad intelectual u otros derechos de terceros; ni (ii) implica alguna afiliación o aprobación de AirPulse, de algún artista, grupo, sello discográfico u otra persona o entidad respecto de usted o de su Contenido de usuario, sin el previo consentimiento expreso por escrito de AirPulse o de dicha persona o entidad.
+
+Es posible que le brindemos la capacidad de publicar o compartir contenido de usuario de diferentes maneras en el Servicio AirPulse, lo que incluye enviar mensajes o comunicaciones a otros usuarios de AirPulse. Al publicar o compartir Contenido de usuario u otra información en el Servicio AirPulse, tenga en cuenta que, según el método de publicación o uso compartido, el contenido y otra información pueden transmitirse de manera privada a uno o más usuarios o pueden ser accesibles públicamente, y pueden ser utilizados y recompartidos por otros en el Servicio AirPulse y en la Web, por lo que debe tener cuidado al publicar o compartir en el Servicio AirPulse y tenga en cuenta la configuración de cuenta. AirPulse no es responsable de lo que usted u otros publican o comparten en el Servicio AirPulse.
+
+Supervisión del contenido del usuario
+
+AirPulse puede, pero no tiene la obligación de, supervisar o revisar el Contenido de usuario (ya sea publicado públicamente o compartido de manera privada). AirPulse se reserva el derecho de eliminar o deshabilitar el acceso a cualquier Contenido de usuario por cualquier motivo o sin motivo alguno. AirPulse puede realizar estas acciones sin previo aviso.
+
+Licencias que nos concede
+Contenido de usuario
+
+Usted conserva la propiedad de su contenido de usuario cuando lo publica en el Servicio. Sin embargo, para que podamos poner su Contenido de usuario a disposición en el Servicio AirPulse y brindarle ciertas funciones y características, necesitamos que nos otorgue una licencia limitada a ese Contenido de usuario. En consecuencia, por la presente otorga a AirPulse una licencia no exclusiva, transferible, sublicenciable, libre de regalías, totalmente pagada, irrevocable y válida en todo el mundo para reproducir, poner a disposición, realizar y mostrar, traducir, modificar, crear obras derivadas, distribuir y, de cualquier otro modo utilizar dicho Contenido de usuario a través de cualquier medio, ya sea solo o en combinación con otros contenidos o materiales, de cualquier manera y por cualquier medio, método o tecnología, ya sea conocido actualmente o creado en el futuro, en relación con el Servicio AirPulse. Cuando corresponda y en la medida en que lo permita la ley aplicable, también acepta renunciar y no hacer valer ningún "derecho moral" o derechos equivalentes, como su derecho a ser identificado como el autor de cualquier Contenido de usuario, lo que incluye los Comentarios, y su derecho a oponerse al tratamiento despectivo de dicho Contenido de usuario.
+
+Comentarios
+
+Si proporciona ideas, sugerencias u otros comentarios relacionados con el uso del Servicio AirPulse o cualquier contenido ("Comentarios"), dichos Comentarios no son confidenciales y pueden ser utilizados por AirPulse sin restricciones y sin realizarle pagos. Los comentarios se consideran un tipo de contenido de usuario en estos Términos.
+
+Su dispositivo.
+
+Usted también nos concede el derecho (1) de permitir que el Servicio AirPulse utilice el procesador, el ancho de banda y el hardware de almacenamiento de su Dispositivo para facilitar el funcionamiento del Servicio AirPulse, y (2) de proporcionarle publicidad y otra información, así como permitir que nuestros socios comerciales hagan lo mismo, según lo permitido de conformidad con la Política de Privacidad de AirPulse.
+
+Experiencia de contenido
+En AirPulse, nuestro objetivo es crear experiencias únicas y grandiosas para cada usuario. Para Comprender las recomendaciones en AirPulse, puede obtener más información acerca de cómo funcionan nuestros sistemas de recomendación, incluido cómo y por qué se muestra cierto contenido. En cualquier parte del Servicio AirPulse, el contenido al que accede, incluida su selección y ubicación, puede estar influenciado por consideraciones comerciales, incluidos los acuerdos de AirPulse con terceros.
+
+Es posible que algunos contenidos con licencia de AirPulse, que se proporcionan a, que se crean o que se ponen a disposición por parte de AirPulse (p. ej., podcasts) incorporen publicidad y AirPulse no es responsable de dicha publicidad.
+
+Reclamos de infracción
+AirPulse respeta los derechos de los propietarios de la propiedad intelectual. Si cree que cualquier contenido infringe sus derechos de autor, marca registrada u otros derechos de propiedad intelectual, consulte la Política de propiedad intelectual de AirPulse.
+
+5. Atención al cliente, información, preguntas y quejas
+Comunidad de soporte de AirPulse
+La Comunidad de soporte de AirPulse ofrece un lugar para el debate y el intercambio de información, consejos y otros materiales relacionados con el Servicio AirPulse. Al usar la Comunidad de soporte de AirPulse, acepta los Términos de la comunidad.
+
+Atención al cliente, información, preguntas, quejas
+Para recibir asistencia con preguntas relacionadas con su cuenta o pagos ("Consultas de atención al cliente"), utilice los recursos de Atención al cliente que aparecen en la sección Acerca de nosotros de nuestro sitio web.
+
+Si tiene preguntas sobre el Servicio AirPulse o estos Términos (incluidos los términos y condiciones adicionales de AirPulse incorporados en los mismos), comuníquese con el Servicio de atención al cliente de AirPulse visitando la sección Acerca de nosotros de nuestro sitio web.
+
+6. Problemas y disputas
+Suspender y finalizar el Servicio AirPulse
+Estos Términos continuarán aplicándose a usted hasta que usted o AirPulse los finalicen. AirPulse puede rescindir estos Términos (incluidos los términos y condiciones adicionales incorporados en el presente documento) o suspender su acceso al Servicio AirPulse en cualquier momento si consideramos que usted ha infringido cualquiera de estos Términos, si dejamos de brindar el Servicio AirPulse o cualquier componente material de estos mediante notificación razonable o si consideramos que es necesario cumplir con la ley aplicable. Si usted o AirPulse rescindieran estos Términos, o si AirPulse suspendiera su acceso al Servicio AirPulse, usted acepta que AirPulse, sujeto a las leyes aplicables, no tendrá ninguna responsabilidad ni obligación hacia usted, y (excepto como se establece expresamente en estos Términos) AirPulse no reembolsará ningún monto que usted ya haya pagado. Puede rescindir estos Términos en cualquier momento, en cuyo caso no podrá seguir accediendo o usando el Servicio AirPulse. Para saber cómo cancelar su cuenta de AirPulse, utilice los recursos de atención al cliente en la página Acerca de nosotros.
+
+Las secciones 4 (Derechos de propiedad intelectual y contenido), 3 (El uso del Servicio AirPulse), 2 (El Servicio AirPulse que proporcionamos), 6 (Problemas y disputas), 7 (Acerca de estos Términos) en el presente, así como cualquier otra sección de estos Términos que, ya sea explícitamente o por su naturaleza, deben permanecer vigentes incluso después de la finalización de estos Términos, continuarán en vigor.
+
+Exenciones de responsabilidad de la garantía
+Algunas jurisdicciones no permiten la exclusión de garantías implícitas o limitaciones de los derechos legales aplicables de un consumidor, por lo que es posible que la exclusión y las limitaciones de esta sección no se apliquen a usted y nada afectará sus derechos legales.
+
+AirPulse proporcionará el Servicio AirPulse mediante la atención y habilidad razonables y de acuerdo con cualquier especificación del Servicio AirPulse proporcionada por AirPulse; sin embargo, sujeto a eso, el Servicio AirPulse se proporciona "tal cual" y "según disponibilidad", sin ninguna garantía de ningún tipo, ya sea expresa, implícita o legal. Además, AirPulse y todos los propietarios del contenido renuncian a cualquier garantía expresa, implícita y reglamentaria con respecto al contenido, incluidas las garantías de calidad satisfactoria, comerciabilidad, idoneidad para un propósito en particular o no infracción. Ni AirPulse ni ningún propietario de contenido garantizan que el Servicio o contenido de AirPulse no tenga malware ni otros componentes dañinos. Además, AirPulse no realiza ninguna declaración con respecto a, ni garantiza ni asume ninguna responsabilidad por, cualquier aplicación de terceros (o su contenido), contenido de usuario, dispositivos o cualquier producto o servicio anunciado, promovido u ofrecido por un tercero en el Servicio AirPulse o cualquier sitio web con hipervínculo, y AirPulse no es responsable de ninguna transacción entre usted y cualquier proveedor externo de lo anterior. Ningún consejo o información, ya sea oral o por escrito, que obtenga de AirPulse creará garantía alguna en nombre de AirPulse. Mientras usa el Servicio AirPulse, es posible que tenga acceso a funciones de filtrado de contenido explícitas, pero el uso de estas funciones aún puede dar lugar a que se muestre contenido explícito, por lo que no debe confiar en dichas funciones para filtrar todo el contenido explícito. Esta sección se aplica en la medida máxima permitida por la ley aplicable.
+
+Limitación de responsabilidad y tiempo para presentar una reclamación
+Sujeto a la ley aplicable, acepta que su único y exclusivo recurso para cualquier problema o insatisfacción con el Servicio AirPulse es desinstalar cualquier software de AirPulse y dejar de usar el Servicio AirPulse. Usted acepta que AirPulse no tiene ninguna obligación ni responsabilidad derivada de, o relacionada con, aplicaciones de terceros o el contenido puesto a disposición a través del Servicio AirPulse, o en relación con este. Si bien su relación con dichas aplicaciones de terceros puede estar regida por acuerdos separados con esos terceros, su único y exclusivo recurso, con respecto a AirPulse, ante cualquier problema o insatisfacción con cualquier aplicación de terceros o su contenido, es desinstalar o dejar de usar dichas aplicaciones.
+
+En ningún caso AirPulse, sus funcionarios, accionistas, empleados, agentes, directores, subsidiarias, filiales, sucesores, cesionarios, los proveedores o licenciatarios serán responsables de (1) cualquier daño indirecto, especial, incidental, punitivo, ejemplar o consecuente; (2) cualquier pérdida de uso, datos, negocios o ganancias (ya sea directa o indirectamente), en todos los casos que surjan del uso o la incapacidad de utilizar el Servicio AirPulse, dispositivos, aplicaciones de terceros o contenido de aplicaciones de terceros; o (3) la responsabilidad agregada por todas las reclamaciones relacionadas con el Servicio AirPulse, aplicaciones de terceros o contenido de aplicaciones de terceros cuyo valor supere al mayor de (a) los montos que usted haya pagado a AirPulse durante los doce meses anteriores a la primera reclamación; o (b) USD 30. Cualquier responsabilidad que tengamos por las pérdidas que sufra se limita estrictamente a las pérdidas razonablemente previsibles.
+
+Para mayor claridad, estos términos no limitan la responsabilidad de AirPulse por fraude, tergiversación fraudulenta, muerte o lesiones personales en la medida en que la ley aplicable prohíba dicha limitación, ni por cualquier otra responsabilidad que, según la ley aplicable, no se limite ni excluya.
+
+Salvo que dicha restricción esté prohibida por la ley aplicable, cualquier reclamación que surja en virtud de estos términos debe iniciarse (ya sea mediante la presentación de una demanda de arbitraje o mediante la interposición de una acción individual conforme al acuerdo de arbitraje a continuación) dentro de un (1) año a partir de la fecha en que la parte que presenta la reclamación tenga conocimiento o razonablemente deba tener conocimiento del acto, omisión o incumplimiento que da lugar a la reclamación; y no existirá derecho a ninguna reparación por reclamaciones que no se presenten dentro de ese período.
+
+Derechos de terceros
+Usted reconoce y acepta que los propietarios del contenido y ciertos distribuidores (como proveedores de tiendas de aplicaciones) son beneficiarios previstos de estos Términos y tienen derecho a hacer cumplir estos Términos directamente contra usted. Además de lo establecido en esta sección, estos Términos no pretenden otorgar derechos a nadie, excepto a usted y a AirPulse, y en ningún caso estos Términos crearán derechos de terceros beneficiarios.
+
+Si ha descargado cualquiera de nuestras aplicaciones de software móvil (cada una, una "Aplicación") del App Store de Apple Inc. ("Apple") o si está utilizando la aplicación en un dispositivo iOS, reconoce que ha leído, comprendido y acepta el siguiente aviso con respecto a Apple. Estos Términos son solo entre usted y AirPulse, no con Apple, y Apple no es responsable del Servicio AirPulse ni del contenido de este. Apple no tiene obligación alguna de proporcionar servicios de mantenimiento y soporte con respecto al Servicio AirPulse. En caso de que el Servicio AirPulse no cumpla con alguna garantía aplicable, puede notificar a Apple y Apple reembolsará el precio de compra aplicable para la aplicación; y, en la medida máxima permitida por la ley aplicable, Apple no tiene ninguna otra obligación de garantía en lo absoluto con respecto al Servicio AirPulse. Apple no es responsable de abordar ninguna reclamación que usted o algún tercero haya realizado relacionada con el Servicio AirPulse o con su posesión o uso del Servicio AirPulse, lo que incluye lo siguiente: (1) reclamaciones de responsabilidad del producto; (2) cualquier reclamación de que el Servicio AirPulse no cumple con cualquier requisito legal o regulatorio aplicable; (3) reclamaciones que surjan en virtud de la protección al consumidor o legislación similar; y (4) reclamaciones relacionadas con la infracción de propiedad intelectual. Apple no es responsable de la investigación, defensa, conciliación y alta de ninguna reclamación de terceros de que el Servicio AirPulse o su posesión y uso de la aplicación infringen los derechos de propiedad intelectual de dichos terceros. Acepta cumplir con cualquier término de terceros aplicable cuando utiliza el Servicio AirPulse. Apple y las subsidiarias de Apple son terceros beneficiarios de estos Términos y, tras su aceptación de estos Términos, Apple tendrá el derecho (y se considerará que ha aceptado el derecho) de hacer cumplir estos Términos contra usted como tercero beneficiario de estos Términos.
+
+Indemnización
+Acepta indemnizar y eximir de responsabilidad a AirPulse de cualquier pérdida directa, daño y gastos razonables previsibles (incluidos los honorarios y costos razonables de abogados) sufridos o incurridos por AirPulse que surjan de o estén relacionados con lo siguiente: (1) su incumplimiento de cualquiera de estos Términos (incluidos cualquier término y condición adicional de AirPulse incorporados en el presente); (2) cualquier Contenido de usuario que publique o de otro modo contribuya; (3) cualquier actividad en la que participe en o a través del Servicio AirPulse; y (4) su incumplimiento de cualquier ley o los derechos de un tercero.
+
+Ley aplicable, arbitraje obligatorio y jurisdicción
+6.1 Ley aplicable / jurisd icción
+A menos que las leyes obligatorias de su país de residencia exijan lo contrario, los Acuerdos (y cualquier disputa/reclamación no contractual que surja de ellos o en relación con ellos) están sujetos a las leyes del estado o país que se enumeran a continuación, sin tener en cuenta la elección o los conflictos de los principios legales.
+
+Además, usted y AirPulse acuerdan la jurisdicción de los tribunales que se enumeran a continuación para resolver cualquier disputa, reclamación o controversia que surja en relación con los Acuerdos (y cualquier disputa o reclamación no contractual que surja de ellos o en relación con ellos), excepto cuando, según las leyes obligatorias aplicables, usted puede optar por iniciar procedimientos legales en su país de residencia o a nosotros se nos obliga a solo iniciar procedimientos legales en su país de residencia.
+
+País o región
+Elección de la ley aplicable
+Jurisdicción
+Todos los demás países y regiones en los que AirPulse está disponible.
+Leyes de Suecia
+Exclusivo; tribunales de Suecia
+Bulgaria, Chipre, Estonia, Francia, Hong Kong, Letonia, Lituania, Luxemburgo, Malta, Mónaco, Noruega, Filipinas, Portugal, Eslovaquia, España, Turquía
+Leyes de Suecia
+No exclusivo; tribunales de Suecia
+Brasil
+Leyes de Brasil
+Exclusivo; tribunales estatales y federales de São Paulo, estado de São Paulo, Brasil
+Canadá
+No se aplica a residentes de Quebec: Leyes de la provincia de Ontario
+Residentes de Quebec: Leyes de la provincia de Quebec, Canadá
+No se aplica a residentes de Quebec: Exclusivo, excepto para el propósito de aplicar juicios; tribunales de Ontario, Canadá
+Residentes de Quebec: Tribunales de Quebec, Canadá
+Bolivia, Chile, Colombia, Costa Rica, República Dominicana, Ecuador, el Salvador, Guatemala, Honduras, Nicaragua, Panamá, Paraguay, Perú, Uruguay
+Estado de Nueva York, Estados Unidos
+Exclusivo; tribunales estatales y federales de Nueva York, NY
+6.2 RENUNCIA A DEMANDA COLECTIVA
+CUANDO LO PERMITA LA LEY APLICABLE, USTED Y AirPulse ACUERDAN QUE CADA UNO PUEDE PRESENTAR RECLAMACIONES CONTRA EL OTRO SOLO EN SU CAPACIDAD INDIVIDUAL Y NO COMO DEMANDANTE O MIEMBRO COLECTIVO EN NINGUNA MEDIDA DE DEMANDA COLECTIVA O REPRESENTATIVA. A menos que tanto usted como AirPulse estén de acuerdo, ningún árbitro ni juez podrá consolidar las reclamaciones de más una persona ni presidir de otra manera ningún tipo de procedimiento representativo o colectivo.
+
+6.3 ARBITRAJE
+Si se encuentra, tiene sedes u oficinas o hace negocios en una jurisdicción en la que esta Sección 6.3. es aplicable, las siguientes disposiciones de arbitraje obligatorias se aplican a usted:
+
+6.3.1 Resolución de disputas y arbitraje
+Usted y AirPulse acuerdan que cualquier disputa, reclamación o controversia entre usted y AirPulse que surja en conexión o que se relacione con estos Acuerdos o su relación con AirPulse como usuario del Servicio (ya sea que se base en un contrato, agravio, estatuto, fraude, tergiversación o cualquier otra teoría legal, y si las reclamaciones surgen durante o después de la finalización de los Acuerdos) se determinarán mediante arbitraje individual obligatorio vinculante. El arbitraje es más informal que una demanda judicial en un tribunal. NO HAY JUEZ NI JURADO EN EL ARBITRAJE, Y LA REVISIÓN JUDICIAL DE UN LAUDO ARBITRAL ES LIMITADA. Puede haber un descubrimiento más limitado que en el tribunal. El árbitro debe cumplir con este acuerdo y puede adjudicar los mismos daños y compensaciones que un tribunal (incluidos los honorarios de abogados), excepto que el árbitro no podrá otorgar medidas declaratorias o cautelares que beneficien a alguien que no sean las partes del arbitraje. Esta disposición de arbitraje sobrevivirá a la terminación de los acuerdos.
+
+6.3.2 Excepciones
+A pesar de la cláusula 6.3.1 anterior, usted y AirPulse acuerdan que nada de lo aquí contenido se considerará como una renuncia, exclusión o limitación de cualquiera de nuestros derechos, en cualquier momento, de (1) presentar una demanda individual en un tribunal de reclamos menores, (2) emprender acciones de aplicación a través de agencias federales, estatales o locales aplicables donde tales acciones estén disponibles, (3) buscar desagravio por mandato judicial en un tribunal de justicia, o (4) presentar una demanda en un tribunal de justicia para abordar reclamos de infracción de propiedad intelectual.
+
+6.3.3 Reglas de arbitraje
+Usted o nosotros podemos iniciar procedimientos de arbitraje. Cualquier arbitraje entre usted y AirPulse se resolverá finalmente de conformidad con las Reglas de arbitraje de la Cámara de Comercio Internacional (la "ICC") entonces en vigor (las "Reglas de la ICC") por uno o más árbitros nombrados de conformidad con las Reglas de la ICC, modificadas por estos Acuerdos, y será administrado por la Corte Internacional de Arbitraje de la ICC.
+
+Todo arbitraje se llevará a cabo en inglés y, a menos que la ley obligatoria de un estado miembro de la Unión Europea o cualquier otra jurisdicción exija lo contrario, la ley que se aplicará en cualquier arbitraje será la ley de [el estado o país pertinente descrito en la cláusula 6.1], sin tener en cuenta las opciones o los conflictos de los principios legales.
+
+6.3.4 Plazo para la presentación
+Cualquier arbitraje debe iniciarse mediante la presentación de una demanda de arbitraje en el plazo de UN (1) AÑO después de la fecha en que la parte que afirme la reclamación primero sepa o razonablemente debería saber del acto, la omisión o el incumplimiento que dé lugar a la reclamación; y no habrá derecho a ningún recurso para ninguna reclamación que no se haya declarado dentro de ese período. Si la ley aplicable prohíbe un período de prescripción de un año para presentar reclamaciones, cualquier reclamación debe ser presentada dentro del período más corto permitido por la ley aplicable.
+
+6.3.5 Aviso; proceso
+Una parte que pretende solicitar el arbitraje debe enviar primero un aviso por escrito de la disputa a la otra, por correo certificado o por Federal Express (se requiere firma) o, en caso de que no tengamos registrada su dirección física, por email ("Aviso"). La dirección de AirPulse para el aviso es: [AirPulse, Attn: Asesoría Legal General, 4 World Trade Center, 150 Greenwich Street, Piso 62, Nueva York, Nueva York 10007, EE. UU.]. El Aviso debe (1) describir la naturaleza y base de la reclamación o disputa; y (2) establecer el alivio específico solicitado ("Demanda"). Estamos de acuerdo en hacer esfuerzos de buena fe para resolver la reclamación directamente, pero si no llegamos a un acuerdo para hacerlo dentro de los 30 días posteriores a la recepción del Aviso, usted o AirPulse pueden iniciar un procedimiento de arbitraje. Durante el arbitraje, el monto de cualquier oferta de conciliación que haya realizado usted o AirPulse no se divulgará al árbitro hasta después de que el árbitro tome una decisión y un laudo finales, si los hubiera. En caso de que nuestra disputa se resuelva finalmente mediante arbitraje a su favor, AirPulse le pagará (1) el monto otorgado por el árbitro, si lo hubiera, (2) el último monto de conciliación por escrito ofrecido por AirPulse en la conciliación de la disputa antes del laudo arbitral; o (3) USD 1000, el monto que sea mayor. Todos los documentos y la información revelada en el curso del arbitraje serán estrictamente confidenciales por el destinatario y no serán utilizados por el destinatario para ningún otro fin que no sea para el arbitraje o el cumplimiento de la decisión y el laudo del árbitro, y no serán divulgados excepto en forma confidencial a las personas que tengan la necesidad de conocerlos para tales fines o según lo requerido por la ley aplicable. Salvo que se requiera para hacer cumplir la decisión y el laudo del árbitro, ni usted ni AirPulse harán ningún anuncio o comentario público ni originarán publicidad relacionada con el arbitraje, lo que incluye el hecho de que las partes estén en disputa, la existencia del arbitraje o cualquier decisión o laudo del árbitro.
+
+6.3.6 Modificaciones
+En el caso de que AirPulse realice cualquier cambio futuro a esta disposición de arbitraje (que no sea un cambio en la dirección de AirPulse para Aviso), puede rechazar dicho cambio enviándonos un aviso por escrito en el plazo de los 30 días posteriores al cambio a la dirección de AirPulse para Aviso, en cuyo caso su cuenta con AirPulse se finalizará de inmediato y esta disposición de arbitraje sobrevivirá, como estuviera en vigor inmediatamente antes de las enmiendas que usted rechace.
+
+6.3.7 Aplicabilidad
+Si se determina que la renuncia a la demanda colectiva en la Sección 6.2 no es aplicable en el arbitraje o si alguna parte de esta Sección 6.3 no se considera válida o aplicable, entonces la totalidad de esta Sección 6.3 será nula y sin efecto y, en tal caso, las partes acuerdan que la jurisdicción y el lugar exclusivos descritos en la Sección 6.1 regirán cualquier acción que surja de o esté relacionada con los Acuerdos y usted no estará impedido de iniciar procedimientos en cualquier momento.
+
+7. Acerca de estos Términos
+Según la ley aplicable, es posible que tenga ciertos derechos que no pueden limitarse por un contrato. Estos términos no pretenden restringir esos derechos de ninguna manera.
+
+Cambios
+Podemos realizar cambios a estos Términos (incluidos los términos y condiciones adicionales de AirPulse incorporados en el presente documento) periódicamente avisando dichos cambios por cualquier medio razonable (antes de que entren en vigor), lo que incluye publicar un Acuerdo revisado en el Servicio AirPulse correspondiente (siempre que, para cambios importantes, intentemos complementar tal aviso por email, un mensaje emergente en el servicio u otros medios). Dichos cambios no se aplicarán a ninguna disputa entre usted y nosotros que surja antes de la fecha en la que publicamos los Términos revisados u otros términos y condiciones de AirPulse, donde se incorporen dichos cambios o que, de otro modo, se le hayan notificado dichos cambios. El uso del Servicio AirPulse después de cualquier cambio en estos Términos constituirá la aceptación de dichos cambios. Si no desea continuar utilizando el Servicio AirPulse bajo los Términos actualizados, puede comunicarse con nosotros para cancelar su cuenta. La fecha establecida en la parte superior de este documento indica cuándo se modificaron estos Términos por última vez.
+
+Acuerdo completo
+Además de lo establecido en esta sección o según lo acordado explícitamente por escrito entre usted y AirPulse, estos Términos constituyen todos los términos y condiciones acordados entre usted y AirPulse y sustituyen cualquier acuerdo previo en relación con el tema de estos Términos, ya sea oral o por escrito. Como se mencionó anteriormente, otros términos y condiciones, pautas y políticas que rigen el uso del Servicio AirPulse se incorporan aquí como referencia. Estos incluyen lo siguiente: (A) términos y condiciones adicionales relacionados con los servicios específicos que se ofrecen en el Servicio AirPulse: los Términos de la oferta promocional de AirPulse Premium; los Términos de la tarjeta de AirPulse y los Términos de la comunidad de soporte de AirPulse; y (b) las pautas y políticas: la Política de Privacidad de AirPulse; las Pautas del usuario de AirPulse; las Reglas de la plataforma de AirPulse y la Política de propiedad intelectual de AirPulse.
+
+Divisibilidad y renuncia
+A menos que se indique lo contrario en estos Términos, si alguna disposición de estos Términos no se considera válida o aplicable por cualquier motivo o en cualquier medida, las disposiciones restantes de estos Términos no se verán afectadas y la aplicación de dicha disposición se aplicará en la medida en que lo permita la ley.
+
+Cualquier incumplimiento por parte de AirPulse o de cualquier beneficiario tercero de hacer cumplir estos Términos o cualquiera de sus disposiciones no constituirá una renuncia al derecho de AirPulse o del beneficiario tercero correspondiente de hacerlos cumplir en el futuro.
+
+Transferencia
+AirPulse puede asignar cualquiera o todos estos Términos y puede asignar o delegar, en su totalidad o en parte, cualquiera de sus derechos u obligaciones en virtud de estos Términos. No puede ceder estos Términos, en su totalidad o en parte, ni transferir o sublicenciar sus derechos bajo estos Términos a terceros.

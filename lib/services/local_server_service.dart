@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:shelf/shelf.dart';
@@ -41,7 +42,7 @@ class LocalServerService {
       ..get('/songs', (Request req) => _handleSongs(req, songs))
       ..get(
         '/songs/<id>/stream',
-        (Request req, String id) => _handleStream(req, id, songs),
+        (Request req, String id) async => _handleStream(req, id, songs),
       )
       ..get(
         '/state',
@@ -368,13 +369,48 @@ fetchSongs();
     );
   }
 
-  Response _handleStream(Request req, String id, List<Song> songs) {
+  Future<Response> _handleStream(
+    Request req,
+    String id,
+    List<Song> songs,
+  ) async {
     final song = songs.where((s) => s.id == id).firstOrNull;
-    if (song == null) return Response.notFound('Song not found');
-    final file = File(song.filePath);
-    if (!file.existsSync()) return Response.notFound('File not found');
+    if (song == null) {
+      dev.log(
+        '[AirPulse] Stream: song $id NOT FOUND in list of ${songs.length}',
+      );
+      return Response.notFound('Song not found');
+    }
 
-    final fileSize = file.lengthSync();
+    dev.log('[AirPulse] Stream: song "$id" path="${song.filePath}"');
+
+    final file = File(song.filePath);
+    final bool exists;
+    try {
+      exists = await file.exists();
+    } catch (e) {
+      dev.log('[AirPulse] Stream: exists() threw: $e');
+      return Response.internalServerError(body: 'Cannot check file: $e');
+    }
+
+    if (!exists) {
+      dev.log('[AirPulse] Stream: FILE NOT FOUND at "${song.filePath}"');
+      return Response.notFound('File not found: ${song.filePath}');
+    }
+
+    final int fileSize;
+    try {
+      fileSize = await file.length();
+    } catch (e) {
+      dev.log('[AirPulse] Stream: length() threw: $e');
+      return Response.internalServerError(body: 'Cannot read file length: $e');
+    }
+
+    final rangeInfo = req.headers['range'] ?? 'none';
+    dev.log(
+      '[AirPulse] Stream: serving ${song.filePath} ($fileSize bytes, range=$rangeInfo)',
+    );
+
     final rangeHeader = req.headers['range'];
 
     // Soporte de Range requests para que el navegador pueda saltar en la pista

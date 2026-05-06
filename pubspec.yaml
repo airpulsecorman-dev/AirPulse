@@ -83,6 +83,7 @@ dependencies:
   json_annotation: ^4.9.0
   rxdart: ^0.28.0
   audio_metadata_reader: ^1.4.1
+  share_plus: ^10.1.4
 
 dev_dependencies:
   flutter_test:

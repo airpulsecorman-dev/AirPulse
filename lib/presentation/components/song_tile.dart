@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
 import 'song_artwork.dart';
@@ -18,6 +19,47 @@ class SongTile extends StatelessWidget {
     this.onMoreTap,
     this.isFavorite = false,
   });
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Compartir canción'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final text =
+                      '🎵 Escucha "${song.title}" de ${song.artist} en AirPulse!';
+                  Share.share(text);
+                },
+              ),
+              if (onMoreTap != null)
+                ListTile(
+                  leading: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? const Color(0xFFFF4D8B) : null,
+                  ),
+                  title: Text(
+                      isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onMoreTap!();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,14 +103,10 @@ class SongTile extends StatelessWidget {
             formatDuration(song.duration),
             style: theme.textTheme.bodySmall,
           ),
-          if (onMoreTap != null)
-            IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? const Color(0xFFFF4D8B) : null,
-              ),
-              onPressed: onMoreTap,
-            ),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => _showOptions(context),
+          ),
         ],
       ),
       onTap: onTap,
@@ -78,3 +116,4 @@ class SongTile extends StatelessWidget {
     );
   }
 }
+
