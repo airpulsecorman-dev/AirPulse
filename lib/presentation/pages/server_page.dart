@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,7 +9,9 @@ import '../hooks/use_server.dart';
 import '../hooks/use_library.dart';
 import '../providers/server_provider.dart';
 import '../providers/library_provider.dart';
+import '../providers/auth_provider.dart';
 import '../components/qr_widget.dart';
+import '../../services/qr_session_service.dart';
 
 class ServerPage extends HookWidget {
   const ServerPage({super.key});
@@ -225,12 +228,58 @@ class _QRScannerPageState extends State<_QRScannerPage> {
     final raw = capture.barcodes.firstOrNull?.rawValue;
     if (raw == null) return;
 
-    // La web envía su URL directamente como QR
+    // ── Flujo 1: QR de autenticación web (estilo WhatsApp Web via RTDB) ──
+    if (raw.startsWith('{')) {
+      try {
+        final json = jsonDecode(raw) as Map<String, dynamic>;
+        if (json['type'] == 'airpulse_web_auth') {
+          final sessionId = json['sessionId'] as String?;
+          if (sessionId == null || sessionId.isEmpty) return;
+
+          setState(() {
+            _scanned = true;
+            _isConnecting = true;
+            _connectError = null;
+          });
+          _scannerController.stop();
+
+          try {
+            final auth = context.read<AuthProvider>();
+            final user = auth.currentUser;
+            if (user == null) {
+              setState(() {
+                _connectError = 'Debes iniciar sesión en el móvil primero';
+                _isConnecting = false;
+              });
+              return;
+            }
+
+            final service = QrSessionService();
+            await service.approveWebSession(sessionId, user);
+
+            setState(() {
+              _connectedUrl = 'web_auth:$sessionId';
+              _isConnecting = false;
+            });
+          } catch (e) {
+            setState(() {
+              _connectError = 'Error al aprobar sesión: $e';
+              _isConnecting = false;
+            });
+          }
+          return;
+        }
+      } catch (_) {
+        // No es JSON válido, continuar con el flujo normal
+      }
+    }
+
+    // ── Flujo 2: QR con URL del servidor web (flujo anterior) ──
     String? webUrl;
     if (raw.startsWith('http')) {
-      webUrl = raw.split('?').first; // ignorar params previos
+      webUrl = raw.split('?').first;
     } else {
-      return; // QR no reconocido
+      return;
     }
 
     setState(() {
@@ -257,9 +306,9 @@ class _QRScannerPageState extends State<_QRScannerPage> {
       }
 
       // 2. Abrir la web con el parámetro serverUrl para auto-conectar
-      final targetUri = Uri.parse(webUrl).replace(
-        queryParameters: {'serverUrl': mobileServerUrl},
-      );
+      final targetUri = Uri.parse(
+        webUrl,
+      ).replace(queryParameters: {'serverUrl': mobileServerUrl});
       await launchUrl(targetUri, mode: LaunchMode.externalApplication);
     } catch (e) {
       setState(() => _connectError = e.toString());
@@ -303,22 +352,27 @@ class _QRScannerPageState extends State<_QRScannerPage> {
       ),
       body: _scanned
           ? (_isConnecting
-              ? const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(color: Color(0xFFFF4D8B)),
-                      SizedBox(height: 16),
-                      Text('Iniciando servidor y abriendo la web…'),
-                    ],
-                  ),
-                )
-              : _connectError != null
-                  ? _ErrorConnectView(
-                      error: _connectError!,
-                      onRetry: _reset,
-                    )
-                  : _ConnectedView(url: _connectedUrl!, onRescan: _reset))
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(
+                          color: Color(0xFFFF4D8B),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _connectedUrl?.startsWith('web_auth:') == true
+                              ? 'Aprobando sesión web…'
+                              : 'Iniciando servidor y abriendo la web…',
+                        ),
+                      ],
+                    ),
+                  )
+                : _connectError != null
+                ? _ErrorConnectView(error: _connectError!, onRetry: _reset)
+                : _connectedUrl?.startsWith('web_auth:') == true
+                ? _WebAuthApprovedView(onRescan: _reset)
+                : _ConnectedView(url: _connectedUrl!, onRescan: _reset))
           : Column(
               children: [
                 Expanded(
@@ -384,11 +438,7 @@ class _ConnectedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.check_circle,
-              size: 80,
-              color: Colors.green,
-            ),
+            const Icon(Icons.check_circle, size: 80, color: Colors.green),
             const SizedBox(height: 24),
             Text(
               '¡Servidor iniciado!',
@@ -483,6 +533,64 @@ class _StartServerCard extends StatelessWidget {
               icon: const Icon(Icons.play_arrow),
               label: const Text('Iniciar servidor'),
               onPressed: onStart,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WebAuthApprovedView extends StatelessWidget {
+  final VoidCallback onRescan;
+
+  const _WebAuthApprovedView({required this.onRescan});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+              ),
+              child: const Icon(
+                Icons.check_circle_outline,
+                size: 48,
+                color: Color(0xFF4CAF50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '¡Sesión web aprobada!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'La web ya está iniciando sesión con tu cuenta.\nPuedes cerrar este diálogo.',
+              style: TextStyle(color: Color(0xFF8899AA)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFFF4D8B)),
+                foregroundColor: const Color(0xFFFF4D8B),
+              ),
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Escanear otro QR'),
+              onPressed: onRescan,
             ),
           ],
         ),

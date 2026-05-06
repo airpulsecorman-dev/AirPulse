@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/auth_provider.dart';
+import '../../services/qr_session_service.dart';
 import 'web_library_page.dart';
+import 'google_onboarding_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,7 +20,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  final _serverUrlCtrl = TextEditingController();
   bool _obscurePass = true;
 
   @override
@@ -45,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
-    _serverUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -74,7 +76,15 @@ class _LoginPageState extends State<LoginPage> {
     final ok = await auth.signInWithGoogle();
     if (!mounted) return;
     if (ok) {
-      Navigator.of(context).pushReplacementNamed('/');
+      final user = auth.currentUser;
+      if (user != null && !user.acceptedTerms) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (_) => const GoogleOnboardingPage()),
+        );
+      } else {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -188,7 +198,8 @@ class _LoginPageState extends State<LoginPage> {
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFF334455)),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
+                borderRadius: BorderRadius.circular(14),
+              ),
               foregroundColor: Colors.white,
             ),
             icon: Image.network(
@@ -207,8 +218,10 @@ class _LoginPageState extends State<LoginPage> {
             Expanded(child: Divider(color: Color(0xFF334455))),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Text('o inicia sesión con correo',
-                  style: TextStyle(color: Color(0xFF8899AA), fontSize: 12)),
+              child: Text(
+                'o inicia sesión con correo',
+                style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+              ),
             ),
             Expanded(child: Divider(color: Color(0xFF334455))),
           ],
@@ -310,168 +323,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildMobileConnectPanel(BuildContext context) {
-    // QR con la URL actual de la web para que el móvil la escanee
-    final webUrl = Uri.base.toString().split('?').first; // sin params previos
-
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2D42),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
-        ),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.smartphone, color: Color(0xFFFF4D8B), size: 32),
-          const SizedBox(height: 12),
-          const Text(
-            'Conectar con el móvil',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Escanea este QR desde la app móvil para conectarse automáticamente.',
-            style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          // QR con la URL de la web para que el móvil lo escanee
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: QrImageView(
-              data: webUrl,
-              version: QrVersions.auto,
-              size: 160,
-              foregroundColor: const Color(0xFF0D1B2A),
-              backgroundColor: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            webUrl,
-            style: const TextStyle(color: Color(0xFF8899AA), fontSize: 10),
-            textAlign: TextAlign.center,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              children: [
-                Expanded(child: Divider(color: Color(0xFF334455))),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    'o conecta manualmente',
-                    style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
-                  ),
-                ),
-                Expanded(child: Divider(color: Color(0xFF334455))),
-              ],
-            ),
-          ),
-          // Instrucciones
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D1B2A),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _StepItem(number: '1', text: 'Abre AirPulse en tu móvil'),
-                SizedBox(height: 6),
-                _StepItem(
-                  number: '2',
-                  text: 'Ve a Servidor → Escanear web',
-                ),
-                SizedBox(height: 6),
-                _StepItem(
-                  number: '3',
-                  text: 'Apunta la cámara al QR de arriba',
-                ),
-                SizedBox(height: 6),
-                _StepItem(
-                  number: '4',
-                  text: '¡Las canciones aparecerán automáticamente!',
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _serverUrlCtrl,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-            decoration: InputDecoration(
-              hintText: 'http://192.168.x.x:8765',
-              hintStyle: const TextStyle(
-                color: Color(0xFF8899AA),
-                fontSize: 13,
-              ),
-              labelText: 'URL del servidor móvil',
-              labelStyle: const TextStyle(color: Color(0xFF8899AA)),
-              prefixIcon: const Icon(Icons.link, color: Color(0xFF8899AA)),
-              filled: true,
-              fillColor: const Color(0xFF0D1B2A),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFFFF4D8B),
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 46,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final url = _serverUrlCtrl.text.trim();
-                if (url.isEmpty) return;
-                final normalized = url.endsWith('/')
-                    ? url.substring(0, url.length - 1)
-                    : url;
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => WebLibraryPage(serverUrl: normalized),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF4D8B),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              icon: const Icon(Icons.wifi_tethering, size: 18),
-              label: const Text(
-                'Conectar con móvil',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const _WebQRLoginPanel();
   }
 
   Widget _buildField({
@@ -517,6 +369,278 @@ class _LoginPageState extends State<LoginPage> {
           borderSide: const BorderSide(color: Color(0xFFFF4D8B), width: 1.5),
         ),
         errorStyle: const TextStyle(color: Color(0xFFFF4D8B)),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Widget de inicio de sesión QR estilo WhatsApp Web (solo en plataforma web)
+// ─────────────────────────────────────────────────────────────────────────────
+
+String _generateSessionId() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final rng = Random.secure();
+  return List.generate(32, (_) => chars[rng.nextInt(chars.length)]).join();
+}
+
+class _WebQRLoginPanel extends StatefulWidget {
+  const _WebQRLoginPanel();
+
+  @override
+  State<_WebQRLoginPanel> createState() => _WebQRLoginPanelState();
+}
+
+class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
+  final _service = QrSessionService();
+  late final String _sessionId;
+  StreamSubscription<WebSessionData>? _sub;
+  bool _waiting = true; // esperando que el móvil apruebe
+  bool _approved = false;
+  String? _errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionId = _generateSessionId();
+    _initSession();
+  }
+
+  Future<void> _initSession() async {
+    try {
+      await _service.createWebSession(_sessionId);
+      _sub = _service.watchSession(_sessionId).listen(_onSessionChange);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMsg = 'Error al crear sesión: $e');
+      }
+    }
+  }
+
+  void _onSessionChange(WebSessionData data) {
+    if (!mounted) return;
+    if (data.status == WebSessionStatus.approved) {
+      setState(() {
+        _waiting = false;
+        _approved = true;
+      });
+      _sub?.cancel();
+      // Limpiar el nodo en RTDB
+      _service.deleteSession(_sessionId);
+      // Cargar el usuario en el AuthProvider
+      final auth = context.read<AuthProvider>();
+      auth.loginFromQRSession(
+        uid: data.uid!,
+        email: data.email!,
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        avatarPath: data.avatarPath,
+      );
+      // Navegar al home
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pushReplacementNamed('/');
+      });
+    }
+  }
+
+  Future<void> _refresh() async {
+    _sub?.cancel();
+    setState(() {
+      _waiting = true;
+      _approved = false;
+      _errorMsg = null;
+    });
+    // Eliminar la sesión anterior si existe
+    await _service.deleteSession(_sessionId);
+    await _initSession();
+    setState(() {}); // fuerza reconstrucción del QR
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  String get _qrData =>
+      '{"type":"airpulse_web_auth","sessionId":"$_sessionId"}';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A2D42),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
+        ),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.smartphone, color: Color(0xFFFF4D8B), size: 32),
+          const SizedBox(height: 12),
+          const Text(
+            'Iniciar sesión con el móvil',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Abre AirPulse en tu teléfono y escanea el código.',
+            style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          // ── QR o estado ──
+          if (_errorMsg != null)
+            _StatusBox(
+              icon: Icons.error_outline,
+              color: const Color(0xFFFF4D8B),
+              label: _errorMsg!,
+              actionLabel: 'Reintentar',
+              onAction: _refresh,
+            )
+          else if (_approved)
+            const _StatusBox(
+              icon: Icons.check_circle_outline,
+              color: Color(0xFF4CAF50),
+              label: '¡Aprobado! Entrando…',
+            )
+          else
+            GestureDetector(
+              onTap: _waiting ? null : _refresh,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: _waiting
+                    ? QrImageView(
+                        data: _qrData,
+                        version: QrVersions.auto,
+                        size: 180,
+                        foregroundColor: const Color(0xFF0D1B2A),
+                        backgroundColor: Colors.white,
+                      )
+                    : const SizedBox(
+                        width: 180,
+                        height: 180,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          if (!_approved && _errorMsg == null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.circle, size: 8, color: Color(0xFF4CAF50)),
+                const SizedBox(width: 6),
+                const Text(
+                  'Esperando aprobación…',
+                  style: TextStyle(color: Color(0xFF8899AA), fontSize: 11),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _refresh,
+                  child: const Text(
+                    'Actualizar QR',
+                    style: TextStyle(
+                      color: Color(0xFFFF4D8B),
+                      fontSize: 11,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 20),
+          // ── Instrucciones ──
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D1B2A),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _StepItem(number: '1', text: 'Abre AirPulse en tu móvil'),
+                SizedBox(height: 6),
+                _StepItem(number: '2', text: 'Ve a Servidor → Escanear web'),
+                SizedBox(height: 6),
+                _StepItem(
+                  number: '3',
+                  text: 'Apunta la cámara al QR de arriba',
+                ),
+                SizedBox(height: 6),
+                _StepItem(
+                  number: '4',
+                  text: '¡Sesión iniciada automáticamente!',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusBox extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _StatusBox({
+    required this.icon,
+    required this.color,
+    required this.label,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 180,
+      height: 180,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1B2A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 40),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: onAction,
+              child: Text(
+                actionLabel!,
+                style: const TextStyle(color: Color(0xFFFF4D8B)),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

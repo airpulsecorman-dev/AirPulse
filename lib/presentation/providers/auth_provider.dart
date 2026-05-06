@@ -106,11 +106,65 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Inicia sesión a partir de los datos aprobados vía QR (RTDB).
+  /// Usado en el flujo estilo WhatsApp Web: el móvil aprueba → la web obtiene
+  /// los datos del usuario desde Realtime Database y los carga en el provider.
+  void loginFromQRSession({
+    required String uid,
+    required String email,
+    String? username,
+    String? firstName,
+    String? lastName,
+    String? avatarPath,
+  }) {
+    _currentUser = User(
+      id: uid,
+      username: username ?? email.split('@').first,
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
+      email: email,
+      avatarPath: avatarPath,
+      createdAt: DateTime.now(),
+      birthDate: DateTime(2000),
+      isMinor: false,
+    );
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     await LogoutUseCase(_repo).call();
     _currentUser = null;
     _status = AuthStatus.unauthenticated;
     notifyListeners();
+  }
+
+  Future<bool> completeGoogleOnboarding({
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
+  }) async {
+    if (_currentUser == null) return false;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _currentUser = await _repo.completeGoogleOnboarding(
+        userId: _currentUser!.id,
+        birthDate: birthDate,
+        acceptedTerms: acceptedTerms,
+        acceptedPrivacy: acceptedPrivacy,
+        acceptedIntellectual: acceptedIntellectual,
+      );
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> updateProfile({

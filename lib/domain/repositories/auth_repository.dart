@@ -28,4 +28,11 @@ abstract class AuthRepository {
     required String currentPassword,
     required String newPassword,
   });
+  Future<User> completeGoogleOnboarding({
+    required String userId,
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
+  });
 }

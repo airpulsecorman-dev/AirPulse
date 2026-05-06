@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'google_onboarding_page.dart';
 import 'terms_page.dart';
 import 'privacy_policy_page.dart';
 import 'intellectual_property_page.dart';
@@ -113,7 +114,15 @@ class _RegisterPageState extends State<RegisterPage> {
     final ok = await auth.signInWithGoogle();
     if (!mounted) return;
     if (ok) {
-      Navigator.of(context).pushReplacementNamed('/');
+      final user = auth.currentUser;
+      if (user != null && !user.acceptedTerms) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (_) => const GoogleOnboardingPage()),
+        );
+      } else {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
     } else {
       _showError(auth.errorMessage ?? 'Error con Google');
     }

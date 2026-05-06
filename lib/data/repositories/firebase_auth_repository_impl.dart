@@ -136,9 +136,14 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       final fbUser = userCredential.user!;
 
       // Si el usuario ya existe en la DB lo retornamos
-      final snap = await _db.child(fbUser.uid).get();
-      if (snap.exists) {
-        return UserModel.fromJson(Map<String, dynamic>.from(snap.value as Map));
+      try {
+        final snap = await _db.child(fbUser.uid).get();
+        if (snap.exists) {
+          return UserModel.fromJson(
+              Map<String, dynamic>.from(snap.value as Map));
+        }
+      } catch (_) {
+        // Permission denied u otro error de DB → tratar como usuario nuevo
       }
 
       // Primera vez con Google: crear registro con datos mínimos
@@ -230,6 +235,29 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_mapFirebaseError(e.code));
     }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // completeGoogleOnboarding
+  // ────────────────────────────────────────────────────────────────────────────
+
+  @override
+  Future<User> completeGoogleOnboarding({
+    required String userId,
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
+  }) async {
+    final isMinor = _calcIsMinor(birthDate);
+    await _db.child(userId).update({
+      'birthDate': birthDate.toIso8601String(),
+      'isMinor': isMinor,
+      'acceptedTerms': acceptedTerms,
+      'acceptedPrivacy': acceptedPrivacy,
+      'acceptedIntellectual': acceptedIntellectual,
+    });
+    return await _fetchUserModel(userId);
   }
 
   // ────────────────────────────────────────────────────────────────────────────
