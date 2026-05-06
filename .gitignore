@@ -32,7 +32,11 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+
+# 🔐 Environment variables - NEVER commit these files with real credentials
 .env
+/assets/env.txt
+/web/.env
 
 # Symbolication related
 app.*.symbols
@@ -44,5 +48,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-/assets/.env

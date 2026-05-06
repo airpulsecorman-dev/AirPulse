@@ -69,6 +69,22 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _googleSignIn() async {
+    final auth = context.read<AuthProvider>();
+    final ok = await auth.signInWithGoogle();
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pushReplacementNamed('/');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Error con Google'),
+          backgroundColor: const Color(0xFFFF4D8B),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -163,6 +179,41 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildForm(dynamic auth) {
     return Column(
       children: [
+        // ── Google ────────────────────────────────────────────────────────────
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: OutlinedButton.icon(
+            onPressed: auth.isLoading ? null : _googleSignIn,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFF334455)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+              foregroundColor: Colors.white,
+            ),
+            icon: Image.network(
+              'https://www.google.com/favicon.ico',
+              width: 20,
+              height: 20,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.login, color: Colors.white, size: 20),
+            ),
+            label: const Text('Continuar con Google'),
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Row(
+          children: [
+            Expanded(child: Divider(color: Color(0xFF334455))),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text('o inicia sesión con correo',
+                  style: TextStyle(color: Color(0xFF8899AA), fontSize: 12)),
+            ),
+            Expanded(child: Divider(color: Color(0xFF334455))),
+          ],
+        ),
+        const SizedBox(height: 20),
         Form(
           key: _formKey,
           child: Column(

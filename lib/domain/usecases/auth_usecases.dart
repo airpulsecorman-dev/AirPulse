@@ -7,10 +7,28 @@ class RegisterUseCase {
 
   Future<User> call({
     required String username,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String cedula,
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
   }) =>
-      _repo.register(username: username, email: email, password: password);
+      _repo.register(
+        username: username,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password,
+        cedula: cedula,
+        birthDate: birthDate,
+        acceptedTerms: acceptedTerms,
+        acceptedPrivacy: acceptedPrivacy,
+        acceptedIntellectual: acceptedIntellectual,
+      );
 }
 
 class LoginUseCase {
@@ -19,6 +37,13 @@ class LoginUseCase {
 
   Future<User> call({required String email, required String password}) =>
       _repo.login(email: email, password: password);
+}
+
+class GoogleSignInUseCase {
+  final AuthRepository _repo;
+  GoogleSignInUseCase(this._repo);
+
+  Future<User> call() => _repo.signInWithGoogle();
 }
 
 class LogoutUseCase {

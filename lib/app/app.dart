@@ -20,7 +20,7 @@ import '../services/library_service.dart';
 import '../services/local_server_service.dart';
 import '../services/qr_service.dart';
 import '../core/di/service_locator.dart';
-import '../data/repositories/auth_repository_impl.dart';
+import '../data/repositories/firebase_auth_repository_impl.dart';
 import '../data/repositories/favorites_repository_impl.dart';
 
 class AirPulseApp extends StatelessWidget {
@@ -31,7 +31,7 @@ class AirPulseApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(AuthRepositoryImpl()),
+          create: (_) => AuthProvider(FirebaseAuthRepositoryImpl()),
         ),
         ChangeNotifierProvider(
           create: (_) => FavoritesProvider(FavoritesRepositoryImpl()),

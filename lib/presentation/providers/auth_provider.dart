@@ -52,8 +52,15 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> register({
     required String username,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String cedula,
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -61,9 +68,33 @@ class AuthProvider extends ChangeNotifier {
     try {
       _currentUser = await RegisterUseCase(_repo).call(
         username: username,
+        firstName: firstName,
+        lastName: lastName,
         email: email,
         password: password,
+        cedula: cedula,
+        birthDate: birthDate,
+        acceptedTerms: acceptedTerms,
+        acceptedPrivacy: acceptedPrivacy,
+        acceptedIntellectual: acceptedIntellectual,
       );
+      _status = AuthStatus.authenticated;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> signInWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _currentUser = await GoogleSignInUseCase(_repo).call();
       _status = AuthStatus.authenticated;
       return true;
     } catch (e) {

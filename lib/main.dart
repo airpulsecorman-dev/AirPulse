@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'core/di/service_locator.dart';
@@ -6,6 +7,7 @@ import 'services/audio_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   // Inicializar el handler de audio: activa la notificación en pantalla de
   // bloqueo, controles de Bluetooth/auriculares y reproducción en background.

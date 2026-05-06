@@ -4,10 +4,18 @@ abstract class AuthRepository {
   Future<User?> getCurrentUser();
   Future<User> register({
     required String username,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String cedula,
+    required DateTime birthDate,
+    required bool acceptedTerms,
+    required bool acceptedPrivacy,
+    required bool acceptedIntellectual,
   });
   Future<User> login({required String email, required String password});
+  Future<User> signInWithGoogle();
   Future<void> logout();
   Future<bool> isLoggedIn();
   Future<User> updateProfile({
