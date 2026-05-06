@@ -14,27 +14,14 @@ import '../providers/favorites_provider.dart';
 import '../../domain/entities/song.dart';
 import 'album_detail_page.dart';
 import 'artist_detail_page.dart';
+import 'terms_page.dart';
+import 'privacy_policy_page.dart';
+import 'intellectual_property_page.dart';
 
 Color _randomPastel() {
   final rng = Random();
   final hue = rng.nextDouble() * 360;
   return HSLColor.fromAHSL(1.0, hue, 0.5, 0.80).toColor();
-}
-
-void _showDialog(BuildContext context, String title, String content) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text(title),
-      content: SingleChildScrollView(child: Text(content)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cerrar'),
-        ),
-      ],
-    ),
-  );
 }
 
 class LibraryPage extends HookWidget {
@@ -120,17 +107,25 @@ class LibraryPage extends HookWidget {
                   Navigator.pushNamed(context, '/settings');
                   break;
                 case 'terms':
-                  _showDialog(
+                  Navigator.push(
                     context,
-                    'Términos y Condiciones',
-                    'Aquí van los términos y condiciones de AirPulse.',
+                    MaterialPageRoute(builder: (_) => const TermsPage()),
                   );
                   break;
                 case 'privacy':
-                  _showDialog(
+                  Navigator.push(
                     context,
-                    'Política de Privacidad',
-                    'Aquí va la política de privacidad de AirPulse.',
+                    MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyPage(),
+                    ),
+                  );
+                  break;
+                case 'intellectual':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const IntellectualPropertyPage(),
+                    ),
                   );
                   break;
                 case 'logout':
@@ -195,7 +190,17 @@ class LibraryPage extends HookWidget {
                     children: [
                       Icon(Icons.privacy_tip, size: 18),
                       SizedBox(width: 8),
-                      Text('Privacidad y Servicios'),
+                      Text('Política de Privacidad'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'intellectual',
+                  child: Row(
+                    children: [
+                      Icon(Icons.gavel, size: 18),
+                      SizedBox(width: 8),
+                      Text('Propiedad Intelectual'),
                     ],
                   ),
                 ),

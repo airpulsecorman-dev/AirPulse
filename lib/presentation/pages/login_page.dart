@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -79,8 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       final user = auth.currentUser;
       if (user != null && !user.acceptedTerms) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (_) => const GoogleOnboardingPage()),
+          MaterialPageRoute(builder: (_) => const GoogleOnboardingPage()),
         );
       } else {
         Navigator.of(context).pushReplacementNamed('/');
@@ -378,11 +377,7 @@ class _LoginPageState extends State<LoginPage> {
 // Widget de inicio de sesión QR estilo WhatsApp Web (solo en plataforma web)
 // ─────────────────────────────────────────────────────────────────────────────
 
-String _generateSessionId() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  final rng = Random.secure();
-  return List.generate(32, (_) => chars[rng.nextInt(chars.length)]).join();
-}
+String _generateSessionId() => const Uuid().v4();
 
 class _WebQRLoginPanel extends StatefulWidget {
   const _WebQRLoginPanel();

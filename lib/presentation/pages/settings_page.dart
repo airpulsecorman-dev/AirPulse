@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 import 'intellectual_property_page.dart';
 import 'privacy_policy_page.dart';
 import 'terms_page.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  bool _notificationsEnabled = true;
-  bool _darkModeEnabled = true;
-  String _audioQuality = 'alta';
-
-  @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes'), centerTitle: true),
       body: SingleChildScrollView(
@@ -28,9 +23,9 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 ListTile(
                   title: const Text('Calidad de audio'),
-                  subtitle: Text(_audioQuality),
+                  subtitle: Text(_qualityLabel(settings.audioQuality)),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showQualityDialog(),
+                  onTap: () => _showQualityDialog(context, settings),
                 ),
               ],
             ),
@@ -42,10 +37,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 SwitchListTile(
                   title: const Text('Notificaciones habilitadas'),
                   subtitle: const Text('Recibir actualizaciones'),
-                  value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() => _notificationsEnabled = value);
-                  },
+                  value: settings.notificationsEnabled,
+                  onChanged: (value) => settings.setNotifications(value),
                 ),
               ],
             ),
@@ -57,10 +50,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 SwitchListTile(
                   title: const Text('Modo oscuro'),
                   subtitle: const Text('Usar tema oscuro'),
-                  value: _darkModeEnabled,
-                  onChanged: (value) {
-                    setState(() => _darkModeEnabled = value);
-                  },
+                  value: settings.darkModeEnabled,
+                  onChanged: (value) => settings.setDarkMode(value),
                 ),
               ],
             ),
@@ -71,9 +62,9 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 ListTile(
                   title: const Text('Limpiar caché'),
-                  subtitle: const Text('Liberar espacio'),
+                  subtitle: const Text('Liberar espacio en el dispositivo'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showClearCacheDialog(),
+                  onTap: () => _showClearCacheDialog(context, settings),
                 ),
               ],
             ),
@@ -94,38 +85,32 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: const Text('Términos y Condiciones'),
                   subtitle: const Text('Leer los términos de uso'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const TermsPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TermsPage()),
+                  ),
                 ),
                 ListTile(
                   title: const Text('Propiedad Intelectual'),
                   subtitle: const Text('Política de propiedad intelectual'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const IntellectualPropertyPage(),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const IntellectualPropertyPage(),
+                    ),
+                  ),
                 ),
                 ListTile(
                   title: const Text('Política de Privacidad'),
                   subtitle: const Text('Cómo gestionamos tus datos personales'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PrivacyPolicyPage(),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyPage(),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -137,48 +122,45 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showQualityDialog() {
+  String _qualityLabel(String quality) {
+    switch (quality) {
+      case 'baja':
+        return 'Baja (96 kbps)';
+      case 'media':
+        return 'Media (192 kbps)';
+      default:
+        return 'Alta (320 kbps)';
+    }
+  }
+
+  void _showQualityDialog(BuildContext context, SettingsProvider settings) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Calidad de audio'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile(
-              title: const Text('Baja (96 kbps)'),
-              value: 'baja',
-              groupValue: _audioQuality,
-              onChanged: (value) {
-                setState(() => _audioQuality = value ?? 'baja');
-                Navigator.pop(context);
-              },
-            ),
-            RadioListTile(
-              title: const Text('Media (192 kbps)'),
-              value: 'media',
-              groupValue: _audioQuality,
-              onChanged: (value) {
-                setState(() => _audioQuality = value ?? 'media');
-                Navigator.pop(context);
-              },
-            ),
-            RadioListTile(
-              title: const Text('Alta (320 kbps)'),
-              value: 'alta',
-              groupValue: _audioQuality,
-              onChanged: (value) {
-                setState(() => _audioQuality = value ?? 'alta');
-                Navigator.pop(context);
-              },
-            ),
-          ],
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Calidad de audio'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ['baja', 'media', 'alta'].map((q) {
+              return RadioListTile<String>(
+                title: Text(_qualityLabel(q)),
+                value: q,
+                groupValue: settings.audioQuality,
+                onChanged: (value) {
+                  if (value != null) {
+                    settings.setAudioQuality(value);
+                    Navigator.pop(context);
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
   }
 
-  void _showClearCacheDialog() {
+  void _showClearCacheDialog(BuildContext context, SettingsProvider settings) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -192,11 +174,17 @@ class _SettingsPageState extends State<SettingsPage> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Caché limpiado correctamente')),
-              );
+              final mb = await settings.clearCache();
+              if (context.mounted) {
+                final label = mb > 0
+                    ? 'Caché limpiado (${mb.toStringAsFixed(1)} MB liberados)'
+                    : 'Caché limpiado correctamente';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(label)),
+                );
+              }
             },
             child: const Text('Limpiar', style: TextStyle(color: Colors.red)),
           ),
