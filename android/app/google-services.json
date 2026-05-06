@@ -13,7 +13,20 @@
           "package_name": "corman.air.pulse.airpulse"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "185439442239-7vuq5i9gjio48rs8s296ksnooq6a1bhu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "corman.air.pulse.airpulse",
+            "certificate_hash": "f495e4c50cd4577518a7dad3e299dfac289116fd"
+          }
+        },
+        {
+          "client_id": "185439442239-7mgic208j98l97dm46en0s3bdljkpcto.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAAXFTmgUL4u31-CLlqw5GSOIzEdWeTIWA"
@@ -21,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "185439442239-7mgic208j98l97dm46en0s3bdljkpcto.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "185439442239-soku0igu5gth7ig4ju565b23bj0mtu0o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "corman.air.pulse.airpulse"
+              }
+            }
+          ]
         }
       }
     }
