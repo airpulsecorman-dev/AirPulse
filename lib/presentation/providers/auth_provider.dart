@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth_usecases.dart';
+
+const _kQrSessionKey = 'qr_session_user';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -23,6 +27,33 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> _init() async {
+    // En web: intentar restaurar sesión QR persistida en localStorage
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_kQrSessionKey);
+      if (json != null) {
+        try {
+          final map = jsonDecode(json) as Map<String, dynamic>;
+          _currentUser = User(
+            id: map['id'] as String,
+            username: map['username'] as String,
+            firstName: map['firstName'] as String? ?? '',
+            lastName: map['lastName'] as String? ?? '',
+            email: map['email'] as String,
+            avatarPath: map['avatarPath'] as String?,
+            createdAt: DateTime.now(),
+            birthDate: DateTime(2000),
+            isMinor: false,
+          );
+          _status = AuthStatus.authenticated;
+          notifyListeners();
+          return;
+        } catch (_) {
+          await prefs.remove(_kQrSessionKey);
+        }
+      }
+    }
+
     final user = await GetCurrentUserUseCase(_repo).call();
     _currentUser = user;
     _status = user != null
@@ -129,11 +160,28 @@ class AuthProvider extends ChangeNotifier {
       isMinor: false,
     );
     _status = AuthStatus.authenticated;
+    // Persistir en localStorage para sobrevivir recargas del navegador
+    if (kIsWeb) {
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString(_kQrSessionKey, jsonEncode({
+          'id': uid,
+          'email': email,
+          'username': _currentUser!.username,
+          'firstName': firstName,
+          'lastName': lastName,
+          'avatarPath': avatarPath,
+        }));
+      });
+    }
     notifyListeners();
   }
 
   Future<void> logout() async {
     await LogoutUseCase(_repo).call();
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_kQrSessionKey);
+    }
     _currentUser = null;
     _status = AuthStatus.unauthenticated;
     notifyListeners();

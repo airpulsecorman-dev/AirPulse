@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../hooks/use_server.dart';
 import '../hooks/use_library.dart';
@@ -101,8 +102,8 @@ class _MobileServerPage extends HookWidget {
         bottom: TabBar(
           controller: tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.wifi_tethering), text: 'Compartir música'),
             Tab(icon: Icon(Icons.qr_code_scanner), text: 'Escanear web'),
+            Tab(icon: Icon(Icons.wifi_tethering), text: 'Compartir música'),
           ],
         ),
         actions: [
@@ -117,6 +118,8 @@ class _MobileServerPage extends HookWidget {
       body: TabBarView(
         controller: tabController,
         children: [
+          // TAB 2: Escanear QR de la web para conectarse como cliente
+          const _QRScannerPage(),
           // TAB 1: Iniciar servidor para compartir canciones a la web
           Padding(
             padding: const EdgeInsets.all(24),
@@ -194,13 +197,34 @@ class _MobileServerPage extends HookWidget {
               ],
             ),
           ),
-          // TAB 2: Escanear QR de la web para conectarse como cliente
-          const _QRScannerPage(),
         ],
       ),
     );
   }
 }
+
+// ── Modelo de dispositivo vinculado ──────────────────────────────────────────
+class _LinkedDevice {
+  final String id;
+  final String name;
+  final DateTime linkedAt;
+
+  _LinkedDevice({required this.id, required this.name, required this.linkedAt});
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'linkedAt': linkedAt.millisecondsSinceEpoch,
+  };
+
+  factory _LinkedDevice.fromJson(Map<String, dynamic> map) => _LinkedDevice(
+    id: map['id'] as String,
+    name: map['name'] as String? ?? 'AirPulse Web',
+    linkedAt: DateTime.fromMillisecondsSinceEpoch(map['linkedAt'] as int),
+  );
+}
+
+const _kLinkedDevicesKey = 'linked_web_devices';
 
 /// Página de escaneo QR para conectar el móvil a un servidor AirPulse web.
 class _QRScannerPage extends StatefulWidget {
@@ -211,7 +235,178 @@ class _QRScannerPage extends StatefulWidget {
 }
 
 class _QRScannerPageState extends State<_QRScannerPage> {
-  MobileScannerController _scannerController = MobileScannerController();
+  List<_LinkedDevice> _linkedDevices = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLinkedDevices();
+  }
+
+  Future<void> _loadLinkedDevices() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kLinkedDevicesKey);
+    if (raw == null) return;
+    try {
+      final list = (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
+      setState(
+        () => _linkedDevices = list.map(_LinkedDevice.fromJson).toList(),
+      );
+    } catch (_) {
+      await prefs.remove(_kLinkedDevicesKey);
+    }
+  }
+
+  Future<void> _saveLinkedDevices() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _kLinkedDevicesKey,
+      jsonEncode(_linkedDevices.map((d) => d.toJson()).toList()),
+    );
+  }
+
+  Future<void> _addLinkedDevice(String sessionId) async {
+    final device = _LinkedDevice(
+      id: sessionId,
+      name: 'AirPulse Web',
+      linkedAt: DateTime.now(),
+    );
+    setState(() => _linkedDevices.add(device));
+    await _saveLinkedDevices();
+  }
+
+  Future<void> _removeLinkedDevice(_LinkedDevice device) async {
+    setState(() => _linkedDevices.removeWhere((d) => d.id == device.id));
+    await _saveLinkedDevices();
+  }
+
+  void _startScanning() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _QRLinkPage(
+          onSessionApproved: (sessionId) async {
+            await _addLinkedDevice(sessionId);
+          },
+        ),
+      ),
+    ).then((_) => _loadLinkedDevices());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // ── Vista principal: lista de dispositivos vinculados ──
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.devices, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Dispositivos vinculados',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${_linkedDevices.length}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_linkedDevices.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: Text(
+                  'No hay dispositivos web vinculados todavía.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: _linkedDevices.length,
+                  itemBuilder: (context, index) {
+                    final device = _linkedDevices[index];
+                    return _DeviceTile(
+                      device: device,
+                      onUnlink: () => _confirmUnlink(device),
+                    );
+                  },
+                ),
+              ),
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: const Text('Vincular dispositivo web'),
+                  onPressed: _startScanning,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmUnlink(_LinkedDevice device) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Desvincular dispositivo'),
+        content: Text(
+          '¿Deseas desvincular "${device.name}"?\nLa sesión web activa no se cerrará automáticamente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Desvincular'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _removeLinkedDevice(device);
+  }
+}
+
+// ── Página independiente de escaneo QR para vincular dispositivo ─────────────
+class _QRLinkPage extends StatefulWidget {
+  final Future<void> Function(String sessionId) onSessionApproved;
+
+  const _QRLinkPage({required this.onSessionApproved});
+
+  @override
+  State<_QRLinkPage> createState() => _QRLinkPageState();
+}
+
+class _QRLinkPageState extends State<_QRLinkPage> {
+  MobileScannerController _scanner = MobileScannerController();
   bool _scanned = false;
   String? _connectedUrl;
   bool _isConnecting = false;
@@ -219,8 +414,19 @@ class _QRScannerPageState extends State<_QRScannerPage> {
 
   @override
   void dispose() {
-    _scannerController.dispose();
+    _scanner.dispose();
     super.dispose();
+  }
+
+  void _reset() {
+    setState(() {
+      _scanned = false;
+      _connectedUrl = null;
+      _isConnecting = false;
+      _connectError = null;
+    });
+    _scanner = MobileScannerController();
+    _scanner.start();
   }
 
   void _onDetect(BarcodeCapture capture) async {
@@ -228,12 +434,12 @@ class _QRScannerPageState extends State<_QRScannerPage> {
     final raw = capture.barcodes.firstOrNull?.rawValue;
     if (raw == null) return;
 
-    // ── Flujo 1: QR de autenticación web (estilo WhatsApp Web via RTDB) ──
+    // ── Flujo 1: QR de autenticación web (WhatsApp Web via RTDB) ──
     if (raw.startsWith('{')) {
       try {
-        final json = jsonDecode(raw) as Map<String, dynamic>;
-        if (json['type'] == 'airpulse_web_auth') {
-          final sessionId = json['sessionId'] as String?;
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        if (map['type'] == 'airpulse_web_auth') {
+          final sessionId = map['sessionId'] as String?;
           if (sessionId == null || sessionId.isEmpty) return;
 
           setState(() {
@@ -241,7 +447,7 @@ class _QRScannerPageState extends State<_QRScannerPage> {
             _isConnecting = true;
             _connectError = null;
           });
-          _scannerController.stop();
+          _scanner.stop();
 
           try {
             final auth = context.read<AuthProvider>();
@@ -256,9 +462,9 @@ class _QRScannerPageState extends State<_QRScannerPage> {
 
             final service = QrSessionService();
             await service.approveWebSession(sessionId, user);
-            // Pequeño delay para que el stream en web detecte "approved" antes del borrado
             await Future.delayed(const Duration(seconds: 2));
             await service.deleteSession(sessionId);
+            await widget.onSessionApproved(sessionId);
 
             setState(() {
               _connectedUrl = 'web_auth:$sessionId';
@@ -272,18 +478,12 @@ class _QRScannerPageState extends State<_QRScannerPage> {
           }
           return;
         }
-      } catch (_) {
-        // No es JSON válido, continuar con el flujo normal
-      }
+      } catch (_) {}
     }
 
-    // ── Flujo 2: QR con URL del servidor web (flujo anterior) ──
-    String? webUrl;
-    if (raw.startsWith('http')) {
-      webUrl = raw.split('?').first;
-    } else {
-      return;
-    }
+    // ── Flujo 2: QR con URL del servidor web ──
+    if (!raw.startsWith('http')) return;
+    final webUrl = raw.split('?').first;
 
     setState(() {
       _scanned = true;
@@ -291,10 +491,9 @@ class _QRScannerPageState extends State<_QRScannerPage> {
       _isConnecting = true;
       _connectError = null;
     });
-    _scannerController.stop();
+    _scanner.stop();
 
     try {
-      // 1. Iniciar el servidor móvil
       final serverProvider = context.read<ServerProvider>();
       final libraryProvider = context.read<LibraryProvider>();
       await serverProvider.startServer(songs: libraryProvider.songs);
@@ -308,7 +507,6 @@ class _QRScannerPageState extends State<_QRScannerPage> {
         return;
       }
 
-      // 2. Abrir la web con el parámetro serverUrl para auto-conectar
       final targetUri = Uri.parse(
         webUrl,
       ).replace(queryParameters: {'serverUrl': mobileServerUrl});
@@ -320,108 +518,105 @@ class _QRScannerPageState extends State<_QRScannerPage> {
     }
   }
 
-  void _reset() {
-    setState(() {
-      _scanned = false;
-      _connectedUrl = null;
-      _isConnecting = false;
-      _connectError = null;
-    });
-    _scannerController = MobileScannerController();
-    _scannerController.start();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    if (_scanned && _isConnecting) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Vinculando…')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+              const SizedBox(height: 16),
+              Text(
+                _connectedUrl?.startsWith('web_auth:') == true
+                    ? 'Aprobando sesión web…'
+                    : 'Iniciando servidor y abriendo la web…',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_scanned && _connectError != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: _ErrorConnectView(error: _connectError!, onRetry: _reset),
+      );
+    }
+
+    if (_scanned && _connectedUrl?.startsWith('web_auth:') == true) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Dispositivo vinculado')),
+        body: _WebAuthApprovedView(onRescan: () => Navigator.pop(context)),
+      );
+    }
+
+    if (_scanned) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Conectado')),
+        body: _ConnectedView(url: _connectedUrl!, onRescan: _reset),
+      );
+    }
+
+    // Vista del escáner
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conectar a AirPulse Web'),
+        title: const Text('Vincular dispositivo web'),
         actions: [
-          if (!_scanned)
-            IconButton(
-              icon: const Icon(Icons.flash_on),
-              tooltip: 'Linterna',
-              onPressed: () => _scannerController.toggleTorch(),
-            ),
-          if (_scanned)
-            IconButton(
-              icon: const Icon(Icons.qr_code_scanner),
-              tooltip: 'Escanear de nuevo',
-              onPressed: _reset,
-            ),
+          IconButton(
+            icon: const Icon(Icons.flash_on),
+            tooltip: 'Linterna',
+            onPressed: () => _scanner.toggleTorch(),
+          ),
         ],
       ),
-      body: _scanned
-          ? (_isConnecting
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const CircularProgressIndicator(
-                          color: Color(0xFFFF4D8B),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _connectedUrl?.startsWith('web_auth:') == true
-                              ? 'Aprobando sesión web…'
-                              : 'Iniciando servidor y abriendo la web…',
-                        ),
-                      ],
-                    ),
-                  )
-                : _connectError != null
-                ? _ErrorConnectView(error: _connectError!, onRetry: _reset)
-                : _connectedUrl?.startsWith('web_auth:') == true
-                ? _WebAuthApprovedView(onRescan: _reset)
-                : _ConnectedView(url: _connectedUrl!, onRescan: _reset))
-          : Column(
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Stack(
               children: [
-                Expanded(
-                  flex: 3,
-                  child: Stack(
-                    children: [
-                      MobileScanner(
-                        controller: _scannerController,
-                        onDetect: _onDetect,
+                MobileScanner(controller: _scanner, onDetect: _onDetect),
+                Center(
+                  child: Container(
+                    width: 240,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.primary,
+                        width: 3,
                       ),
-                      // Marco de guía
-                      Center(
-                        child: Container(
-                          width: 240,
-                          height: 240,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.primary,
-                              width: 3,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.computer, size: 32),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Abre AirPulse web, ve al panel de conexión y escanea el QR que aparece en la pantalla de la web.',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
               ],
             ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.computer, size: 32),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Abre AirPulse web, ve al panel de conexión y escanea el QR que aparece en pantalla.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -596,6 +791,54 @@ class _WebAuthApprovedView extends StatelessWidget {
               onPressed: onRescan,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeviceTile extends StatelessWidget {
+  final _LinkedDevice device;
+  final VoidCallback onUnlink;
+
+  const _DeviceTile({required this.device, required this.onUnlink});
+
+  String _formatDate(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}  '
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            Icons.computer,
+            color: theme.colorScheme.primary,
+            size: 22,
+          ),
+        ),
+        title: Text(
+          device.name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          'Vinculado: ${_formatDate(device.linkedAt)}',
+          style: theme.textTheme.bodySmall,
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.link_off, color: Colors.redAccent),
+          tooltip: 'Desvincular',
+          onPressed: onUnlink,
         ),
       ),
     );
