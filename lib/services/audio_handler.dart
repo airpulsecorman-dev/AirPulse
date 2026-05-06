@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:path_provider/path_provider.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
@@ -79,7 +80,7 @@ class AirPulseAudioHandler extends BaseAudioHandler
   // ─── Sincronización con volumen del sistema ──────────────────────────────
 
   void _listenToSystemVolume() {
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       _systemVolumeService.startListening();
       _systemVolumeSub = _systemVolumeService.volumeStream.listen((volume) {
         // Cuando el sistema cambia el volumen, actualizar el reproductor
@@ -223,7 +224,7 @@ class AirPulseAudioHandler extends BaseAudioHandler
     _volumeController.add(volume);
 
     // Actualizar el volumen del sistema en Android
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       _systemVolumeService.setVolume(volume);
     }
 

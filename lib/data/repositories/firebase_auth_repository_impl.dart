@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../core/config/env_loader.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
@@ -8,7 +10,9 @@ import '../models/user_model.dart';
 class FirebaseAuthRepositoryImpl implements AuthRepository {
   final fb.FirebaseAuth _auth = fb.FirebaseAuth.instance;
   final DatabaseReference _db = FirebaseDatabase.instance.ref('AirPulse/users');
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? EnvLoader.get('GOOGLE_CLIENT_ID') : null,
+  );
 
   // ────────────────────────────────────────────────────────────────────────────
   // Helpers
@@ -140,7 +144,8 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         final snap = await _db.child(fbUser.uid).get();
         if (snap.exists) {
           return UserModel.fromJson(
-              Map<String, dynamic>.from(snap.value as Map));
+            Map<String, dynamic>.from(snap.value as Map),
+          );
         }
       } catch (_) {
         // Permission denied u otro error de DB → tratar como usuario nuevo

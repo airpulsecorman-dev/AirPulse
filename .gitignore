@@ -35,6 +35,7 @@ migrate_working_dir/
 
 # 🔐 Environment variables - NEVER commit these files with real credentials
 .env
+env.json
 /assets/env.txt
 /web/.env
 
