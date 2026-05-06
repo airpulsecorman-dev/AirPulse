@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
@@ -31,6 +32,9 @@ class SongArtwork extends StatelessWidget {
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
         );
+
+    // En web: mostrar fallback directamente
+    if (kIsWeb) return fallback;
 
     // En macOS usamos el archivo en caché
     if (Platform.isMacOS) {

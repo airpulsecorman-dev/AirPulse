@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:developer' show log;
 import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,6 +29,7 @@ class LibraryLocalSource {
   };
 
   Future<bool> requestPermissions() async {
+    if (kIsWeb) return true;
     // macOS no requiere permission_handler
     if (Platform.isMacOS) return true;
 
@@ -175,6 +177,7 @@ class LibraryLocalSource {
   }
 
   Future<List<Song>> fetchSongs() async {
+    if (kIsWeb) return [];
     // on_audio_query y permission_handler no tienen soporte macOS
     if (Platform.isMacOS) return _fetchSongsMacOS();
 
@@ -208,6 +211,7 @@ class LibraryLocalSource {
   static const _libraryChannel = MethodChannel('com.airpulse/library');
 
   Future<void> deleteSongs(List<Song> songs) async {
+    if (kIsWeb) return;
     if (Platform.isAndroid) {
       // En Android usamos el canal nativo que llama MediaStore.createDeleteRequest()
       // en Android 11+ (muestra diálogo del sistema) o File.delete() en versiones anteriores.
