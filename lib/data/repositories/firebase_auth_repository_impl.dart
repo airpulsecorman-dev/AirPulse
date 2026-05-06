@@ -7,7 +7,7 @@ import '../models/user_model.dart';
 
 class FirebaseAuthRepositoryImpl implements AuthRepository {
   final fb.FirebaseAuth _auth = fb.FirebaseAuth.instance;
-  final DatabaseReference _db = FirebaseDatabase.instance.ref('users');
+  final DatabaseReference _db = FirebaseDatabase.instance.ref('AirPulse/users');
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -26,7 +26,9 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
 
   Future<UserModel> _fetchUserModel(String uid) async {
     final snap = await _db.child(uid).get();
-    if (!snap.exists) throw Exception('Usuario no encontrado en la base de datos.');
+    if (!snap.exists) {
+      throw Exception('Usuario no encontrado en la base de datos.');
+    }
     final data = Map<String, dynamic>.from(snap.value as Map);
     return UserModel.fromJson(data);
   }
@@ -102,10 +104,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
   // ────────────────────────────────────────────────────────────────────────────
 
   @override
-  Future<User> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<User> login({required String email, required String password}) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
@@ -145,7 +144,9 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
       // Primera vez con Google: crear registro con datos mínimos
       final nameParts = (fbUser.displayName ?? '').split(' ');
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      final lastName = nameParts.length > 1
+          ? nameParts.sublist(1).join(' ')
+          : '';
       final now = DateTime.now();
 
       final model = UserModel(
@@ -155,7 +156,7 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
         lastName: lastName,
         email: fbUser.email?.toLowerCase() ?? '',
         createdAt: now,
-        birthDate: DateTime(2000),   // se pedirá completar perfil
+        birthDate: DateTime(2000), // se pedirá completar perfil
         subscriptionType: SubscriptionType.free,
         isMinor: false,
         acceptedTerms: false,

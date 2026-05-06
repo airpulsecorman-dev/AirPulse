@@ -25,8 +25,9 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _init() async {
     final user = await GetCurrentUserUseCase(_repo).call();
     _currentUser = user;
-    _status =
-        user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated;
+    _status = user != null
+        ? AuthStatus.authenticated
+        : AuthStatus.unauthenticated;
     notifyListeners();
   }
 
@@ -35,10 +36,9 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      _currentUser = await LoginUseCase(_repo).call(
-        email: email,
-        password: password,
-      );
+      _currentUser = await LoginUseCase(
+        _repo,
+      ).call(email: email, password: password);
       _status = AuthStatus.authenticated;
       return true;
     } catch (e) {

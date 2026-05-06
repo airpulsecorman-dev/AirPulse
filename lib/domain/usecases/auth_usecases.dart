@@ -16,19 +16,18 @@ class RegisterUseCase {
     required bool acceptedTerms,
     required bool acceptedPrivacy,
     required bool acceptedIntellectual,
-  }) =>
-      _repo.register(
-        username: username,
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        password: password,
-        cedula: cedula,
-        birthDate: birthDate,
-        acceptedTerms: acceptedTerms,
-        acceptedPrivacy: acceptedPrivacy,
-        acceptedIntellectual: acceptedIntellectual,
-      );
+  }) => _repo.register(
+    username: username,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: password,
+    cedula: cedula,
+    birthDate: birthDate,
+    acceptedTerms: acceptedTerms,
+    acceptedPrivacy: acceptedPrivacy,
+    acceptedIntellectual: acceptedIntellectual,
+  );
 }
 
 class LoginUseCase {
