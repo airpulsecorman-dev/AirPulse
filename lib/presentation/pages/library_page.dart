@@ -26,9 +26,7 @@ void _showDialog(BuildContext context, String title, String content) {
     context: context,
     builder: (_) => AlertDialog(
       title: Text(title),
-      content: SingleChildScrollView(
-        child: Text(content),
-      ),
+      content: SingleChildScrollView(child: Text(content)),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
@@ -208,7 +206,10 @@ class LibraryPage extends HookWidget {
                     children: [
                       Icon(Icons.logout, size: 18, color: Colors.red),
                       SizedBox(width: 8),
-                      Text('Cerrar sesión', style: TextStyle(color: Colors.red)),
+                      Text(
+                        'Cerrar sesión',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ],
                   ),
                 ),
@@ -230,6 +231,7 @@ class LibraryPage extends HookWidget {
                   onAddSongs: library.addSongsFromFiles,
                   onRefresh: library.loadLibrary,
                   accentColor: accentColor.value,
+                  onDeleteSongs: library.deleteSongs,
                   onSongTap: (song) async {
                     await audio.play(
                       song,
@@ -280,13 +282,14 @@ class LibraryPage extends HookWidget {
   }
 }
 
-class _SongsList extends StatelessWidget {
+class _SongsList extends StatefulWidget {
   final List<Song> songs;
   final Song? currentSong;
   final ValueChanged<Song> onSongTap;
   final VoidCallback onAddSongs;
   final Future<void> Function() onRefresh;
   final Color accentColor;
+  final void Function(List<String>) onDeleteSongs;
 
   const _SongsList({
     required this.songs,
@@ -295,15 +298,63 @@ class _SongsList extends StatelessWidget {
     required this.onAddSongs,
     required this.onRefresh,
     required this.accentColor,
+    required this.onDeleteSongs,
   });
 
   @override
+  State<_SongsList> createState() => _SongsListState();
+}
+
+class _SongsListState extends State<_SongsList> {
+  final Set<String> _selected = {};
+  bool get _isSelecting => _selected.isNotEmpty;
+
+  void _toggleSelection(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
+
+  void _confirmDelete(BuildContext context) {
+    final count = _selected.length;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Eliminar canciones'),
+        content: Text(
+          '¿Eliminar $count ${count == 1 ? 'canción' : 'canciones'} de la biblioteca?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(context);
+              widget.onDeleteSongs(_selected.toList());
+              setState(() => _selected.clear());
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final songs = widget.songs;
     if (songs.isEmpty) {
       return RefreshIndicator(
-        onRefresh: onRefresh,
+        onRefresh: widget.onRefresh,
         child: Container(
-          color: accentColor.withValues(alpha: 0.08),
+          color: widget.accentColor.withValues(alpha: 0.08),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -325,7 +376,7 @@ class _SongsList extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: onAddSongs,
+                  onPressed: widget.onAddSongs,
                   icon: const Icon(Icons.add),
                   label: const Text('Agregar canciones'),
                   style: ElevatedButton.styleFrom(
@@ -350,19 +401,87 @@ class _SongsList extends StatelessWidget {
     final userId = context.read<AuthProvider>().currentUser?.id ?? '';
 
     return Container(
-      color: accentColor.withValues(alpha: 0.08),
-      child: RefreshIndicator(
-        onRefresh: onRefresh,
-        child: ListView.builder(
-          itemCount: songs.length,
-          itemBuilder: (_, i) => SongTile(
-            song: songs[i],
-            isPlaying: songs[i].id == currentSong?.id,
-            onTap: () => onSongTap(songs[i]),
-            onMoreTap: () => favs.toggleFavorite(userId, songs[i]),
-            isFavorite: favs.isFavorite(songs[i].id),
+      color: widget.accentColor.withValues(alpha: 0.08),
+      child: Column(
+        children: [
+          if (_isSelecting)
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'Cancelar selección',
+                      onPressed: () => setState(() => _selected.clear()),
+                    ),
+                    Text(
+                      '${_selected.length} seleccionada${_selected.length == 1 ? '' : 's'}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Eliminar'),
+                      onPressed: () => _confirmDelete(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: widget.onRefresh,
+              child: ListView.builder(
+                itemCount: songs.length,
+                itemBuilder: (_, i) {
+                  final song = songs[i];
+                  final isSelected = _selected.contains(song.id);
+                  return InkWell(
+                    onLongPress: () => _toggleSelection(song.id),
+                    onTap: _isSelecting
+                        ? () => _toggleSelection(song.id)
+                        : () => widget.onSongTap(song),
+                    child: ColoredBox(
+                      color: isSelected
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.15)
+                          : Colors.transparent,
+                      child: Row(
+                        children: [
+                          if (_isSelecting)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Checkbox(
+                                value: isSelected,
+                                onChanged: (_) => _toggleSelection(song.id),
+                              ),
+                            ),
+                          Expanded(
+                            child: SongTile(
+                              song: song,
+                              isPlaying: song.id == widget.currentSong?.id,
+                              onTap: _isSelecting
+                                  ? () => _toggleSelection(song.id)
+                                  : () => widget.onSongTap(song),
+                              onMoreTap: _isSelecting
+                                  ? null
+                                  : () => favs.toggleFavorite(userId, song),
+                              isFavorite: favs.isFavorite(song.id),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

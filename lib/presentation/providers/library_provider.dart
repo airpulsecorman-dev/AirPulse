@@ -125,6 +125,14 @@ class LibraryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteSongs(List<String> ids) async {
+    final idSet = ids.toSet();
+    final toDelete = _songs.where((s) => idSet.contains(s.id)).toList();
+    await _libraryService.deleteSongsFromDevice(toDelete);
+    _songs = _songs.where((s) => !idSet.contains(s.id)).toList();
+    notifyListeners();
+  }
+
   Future<void> _refreshPlaylists() async {
     _playlists = await _libraryService.getAllPlaylists();
     notifyListeners();

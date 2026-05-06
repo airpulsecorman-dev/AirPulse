@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:developer' show log;
 import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+import 'package:flutter/services.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -46,6 +47,10 @@ class LibraryLocalSource {
       }
       // Android 13+: solicitar permiso de notificaciones
       await Permission.notification.request();
+      // Android 11+: solicitar acceso completo para poder borrar archivos
+      if (await Permission.manageExternalStorage.isDenied) {
+        await Permission.manageExternalStorage.request();
+      }
     }
     return status.isGranted;
   }
@@ -147,9 +152,7 @@ class LibraryLocalSource {
       if (metadata.pictures.isNotEmpty) {
         final pic = metadata.pictures.first;
         final cacheDir = await getTemporaryDirectory();
-        final artFile = File(
-          '${cacheDir.path}/${file.path.hashCode}.jpg',
-        );
+        final artFile = File('${cacheDir.path}/${file.path.hashCode}.jpg');
         if (!await artFile.exists()) {
           await artFile.writeAsBytes(pic.bytes);
         }
@@ -200,6 +203,33 @@ class LibraryLocalSource {
     // Excluir audios de WhatsApp que no sean MP3 reales
     final isWhatsAppAudio = path.contains('whatsapp') && !path.endsWith('.mp3');
     return !isWhatsAppAudio;
+  }
+
+  static const _libraryChannel = MethodChannel('com.airpulse/library');
+
+  Future<void> deleteSongs(List<Song> songs) async {
+    if (Platform.isAndroid) {
+      // En Android usamos el canal nativo que llama MediaStore.createDeleteRequest()
+      // en Android 11+ (muestra diálogo del sistema) o File.delete() en versiones anteriores.
+      final filePaths = songs.map((s) => s.filePath).toList();
+      final songIds = songs.map((s) => s.id).toList();
+      try {
+        await _libraryChannel.invokeMethod('deleteSongs', {
+          'filePaths': filePaths,
+          'songIds': songIds,
+        });
+      } catch (e) {
+        log('[AirPulse] Error al borrar canciones: $e');
+      }
+    } else {
+      // macOS / iOS: eliminar directamente el archivo
+      for (final song in songs) {
+        try {
+          final file = File(song.filePath);
+          if (await file.exists()) await file.delete();
+        } catch (_) {}
+      }
+    }
   }
 
   Future<List<Song>> searchSongs(String query) async {

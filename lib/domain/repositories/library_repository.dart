@@ -14,5 +14,6 @@ abstract class LibraryRepository {
   Future<void> addSongToPlaylist(String playlistId, Song song);
   Future<void> removeSongFromPlaylist(String playlistId, String songId);
   Future<void> deletePlaylist(String playlistId);
+  Future<void> deleteSongsFromDevice(List<Song> songs);
   Stream<List<Song>> watchSongs();
 }

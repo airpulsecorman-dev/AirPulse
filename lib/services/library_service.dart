@@ -24,5 +24,7 @@ class LibraryService {
       _repo.removeSongFromPlaylist(playlistId, songId);
   Future<void> deletePlaylist(String playlistId) =>
       _repo.deletePlaylist(playlistId);
+  Future<void> deleteSongsFromDevice(List<Song> songs) =>
+      _repo.deleteSongsFromDevice(songs);
   Stream<List<Song>> watchSongs() => _repo.watchSongs();
 }

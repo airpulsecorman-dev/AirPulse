@@ -108,5 +108,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
+  Future<void> deleteSongsFromDevice(List<Song> songs) =>
+      _localSource.deleteSongs(songs);
+
+  @override
   Stream<List<Song>> watchSongs() => _songStreamController.stream;
 }

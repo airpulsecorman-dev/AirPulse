@@ -25,6 +25,7 @@ LibraryHookResult useLibrary(BuildContext context) {
     addSongToPlaylist: provider.addSongToPlaylist,
     deletePlaylist: provider.deletePlaylist,
     addSongsFromFiles: provider.addSongsFromFiles,
+    deleteSongs: provider.deleteSongs,
   );
 }
 
@@ -42,6 +43,7 @@ class LibraryHookResult {
   final Future<void> Function(String, Song) addSongToPlaylist;
   final Future<void> Function(String) deletePlaylist;
   final Future<void> Function() addSongsFromFiles;
+  final Future<void> Function(List<String>) deleteSongs;
 
   const LibraryHookResult({
     required this.songs,
@@ -57,5 +59,6 @@ class LibraryHookResult {
     required this.addSongToPlaylist,
     required this.deletePlaylist,
     required this.addSongsFromFiles,
+    required this.deleteSongs,
   });
 }
