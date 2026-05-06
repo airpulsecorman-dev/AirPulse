@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../hooks/use_subscription.dart';
 import './pricing_page.dart';
+import './terms_page.dart';
+import './privacy_policy_page.dart';
+import './intellectual_property_page.dart';
 import '../../domain/entities/subscription_plan.dart';
 
 class ProfilePage extends HookWidget {
@@ -626,31 +632,301 @@ class _SettingsSection extends StatelessWidget {
         _SettingsTile(
           icon: Icons.notifications,
           title: 'Notificaciones',
+          onTap: () => _showNotificationsDialog(context),
+        ),
+        _SettingsTile(
+          icon: Icons.privacy_tip,
+          title: 'Política de Privacidad',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Configuración de notificaciones')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
             );
           },
         ),
         _SettingsTile(
-          icon: Icons.privacy_tip,
-          title: 'Privacidad',
+          icon: Icons.description,
+          title: 'Términos y Condiciones',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Configuración de privacidad')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TermsPage()),
+            );
+          },
+        ),
+        _SettingsTile(
+          icon: Icons.gavel,
+          title: 'Propiedad Intelectual',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const IntellectualPropertyPage(),
+              ),
             );
           },
         ),
         _SettingsTile(
           icon: Icons.help,
           title: 'Ayuda y Soporte',
-          onTap: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Centro de ayuda')));
+          onTap: () => _showSupportDialog(context),
+        ),
+      ],
+    );
+  }
+}
+
+void _showCopyEmailDialog(BuildContext context, String email) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Sin app de correo'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'No encontramos una app de correo en tu dispositivo. Puedes escribirnos directamente a:',
+          ),
+          const SizedBox(height: 16),
+          SelectableText(
+            email,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.copy, size: 16),
+          label: const Text('Copiar'),
+          onPressed: () {
+            // ignore: deprecated_member_use
+            Clipboard.setData(ClipboardData(text: email));
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Email copiado al portapapeles')),
+            );
           },
         ),
       ],
+    ),
+  );
+}
+
+void _showSupportDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.help_outline),
+          SizedBox(width: 8),
+          Text('Ayuda y Soporte'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '¿En qué podemos ayudarte?',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          _SupportOption(
+            icon: Icons.email_outlined,
+            title: 'Contactar soporte',
+            subtitle: 'Envíanos un correo y te respondemos pronto',
+            onTap: () async {
+              Navigator.pop(context);
+              final uri = Uri(
+                scheme: 'mailto',
+                path: 'airpulsecorman@gmail.com',
+                queryParameters: {
+                  'subject': 'Soporte AirPulse',
+                  'body': 'Hola, necesito ayuda con...',
+                },
+              );
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                _showCopyEmailDialog(context, 'airpulsecorman@gmail.com');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+          _SupportOption(
+            icon: Icons.bug_report_outlined,
+            title: 'Reportar un problema',
+            subtitle: 'Cuéntanos si algo no funciona bien',
+            onTap: () async {
+              Navigator.pop(context);
+              final uri = Uri(
+                scheme: 'mailto',
+                path: 'airpulsecorman@gmail.com',
+                queryParameters: {
+                  'subject': 'Reporte de problema – AirPulse',
+                  'body':
+                      'Describe el problema que encontraste:\n\n'
+                      'Dispositivo: \nVersión de la app: 1.0.0\n\nDescripción:\n',
+                },
+              );
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                _showCopyEmailDialog(context, 'airpulsecorman@gmail.com');
+              }
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+      ],
+    ),
+  );
+}
+
+class _SupportOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _SupportOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.4),
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: theme.colorScheme.primary, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showNotificationsDialog(BuildContext context) async {
+  final status = await Permission.notification.status;
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Notificaciones'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'AirPulse usa notificaciones para:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          const _NotifBullet(
+            icon: Icons.music_note,
+            text: 'Mostrar controles de reproducción en la pantalla de bloqueo',
+          ),
+          const _NotifBullet(
+            icon: Icons.bluetooth,
+            text:
+                'Controlar la música desde auriculares y dispositivos Bluetooth',
+          ),
+          const _NotifBullet(
+            icon: Icons.headphones,
+            text: 'Reproducir música en segundo plano sin interrupciones',
+          ),
+          const SizedBox(height: 16),
+          Text(
+            status.isGranted
+                ? '✅ Las notificaciones están habilitadas.'
+                : '⚠️ Las notificaciones están deshabilitadas. Actívalas desde los ajustes del sistema para disfrutar de la reproducción en segundo plano.',
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+        if (!status.isGranted)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Abrir Ajustes'),
+          ),
+      ],
+    ),
+  );
+}
+
+class _NotifBullet extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _NotifBullet({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+        ],
+      ),
     );
   }
 }
