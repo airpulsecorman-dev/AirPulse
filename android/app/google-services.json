@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "185439442239",
+    "firebase_url": "https://airpluse-216ed-default-rtdb.firebaseio.com",
+    "project_id": "airpluse-216ed",
+    "storage_bucket": "airpluse-216ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185439442239:android:707219dd632cd8504b6f8a",
+        "android_client_info": {
+          "package_name": "corman.air.pulse.airpulse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAXFTmgUL4u31-CLlqw5GSOIzEdWeTIWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

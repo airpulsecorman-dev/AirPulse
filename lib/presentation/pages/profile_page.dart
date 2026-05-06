@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../hooks/use_subscription.dart';
 import './pricing_page.dart';
+import './change_password_page.dart';
+import './edit_profile_page.dart';
 import './terms_page.dart';
 import './privacy_policy_page.dart';
 import './intellectual_property_page.dart';
@@ -624,9 +626,10 @@ class _SettingsSection extends StatelessWidget {
           icon: Icons.lock,
           title: 'Cambiar Contraseña',
           onTap: () {
-            ScaffoldMessenger.of(
+            Navigator.push(
               context,
-            ).showSnackBar(const SnackBar(content: Text('Cambiar contraseña')));
+              MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+            );
           },
         ),
         _SettingsTile(
@@ -979,9 +982,10 @@ class _ActionButtons extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: () {
-              ScaffoldMessenger.of(
+              Navigator.push(
                 context,
-              ).showSnackBar(const SnackBar(content: Text('Editar perfil')));
+                MaterialPageRoute(builder: (_) => const EditProfilePage()),
+              );
             },
             icon: const Icon(Icons.edit),
             label: const Text('Editar Perfil'),
