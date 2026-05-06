@@ -256,6 +256,9 @@ class _QRScannerPageState extends State<_QRScannerPage> {
 
             final service = QrSessionService();
             await service.approveWebSession(sessionId, user);
+            // Pequeño delay para que el stream en web detecte "approved" antes del borrado
+            await Future.delayed(const Duration(seconds: 2));
+            await service.deleteSession(sessionId);
 
             setState(() {
               _connectedUrl = 'web_auth:$sessionId';

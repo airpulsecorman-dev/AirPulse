@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import '../domain/entities/user.dart';
 
 /// Estatus posibles de una sesión web QR.
@@ -51,14 +52,12 @@ class QrSessionService {
   // WEB: crea la sesión en estado "pending"
   // ──────────────────────────────────────────────────────────
   Future<void> createWebSession(String sessionId) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
     await _ref(sessionId).set({
       'status': 'pending',
       'createdAt': ServerValue.timestamp,
-      'expiresAt': ServerValue.timestamp, // actualizado abajo
+      'expiresAt': now + _kTtlMs,
     });
-    // Actualizar expiresAt con la marca real + TTL
-    final now = DateTime.now().millisecondsSinceEpoch;
-    await _ref(sessionId).update({'expiresAt': now + _kTtlMs});
   }
 
   // ──────────────────────────────────────────────────────────
@@ -67,6 +66,7 @@ class QrSessionService {
   Stream<WebSessionData> watchSession(String sessionId) {
     return _ref(sessionId).onValue.map((event) {
       final data = event.snapshot.value;
+      debugPrint('[QrSession] watchSession($sessionId) → $data');
       if (data == null || data is! Map) {
         return const WebSessionData(status: WebSessionStatus.unknown);
       }

@@ -34,11 +34,13 @@ class AirPulseApp extends StatefulWidget {
 
 class _AirPulseAppState extends State<AirPulseApp> {
   final _settings = SettingsProvider();
+  late final AuthProvider _authProvider;
 
   @override
   void initState() {
     super.initState();
     _settings.load();
+    _authProvider = AuthProvider(FirebaseAuthRepositoryImpl());
   }
 
   @override
@@ -46,9 +48,7 @@ class _AirPulseAppState extends State<AirPulseApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<SettingsProvider>.value(value: _settings),
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(FirebaseAuthRepositoryImpl()),
-        ),
+        ChangeNotifierProvider<AuthProvider>.value(value: _authProvider),
         ChangeNotifierProvider(
           create: (_) => FavoritesProvider(FavoritesRepositoryImpl()),
         ),
@@ -111,24 +111,21 @@ class _AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // En web siempre mostrar LoginPage (que contiene el panel de conexión con móvil).
-    // Las APIs de audio/biblioteca local no están disponibles en web.
-    if (kIsWeb) return const LoginPage();
-
     final auth = context.watch<AuthProvider>();
 
-    switch (auth.status) {
-      case AuthStatus.unknown:
-        return const Scaffold(
-          backgroundColor: Color(0xFF0D1B2A),
-          body: Center(
-            child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
-          ),
-        );
-      case AuthStatus.unauthenticated:
-        return const LoginPage();
-      case AuthStatus.authenticated:
-        return const LibraryPage();
+    if (auth.status == AuthStatus.authenticated) {
+      return const LibraryPage();
     }
+
+    if (!kIsWeb && auth.status == AuthStatus.unknown) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF0D1B2A),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+        ),
+      );
+    }
+
+    return const LoginPage();
   }
 }

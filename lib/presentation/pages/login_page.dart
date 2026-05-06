@@ -96,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.read<AuthProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D1B2A),
@@ -415,14 +415,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
   void _onSessionChange(WebSessionData data) {
     if (!mounted) return;
     if (data.status == WebSessionStatus.approved) {
-      setState(() {
-        _waiting = false;
-        _approved = true;
-      });
       _sub?.cancel();
-      // Limpiar el nodo en RTDB
-      _service.deleteSession(_sessionId);
-      // Cargar el usuario en el AuthProvider
       final auth = context.read<AuthProvider>();
       auth.loginFromQRSession(
         uid: data.uid!,
@@ -432,10 +425,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
         lastName: data.lastName,
         avatarPath: data.avatarPath,
       );
-      // Navegar al home
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pushReplacementNamed('/');
-      });
+      // _AuthGate reacciona al cambio de auth y muestra LibraryPage automáticamente
     }
   }
 
