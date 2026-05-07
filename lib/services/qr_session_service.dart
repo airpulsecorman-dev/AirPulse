@@ -154,4 +154,42 @@ class QrSessionService {
       return Map<String, dynamic>.from(data)['serverUrl'] as String?;
     });
   }
+
+  // ──────────────────────────────────────────────────────────
+  // MÓVIL → WEB/DESKTOP: comando de desconexión remota
+  // ──────────────────────────────────────────────────────────
+
+  static const _kDeviceCommands = 'device_commands';
+
+  /// Escribe un comando de desconexión en RTDB para que el cliente
+  /// web/desktop que está escuchando cierre su sesión.
+  Future<void> sendDisconnectCommand(String sessionId) async {
+    try {
+      await _db.ref('$_kDeviceCommands/$sessionId').set({
+        'action': 'disconnect',
+        'at': ServerValue.timestamp,
+      });
+    } catch (e) {
+      debugPrint('[QrSession] sendDisconnectCommand failed: $e');
+    }
+  }
+
+  /// El cliente web/desktop escucha este stream y, cuando recibe
+  /// action = 'disconnect', cierra la sesión.
+  Stream<bool> watchDisconnectCommand(String sessionId) {
+    return _db.ref('$_kDeviceCommands/$sessionId').onValue.map((event) {
+      final data = event.snapshot.value;
+      if (data == null || data is! Map) return false;
+      return Map<String, dynamic>.from(data)['action'] == 'disconnect';
+    });
+  }
+
+  /// Limpia el nodo de comando (llamar desde el cliente al recibir el comando).
+  Future<void> clearDisconnectCommand(String sessionId) async {
+    try {
+      await _db.ref('$_kDeviceCommands/$sessionId').remove();
+    } catch (e) {
+      debugPrint('[QrSession] clearDisconnectCommand failed: $e');
+    }
+  }
 }

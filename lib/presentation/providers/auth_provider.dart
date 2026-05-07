@@ -6,6 +6,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth_usecases.dart';
 
 const _kQrSessionKey = 'qr_session_user';
+const _kQrSessionIdKey = 'qr_session_id';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -16,6 +17,7 @@ class AuthProvider extends ChangeNotifier {
   User? _currentUser;
   String? _errorMessage;
   bool _isLoading = false;
+  String? _qrSessionId;
 
   AuthProvider(this._repo) {
     _init();
@@ -25,6 +27,7 @@ class AuthProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
+  String? get qrSessionId => _qrSessionId;
 
   Future<void> _init() async {
     // En web: intentar restaurar sesión QR persistida en localStorage
@@ -45,11 +48,13 @@ class AuthProvider extends ChangeNotifier {
             birthDate: DateTime(2000),
             isMinor: false,
           );
+          _qrSessionId = prefs.getString(_kQrSessionIdKey);
           _status = AuthStatus.authenticated;
           notifyListeners();
           return;
         } catch (_) {
           await prefs.remove(_kQrSessionKey);
+          await prefs.remove(_kQrSessionIdKey);
         }
       }
     }
@@ -147,7 +152,9 @@ class AuthProvider extends ChangeNotifier {
     String? firstName,
     String? lastName,
     String? avatarPath,
+    String? sessionId,
   }) {
+    _qrSessionId = sessionId;
     _currentUser = User(
       id: uid,
       username: username ?? email.split('@').first,
@@ -171,6 +178,9 @@ class AuthProvider extends ChangeNotifier {
           'lastName': lastName,
           'avatarPath': avatarPath,
         }));
+        if (sessionId != null) {
+          prefs.setString(_kQrSessionIdKey, sessionId);
+        }
       });
     }
     notifyListeners();
@@ -181,7 +191,9 @@ class AuthProvider extends ChangeNotifier {
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kQrSessionKey);
+      await prefs.remove(_kQrSessionIdKey);
     }
+    _qrSessionId = null;
     _currentUser = null;
     _status = AuthStatus.unauthenticated;
     notifyListeners();

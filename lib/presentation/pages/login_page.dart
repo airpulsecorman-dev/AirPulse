@@ -434,6 +434,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
         firstName: data.firstName,
         lastName: data.lastName,
         avatarPath: data.avatarPath,
+        sessionId: _sessionId,
       );
       // Si el móvil envió la URL del servidor, redirigir el navegador
       // directamente al servidor HTTP local (mismo origen → sin mixed-content).

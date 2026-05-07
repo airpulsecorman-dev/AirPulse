@@ -282,13 +282,20 @@ class _QRScannerPageState extends State<_QRScannerPage> {
   }
 
   Future<void> _confirmUnlink(_LinkedDevice device) async {
+    final serverProvider = context.read<ServerProvider>();
+    final connectedCount = serverProvider.connectedClients.length;
+    final isLastDevice = connectedCount <= 1;
+
+    // Mensaje adaptado según cuántos clientes estén conectados
+    final contentText = isLastDevice
+        ? '¿Deseas desvincular "${device.name}"?\nEl servidor se detendrá ya que no quedan más dispositivos conectados.'
+        : '¿Deseas desvincular "${device.name}"?\nEl servidor seguirá activo porque hay otros $connectedCount dispositivos conectados.';
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Desvincular dispositivo'),
-        content: Text(
-          '¿Deseas desvincular "${device.name}"?\nLa sesión web activa no se cerrará automáticamente.',
-        ),
+        content: Text(contentText),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -302,7 +309,28 @@ class _QRScannerPageState extends State<_QRScannerPage> {
         ],
       ),
     );
-    if (confirmed == true) await _removeLinkedDevice(device);
+    if (confirmed != true) return;
+
+    // Enviar comando de desconexión al dispositivo web/desktop via RTDB
+    await QrSessionService().sendDisconnectCommand(device.id);
+
+    // Detener el servidor solo si era el único dispositivo conectado
+    if (isLastDevice && serverProvider.isRunning) {
+      await serverProvider.stopServer();
+    }
+
+    await _removeLinkedDevice(device);
+
+    if (mounted && !isLastDevice) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Dispositivo desvinculado. El servidor sigue activo para los demás dispositivos.',
+          ),
+          duration: Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }
 
@@ -393,7 +421,9 @@ class _QRLinkPageState extends State<_QRLinkPage> {
 
             // Advertir al usuario si ngrok no pudo abrir el túnel HTTPS.
             // La sesión se aprueba igual, pero la web no podrá conectar al servidor.
-            if (serverUrl == null && serverProvider.ngrokError != null && context.mounted) {
+            if (serverUrl == null &&
+                serverProvider.ngrokError != null &&
+                context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -406,7 +436,11 @@ class _QRLinkPageState extends State<_QRLinkPage> {
               );
             }
 
-            await service.approveWebSession(sessionId, user, serverUrl: serverUrl);
+            await service.approveWebSession(
+              sessionId,
+              user,
+              serverUrl: serverUrl,
+            );
             await Future.delayed(const Duration(seconds: 2));
             await service.deleteSession(sessionId);
             await widget.onSessionApproved(sessionId);
