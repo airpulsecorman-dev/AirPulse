@@ -9,23 +9,29 @@ class NgrokService {
   static const _authtoken = '3DNRmnh96kv1pNGMOQ0vOLNlyQL_3Br7DyYiLyGJQe8BNJij2';
 
   String? _tunnelUrl;
+  String? _lastError;
   String? get tunnelUrl => _tunnelUrl;
+  String? get lastError => _lastError;
   bool get isActive => _tunnelUrl != null;
 
   /// Inicia el túnel ngrok hacia [port]. Devuelve la URL HTTPS pública
   /// o null si la plataforma no soporta ngrok.
   Future<String?> startTunnel(int port) async {
     if (defaultTargetPlatform != TargetPlatform.android) return null;
+    _lastError = null;
     try {
       final url = await _channel.invokeMethod<String>('startTunnel', {
         'port': port,
         'authtoken': _authtoken,
       });
       _tunnelUrl = url;
+      // ignore: avoid_print
+      print('[NgrokService] tunnel started: $url');
       return url;
     } on PlatformException catch (e) {
+      _lastError = e.message;
       // ignore: avoid_print
-      print('[NgrokService] startTunnel error: ${e.message}');
+      print('[NgrokService] startTunnel error code=${e.code} msg=${e.message} details=${e.details}');
       _tunnelUrl = null;
       return null;
     }

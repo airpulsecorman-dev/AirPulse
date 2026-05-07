@@ -128,6 +128,7 @@ class ServerProvider extends ChangeNotifier {
   bool get isStarting => _isStarting;
   bool get isRunning => _session?.status == ServerStatus.running;
   String? get error => _error;
+  String? get ngrokError => _ngrok.lastError;
   List<String> get connectedClients => _connectedClients;
   String? get serverUrl => _session?.serverUrl;
   String? get qrPayload => _session?.qrPayload;
@@ -166,6 +167,11 @@ class ServerProvider extends ChangeNotifier {
 
       // Intentar abrir túnel ngrok HTTPS para evitar Mixed Content desde HTTPS
       final ngrokUrl = await _ngrok.startTunnel(port);
+      if (ngrokUrl == null && _ngrok.lastError != null) {
+        // No es error fatal: el servidor local sigue funcionando.
+        // El error de ngrok se guarda para diagnóstico en la UI.
+        debugPrint('[ServerProvider] ngrok failed: ${_ngrok.lastError}');
+      }
 
       // Solo publicar en Firebase si tenemos URL HTTPS (ngrok).
       // La IP local no sirve para clientes web en HTTPS (Mixed Content).

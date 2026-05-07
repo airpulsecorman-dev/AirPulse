@@ -390,6 +390,22 @@ class _QRLinkPageState extends State<_QRLinkPage> {
             final serverUrl = (rawUrl != null && rawUrl.startsWith('https://'))
                 ? rawUrl
                 : null;
+
+            // Advertir al usuario si ngrok no pudo abrir el túnel HTTPS.
+            // La sesión se aprueba igual, pero la web no podrá conectar al servidor.
+            if (serverUrl == null && serverProvider.ngrokError != null && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Túnel ngrok no disponible: ${serverProvider.ngrokError}\n'
+                    'La web no podrá conectar al servidor.',
+                  ),
+                  backgroundColor: Colors.orange,
+                  duration: const Duration(seconds: 6),
+                ),
+              );
+            }
+
             await service.approveWebSession(sessionId, user, serverUrl: serverUrl);
             await Future.delayed(const Duration(seconds: 2));
             await service.deleteSession(sessionId);

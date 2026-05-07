@@ -14,6 +14,7 @@ ServerHookResult useServer(BuildContext context) {
     isRunning: provider.isRunning,
     isStarting: provider.isStarting,
     error: provider.error,
+    ngrokError: provider.ngrokError,
     connectedClients: provider.connectedClients,
     serverUrl: provider.serverUrl,
     qrPayload: provider.qrPayload,
@@ -29,6 +30,7 @@ class ServerHookResult {
   final bool isRunning;
   final bool isStarting;
   final String? error;
+  final String? ngrokError;
   final List<String> connectedClients;
   final String? serverUrl;
   final String? qrPayload;
@@ -41,6 +43,7 @@ class ServerHookResult {
     required this.isRunning,
     required this.isStarting,
     required this.error,
+    this.ngrokError,
     required this.connectedClients,
     required this.serverUrl,
     required this.qrPayload,
