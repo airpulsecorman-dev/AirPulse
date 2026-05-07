@@ -4,32 +4,20 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../../services/qr_session_service.dart';
 import 'google_onboarding_page.dart';
-import 'web_library_page.dart';
+import 'server_webview_page.dart';
 
-/// Abre [url] en el navegador externo / pestaña nueva.
-/// Si ya estamos en el servidor HTTP local (misma origin), navega internamente.
+/// Abre [url] del servidor local en un WebView embebido.
+/// En web (browser) usa iframe — funciona si el esquema coincide (ambos http://).
+/// Desde GitHub Pages (https://) el browser bloqueará http:// por Mixed Content;
+/// en ese caso se abre en nueva pestaña como fallback.
 Future<void> _openServerUrl(String url, BuildContext context) async {
-  // Si estamos en el servidor local (http://IP:8765/), navegar internamente
-  // para evitar abrir otra pestaña del mismo origen.
-  if (kIsWeb && Uri.base.scheme == 'http') {
-    if (context.mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => WebLibraryPage(serverUrl: url)),
-      );
-    }
-    return;
-  }
-  final uri = Uri.parse(url);
-  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('No se pudo abrir: $url')));
-    }
+  if (context.mounted) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ServerWebViewPage(serverUrl: url)),
+    );
   }
 }
 
