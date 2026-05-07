@@ -17,8 +17,8 @@ ServerHookResult useServer(BuildContext context) {
     connectedClients: provider.connectedClients,
     serverUrl: provider.serverUrl,
     qrPayload: provider.qrPayload,
-    startServer: ({port = 8765, songs = const []}) =>
-        provider.startServer(port: port, songs: songs),
+    startServer: ({port = 8765, songs = const [], String? userId}) =>
+        provider.startServer(port: port, songs: songs, userId: userId),
     stopServer: provider.stopServer,
     broadcastPlayerState: provider.broadcastPlayerState,
   );
@@ -32,7 +32,7 @@ class ServerHookResult {
   final List<String> connectedClients;
   final String? serverUrl;
   final String? qrPayload;
-  final Future<void> Function({int port, List<Song> songs}) startServer;
+  final Future<void> Function({int port, List<Song> songs, String? userId}) startServer;
   final Future<void> Function() stopServer;
   final void Function(Map<String, dynamic>) broadcastPlayerState;
 

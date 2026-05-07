@@ -104,15 +104,21 @@ class AudioService {
     }
   }
 
-  Map<String, dynamic> toJsonState() {
+  Map<String, dynamic> toJsonState({
+    bool? isPlaying,
+    int positionMs = 0,
+  }) {
     return {
       'type': 'player_state',
       'songId': _currentSong?.id,
       'songTitle': _currentSong?.title,
       'songArtist': _currentSong?.artist,
-      'isPlaying': true,
+      'songAlbum': _currentSong?.album,
+      'isPlaying': isPlaying ?? false,
+      'positionMs': positionMs,
       'repeatMode': _repeatMode.name,
       'shuffleEnabled': _shuffleEnabled,
+      'currentIndex': _currentIndex,
     };
   }
 

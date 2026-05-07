@@ -194,7 +194,7 @@ function connectWS() {
   ws.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'state') applyState(msg);
+      if (msg.type === 'state' || msg.type === 'player_state') applyState(msg);
     } catch(_) {}
   };
   ws.onclose = () => {
@@ -296,7 +296,39 @@ function seek(e) {
 }
 
 function applyState(msg) {
-  // Sincronizar estado si el móvil controla la reproducción
+  // Sincronizar canción actual
+  if (msg.songId) {
+    const song = songs.find(s => s.id === msg.songId);
+    if (song) {
+      const idx = songs.indexOf(song);
+      if (idx !== currentIdx) {
+        currentIdx = idx;
+        document.getElementById('player').style.display = '';
+        document.getElementById('p-title').textContent = song.title;
+        document.getElementById('p-sub').textContent = song.artist + ' · ' + (song.album || '');
+        audio.src = BASE + '/songs/' + song.id + '/stream';
+        audio.load();
+        render();
+      }
+    }
+  }
+
+  // Sincronizar play/pause
+  if (typeof msg.isPlaying === 'boolean') {
+    if (msg.isPlaying && audio.paused) {
+      audio.play().catch(() => {});
+    } else if (!msg.isPlaying && !audio.paused) {
+      audio.pause();
+    }
+  }
+
+  // Sincronizar posición (solo si diferencia > 3 s)
+  if (typeof msg.positionMs === 'number' && audio.duration) {
+    const serverPosSec = msg.positionMs / 1000;
+    if (Math.abs(audio.currentTime - serverPosSec) > 3) {
+      audio.currentTime = serverPosSec;
+    }
+  }
 }
 
 // ── Eventos audio ─────────────────────────────────────────────

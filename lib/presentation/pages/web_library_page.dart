@@ -58,7 +58,8 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
     super.dispose();
   }
 
-  Future<void> _fetchSongs() async {
+  Future<void> _fetchSongs({int attempt = 1}) async {
+    final maxAttempts = 5;
     try {
       final uri = Uri.parse('${widget.serverUrl}/songs');
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
@@ -69,6 +70,7 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
               .map((e) => SongModel.fromJson(e as Map<String, dynamic>))
               .toList();
           _isLoading = false;
+          _error = null;
         });
       } else {
         setState(() {
@@ -77,11 +79,21 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
         });
       }
     } catch (e) {
-      setState(() {
-        _error = 'No se pudo conectar al servidor móvil.\n'
-            'Verifica que el móvil esté en la misma red y el servidor esté activo.';
-        _isLoading = false;
-      });
+      if (attempt < maxAttempts) {
+        // Reintento con backoff: el servidor móvil puede tardar unos segundos en arrancar
+        final delay = Duration(seconds: attempt * 2);
+        setState(() {
+          _error = 'Conectando al servidor móvil (intento $attempt/$maxAttempts)…';
+        });
+        await Future.delayed(delay);
+        if (mounted) return _fetchSongs(attempt: attempt + 1);
+      } else {
+        setState(() {
+          _error = 'No se pudo conectar al servidor móvil.\n'
+              'Verifica que el móvil esté en la misma red y el servidor esté activo.';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -177,7 +189,13 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
               child: CircularProgressIndicator(
                   color: Color(0xFFFF4D8B)))
           : _error != null
-              ? _ErrorView(error: _error!, onRetry: _fetchSongs)
+              ? _ErrorView(
+                  error: _error!,
+                  onRetry: () {
+                    setState(() { _isLoading = true; _error = null; });
+                    _fetchSongs();
+                  },
+                )
               : Column(
                   children: [
                     Expanded(child: _buildSongList(theme)),

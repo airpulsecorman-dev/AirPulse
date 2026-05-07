@@ -59,7 +59,7 @@ class _AirPulseAppState extends State<AirPulseApp> {
           create: (_) => LibraryProvider(sl<LibraryService>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => ServerProvider(sl<LocalServerService>(), sl<QRService>()),
+          create: (_) => ServerProvider(sl<LocalServerService>(), sl<AudioService>(), sl<QRService>()),
         ),
       ],
       child: Consumer<SettingsProvider>(

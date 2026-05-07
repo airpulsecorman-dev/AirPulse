@@ -425,7 +425,19 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
         lastName: data.lastName,
         avatarPath: data.avatarPath,
       );
-      // _AuthGate reacciona al cambio de auth y muestra LibraryPage automáticamente
+      // Si el móvil envió la URL del servidor, ir directo a WebLibraryPage
+      // sin necesidad de un segundo QR.
+      if (data.serverUrl != null && data.serverUrl!.isNotEmpty) {
+        final normalized = data.serverUrl!.endsWith('/')
+            ? data.serverUrl!.substring(0, data.serverUrl!.length - 1)
+            : data.serverUrl!;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => WebLibraryPage(serverUrl: normalized),
+          ),
+        );
+      }
+      // Si no hay serverUrl, _AuthGate muestra LibraryPage automáticamente
     }
   }
 
@@ -524,16 +536,21 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
             ),
           const SizedBox(height: 12),
           if (!_approved && _errorMsg == null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 6,
               children: [
-                const Icon(Icons.circle, size: 8, color: Color(0xFF4CAF50)),
-                const SizedBox(width: 6),
-                const Text(
-                  'Esperando aprobación…',
-                  style: TextStyle(color: Color(0xFF8899AA), fontSize: 11),
+                const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, size: 8, color: Color(0xFF4CAF50)),
+                    SizedBox(width: 4),
+                    Text(
+                      'Esperando aprobación…',
+                      style: TextStyle(color: Color(0xFF8899AA), fontSize: 11),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _refresh,
                   child: const Text(
@@ -667,10 +684,15 @@ class _StepItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
+        Flexible(
           child: Text(
             text,
-            style: const TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+            softWrap: true,
+            style: const TextStyle(
+              color: Color(0xFF8899AA),
+              fontSize: 13,
+              height: 1.4,
+            ),
           ),
         ),
       ],

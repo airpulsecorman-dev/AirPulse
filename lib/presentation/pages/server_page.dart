@@ -52,7 +52,10 @@ class ServerPage extends HookWidget {
             if (server.error != null) _ErrorBanner(error: server.error!),
             if (!server.isRunning && !server.isStarting)
               _StartServerCard(
-                onStart: () => server.startServer(songs: library.songs),
+                onStart: () => server.startServer(
+                  songs: library.songs,
+                  userId: context.read<AuthProvider>().currentUser?.id,
+                ),
               ),
             if (server.isStarting)
               const Center(
@@ -129,7 +132,10 @@ class _MobileServerPage extends HookWidget {
                 if (server.error != null) _ErrorBanner(error: server.error!),
                 if (!server.isRunning && !server.isStarting)
                   _StartServerCard(
-                    onStart: () => server.startServer(songs: library.songs),
+                    onStart: () => server.startServer(
+                      songs: library.songs,
+                      userId: context.read<AuthProvider>().currentUser?.id,
+                    ),
                   ),
                 if (server.isStarting)
                   const Center(
@@ -461,7 +467,22 @@ class _QRLinkPageState extends State<_QRLinkPage> {
             }
 
             final service = QrSessionService();
-            await service.approveWebSession(sessionId, user);
+
+            // Arrancar servidor ANTES de aprobar para que la URL ya esté
+            // disponible cuando la web reciba el estado "approved".
+            final serverProvider = context.read<ServerProvider>();
+            final libraryProvider = context.read<LibraryProvider>();
+            if (!serverProvider.isRunning) {
+              await serverProvider.startServer(
+                songs: libraryProvider.songs,
+                userId: user.id,
+              );
+            }
+
+            // Escribir también la URL del servidor en la sesión QR para que
+            // la web pueda conectarse directamente sin un segundo escaneo.
+            final serverUrl = serverProvider.serverUrl;
+            await service.approveWebSession(sessionId, user, serverUrl: serverUrl);
             await Future.delayed(const Duration(seconds: 2));
             await service.deleteSession(sessionId);
             await widget.onSessionApproved(sessionId);
@@ -496,7 +517,11 @@ class _QRLinkPageState extends State<_QRLinkPage> {
     try {
       final serverProvider = context.read<ServerProvider>();
       final libraryProvider = context.read<LibraryProvider>();
-      await serverProvider.startServer(songs: libraryProvider.songs);
+      final authProvider = context.read<AuthProvider>();
+      await serverProvider.startServer(
+        songs: libraryProvider.songs,
+        userId: authProvider.currentUser?.id,
+      );
 
       final mobileServerUrl = serverProvider.serverUrl;
       if (mobileServerUrl == null) {

@@ -108,10 +108,44 @@ function handleServerMessage(msg) {
 }
 
 function syncPlayerState(msg) {
+  // Sincronizar metadatos de canción
+  if (msg.songId && msg.songId !== state.currentSong?.id) {
+    const song = state.songs.find(s => s.id === msg.songId);
+    if (song) {
+      state.currentSong = song;
+      state.currentIndex = msg.currentIndex ?? state.songs.indexOf(song);
+      updateSongInfo(song);
+      renderSongList();
+    }
+  }
   if (msg.songTitle) {
     qs('#song-title').textContent = msg.songTitle ?? '—';
     qs('#song-artist').textContent = msg.songArtist ?? '—';
+    if (qs('#song-album')) qs('#song-album').textContent = msg.songAlbum ?? '';
   }
+
+  // Sincronizar estado reproducción
+  if (typeof msg.isPlaying === 'boolean') {
+    if (msg.isPlaying && state.audio.paused && state.currentSong) {
+      state.audio.play().catch(() => {});
+    } else if (!msg.isPlaying && !state.audio.paused) {
+      state.audio.pause();
+    }
+    state.isPlaying = msg.isPlaying;
+    updatePlayButton();
+  }
+
+  // Sincronizar posición (solo si diferencia > 3 s para evitar saltos)
+  if (typeof msg.positionMs === 'number' && state.audio.duration) {
+    const serverPosSec = msg.positionMs / 1000;
+    if (Math.abs(state.audio.currentTime - serverPosSec) > 3) {
+      state.audio.currentTime = serverPosSec;
+    }
+  }
+
+  // Sincronizar repeatMode y shuffle
+  if (msg.repeatMode) state.repeatMode = msg.repeatMode;
+  if (typeof msg.shuffleEnabled === 'boolean') state.shuffleEnabled = msg.shuffleEnabled;
 }
 
 // ─── Audio Playback ───────────────────────────────────────────────────────────
