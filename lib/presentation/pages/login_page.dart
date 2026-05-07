@@ -4,10 +4,23 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../../services/qr_session_service.dart';
-import 'web_library_page.dart';
 import 'google_onboarding_page.dart';
+
+/// Abre [url] en el navegador externo / pestaña nueva.
+/// En web navega a la URL del servidor HTTP local, evitando mixed-content.
+Future<void> _openServerUrl(String url, BuildContext context) async {
+  final uri = Uri.parse(url);
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No se pudo abrir: $url')));
+    }
+  }
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -28,17 +41,15 @@ class _LoginPageState extends State<LoginPage> {
     // Si la web se abrió con ?serverUrl= (enviado por el móvil tras escanear el QR),
     // auto-navegar directamente a WebLibraryPage.
     if (kIsWeb) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         final serverUrl = Uri.base.queryParameters['serverUrl'];
         if (serverUrl != null && serverUrl.isNotEmpty && mounted) {
           final normalized = serverUrl.endsWith('/')
               ? serverUrl.substring(0, serverUrl.length - 1)
               : serverUrl;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => WebLibraryPage(serverUrl: normalized),
-            ),
-          );
+          // Redirigir directamente al servidor del móvil (HTTP mismo origen).
+          // Así el reproductor web corre en http:// y no hay bloqueo de mixed-content.
+          await _openServerUrl(normalized, context);
         }
       });
     }
@@ -412,7 +423,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
     }
   }
 
-  void _onSessionChange(WebSessionData data) {
+  void _onSessionChange(WebSessionData data) async {
     if (!mounted) return;
     if (data.status == WebSessionStatus.approved) {
       _sub?.cancel();
@@ -425,17 +436,13 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
         lastName: data.lastName,
         avatarPath: data.avatarPath,
       );
-      // Si el móvil envió la URL del servidor, ir directo a WebLibraryPage
-      // sin necesidad de un segundo QR.
+      // Si el móvil envió la URL del servidor, redirigir el navegador
+      // directamente al servidor HTTP local (mismo origen → sin mixed-content).
       if (data.serverUrl != null && data.serverUrl!.isNotEmpty) {
         final normalized = data.serverUrl!.endsWith('/')
             ? data.serverUrl!.substring(0, data.serverUrl!.length - 1)
             : data.serverUrl!;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => WebLibraryPage(serverUrl: normalized),
-          ),
-        );
+        await _openServerUrl(normalized, context);
       }
       // Si no hay serverUrl, _AuthGate muestra LibraryPage automáticamente
     }
@@ -639,12 +646,18 @@ class _StatusBox extends StatelessWidget {
                 onPressed: onAction,
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
                   actionLabel!,
-                  style: const TextStyle(color: Color(0xFFFF4D8B), fontSize: 11),
+                  style: const TextStyle(
+                    color: Color(0xFFFF4D8B),
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ],
