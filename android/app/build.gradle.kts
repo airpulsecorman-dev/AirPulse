@@ -38,9 +38,12 @@ android {
     }
 
     packaging {
+        jniLibs {
+            // El .so de ngrok se provee en jniLibs; excluirlo del JAR evita duplicados
+            excludes += listOf("**/libngrok_java.so")
+        }
         resources {
-            // Los dos JARs nativos de ngrok incluyen native.properties — tomamos el primero
-            pickFirsts += setOf("native.properties")
+            excludes += listOf("native.properties")
         }
     }
 }
@@ -50,7 +53,6 @@ flutter {
 }
 
 dependencies {
-    // ngrok embedded agent SDK + native binaries para Android ARM64
     implementation("com.ngrok:ngrok-java:1.1.1")
     runtimeOnly("com.ngrok:ngrok-java-native:1.1.1:linux-android-aarch_64")
 }
