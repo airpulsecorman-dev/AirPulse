@@ -24,7 +24,14 @@ class LocalServerService {
       _wsSource.commandStream;
   Stream<List<String>> get connectedClientsStream =>
       _wsSource.connectedClientsStream;
+  /// Emite el clientId cada vez que se conecta un nuevo cliente WS.
+  Stream<String> get newClientStream => _wsSource.newClientStream;
   ServerSession? get activeSession => _activeSession;
+
+  /// Envía el estado actual solo al cliente que acaba de conectarse.
+  void sendStateToClient(String clientId, Map<String, dynamic> state) {
+    _wsSource.sendToClient(clientId, state);
+  }
 
   Future<ServerSession> start({
     int port = 8765,

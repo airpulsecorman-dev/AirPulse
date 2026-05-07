@@ -21,12 +21,71 @@ class ServerProvider extends ChangeNotifier {
   StreamSubscription? _playingSub;
   StreamSubscription? _songSub;
   StreamSubscription? _positionSub;
+  // ignore: unused_field
+  StreamSubscription? _newClientSub;
+  // ignore: unused_field
+  StreamSubscription? _commandSub;
   bool _isPlaying = false;
   Duration _position = Duration.zero;
+
+  // Songs list cacheada para resolver índices de comandos del browser
+  List<Song> _songs = [];
 
   ServerProvider(this._serverService, this._audioService, this._qrService) {
     _listenToClients();
     _listenToAudio();
+    _listenToNewClients();
+    _listenToCommands();
+  }
+
+  /// Procesa comandos enviados por el browser (play, pause, resume, next, prev, seek)
+  void _listenToCommands() {
+    _commandSub = _serverService.clientCommandStream.listen((cmd) async {
+      final type = cmd['type'] as String? ?? '';
+      switch (type) {
+        case 'play':
+          final songId = cmd['songId'] as String?;
+          final index = cmd['index'] as int?;
+          if (songId != null) {
+            // busca la canción por id en el cache
+            final song = _songs.where((s) => s.id == songId).firstOrNull;
+            if (song != null) {
+              await _audioService.playSong(song, queue: _songs, index: index ?? _songs.indexOf(song));
+            }
+          }
+          break;
+        case 'pause':
+          await _audioService.pause();
+          break;
+        case 'resume':
+          await _audioService.resume();
+          break;
+        case 'next':
+          await _audioService.next();
+          break;
+        case 'prev':
+        case 'previous':
+          await _audioService.previous();
+          break;
+        case 'seek':
+          final ms = cmd['positionMs'];
+          if (ms is num) await _audioService.seek(Duration(milliseconds: ms.toInt()));
+          break;
+      }
+    });
+  }
+
+  /// Cuando se conecta un nuevo cliente WS, le enviamos el estado actual
+  /// inmediatamente para que sincronice sin esperar el próximo cambio.
+  void _listenToNewClients() {
+    _newClientSub = _serverService.newClientStream.listen((clientId) {
+      if (!isRunning) return;
+      final state = _audioService.toJsonState(
+        isPlaying: _isPlaying,
+        positionMs: _position.inMilliseconds,
+      );
+      _serverService.sendStateToClient(clientId, state);
+    });
   }
 
   void _listenToAudio() {
@@ -58,6 +117,8 @@ class ServerProvider extends ChangeNotifier {
     _playingSub?.cancel();
     _songSub?.cancel();
     _positionSub?.cancel();
+    _newClientSub?.cancel();
+    _commandSub?.cancel();
     super.dispose();
   }
 
@@ -85,10 +146,21 @@ class ServerProvider extends ChangeNotifier {
   }) async {
     _isStarting = true;
     _activeUserId = userId;
+    _songs = songs;
     _error = null;
     notifyListeners();
     try {
-      _session = await _serverService.start(port: port, songs: songs);
+      _session = await _serverService.start(
+        port: port,
+        songs: songs,
+        onPlayerStateRequested: (map) {
+          final state = _audioService.toJsonState(
+            isPlaying: _isPlaying,
+            positionMs: _position.inMilliseconds,
+          );
+          map.addAll(state);
+        },
+      );
       if (userId != null && _session?.serverUrl != null) {
         await QrSessionService().publishServerSession(
           userId: userId,

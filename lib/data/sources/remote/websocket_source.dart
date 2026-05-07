@@ -6,16 +6,20 @@ class WebSocketSource {
   final _clientsController = StreamController<List<String>>.broadcast();
   final _commandController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _newClientController = StreamController<String>.broadcast();
 
   final Map<String, WebSocketChannel> _clients = {};
 
   Stream<List<String>> get connectedClientsStream => _clientsController.stream;
   Stream<Map<String, dynamic>> get commandStream => _commandController.stream;
+  /// Emite el clientId cada vez que se conecta un nuevo cliente.
+  Stream<String> get newClientStream => _newClientController.stream;
   List<String> get connectedClientIds => _clients.keys.toList();
 
   void registerClient(String clientId, WebSocketChannel channel) {
     _clients[clientId] = channel;
     _clientsController.add(connectedClientIds);
+    _newClientController.add(clientId);
 
     channel.stream.listen(
       (message) {
@@ -53,5 +57,6 @@ class WebSocketSource {
     _clients.clear();
     _clientsController.close();
     _commandController.close();
+    _newClientController.close();
   }
 }
