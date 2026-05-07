@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:mime/mime.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
@@ -59,17 +57,9 @@ class LocalServerService {
       )
       ..get('/ws', webSocketHandler(_handleWebSocket));
 
-    // Fallback: sirve la Flutter web app embebida en assets/web/
-    final handler = Pipeline().addMiddleware(_corsMiddleware()).addHandler((
-      Request req,
-    ) async {
-      final r = await router(req);
-      // Si el router no manejó la ruta (404), intenta servir archivo estático
-      if (r.statusCode == 404) {
-        return _serveWebAsset(req);
-      }
-      return r;
-    });
+    final handler = Pipeline()
+        .addMiddleware(_corsMiddleware())
+        .addHandler(router.call);
 
     _server = await shelf_io.serve(handler, InternetAddress.anyIPv4, port);
 
@@ -101,51 +91,6 @@ class LocalServerService {
   void broadcastPlayerState(Map<String, dynamic> state) {
     _wsSource.broadcast(state);
   }
-
-  /// Sirve los archivos est\u00e1ticos de la Flutter web app embebida en assets/web/.
-  /// Permite cargar la PWA completa desde http://IP:port/ sin mixed-content.
-  Future<Response> _serveWebAsset(Request request) async {
-    var path = request.url.path;
-    if (path.isEmpty || path == '/') path = 'index.html';
-    // Eliminar query string si la tiene (service worker, etc.)
-    path = path.split('?').first;
-
-    final assetPath = 'assets/web/$path';
-    try {
-      final data = await rootBundle.load(assetPath);
-      final bytes = data.buffer.asUint8List();
-      final mimeType = lookupMimeType(path) ?? 'application/octet-stream';
-      return Response.ok(
-        bytes,
-        headers: {
-          'content-type': mimeType,
-          // Sin cache para HTML, service worker y manifest (cambios frecuentes)
-          if (path.endsWith('.html') ||
-              path.endsWith('.json') ||
-              path.endsWith('_service_worker.js'))
-            'cache-control': 'no-cache'
-          else
-            'cache-control': 'max-age=3600',
-        },
-      );
-    } catch (_) {
-      // Fallback: si no se encuentra el asset devuelve index.html (SPA routing)
-      try {
-        final data = await rootBundle.load('assets/web/index.html');
-        final bytes = data.buffer.asUint8List();
-        return Response.ok(
-          bytes,
-          headers: {
-            'content-type': 'text/html; charset=utf-8',
-            'cache-control': 'no-cache',
-          },
-        );
-      } catch (_) {
-        return Response.notFound('Not found');
-      }
-    }
-  }
-
   Response _handleHealth(Request req) {
     return Response.ok(
       jsonEncode({'status': 'ok', 'service': 'airpulse'}),

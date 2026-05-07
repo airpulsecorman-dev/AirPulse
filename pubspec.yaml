@@ -118,20 +118,7 @@ flutter:
     - .env
     - assets/env.txt
     - assets/images/Icon-512.png
-    # Flutter web build embebido para servirlo desde el servidor Shelf local
-    - assets/web/
-    - assets/web/assets/
-    - assets/web/assets/assets/
-    - assets/web/assets/assets/images/
-    - assets/web/assets/fonts/
-    - assets/web/assets/packages/
-    - assets/web/assets/packages/cupertino_icons/
-    - assets/web/assets/packages/cupertino_icons/assets/
-    - assets/web/assets/shaders/
-    - assets/web/canvaskit/
-    - assets/web/canvaskit/chromium/
-    - assets/web/icons/
-    - assets/web/pwa/
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
