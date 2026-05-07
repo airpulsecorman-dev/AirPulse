@@ -36,6 +36,13 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    packaging {
+        resources {
+            // Los dos JARs nativos de ngrok incluyen native.properties — tomamos el primero
+            pickFirsts += setOf("native.properties")
+        }
+    }
 }
 
 flutter {
@@ -43,5 +50,7 @@ flutter {
 }
 
 dependencies {
-    implementation("com.ngrok:ngrok-java:0.7.0")
+    // ngrok embedded agent SDK + native binaries para Android ARM64
+    implementation("com.ngrok:ngrok-java:1.1.1")
+    runtimeOnly("com.ngrok:ngrok-java-native:1.1.1:linux-android-aarch_64")
 }

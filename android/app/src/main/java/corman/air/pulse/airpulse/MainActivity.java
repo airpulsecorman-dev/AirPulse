@@ -13,13 +13,14 @@ import com.ryanheise.audioservice.AudioServiceActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.ngrok.Session;
-import com.ngrok.Http;
+import com.ngrok.Forwarder;
 
 public class MainActivity extends AudioServiceActivity {
     private static final String VOLUME_CHANNEL  = "com.airpulse/volume";
@@ -33,7 +34,7 @@ public class MainActivity extends AudioServiceActivity {
 
     // ngrok state
     private Session ngrokSession;
-    private Http.Listener ngrokListener;
+    private Forwarder.Endpoint ngrokForwarder;
     private final ExecutorService ngrokExecutor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -103,9 +104,9 @@ public class MainActivity extends AudioServiceActivity {
                         try {
                             stopNgrok(); // cierra túnel previo si existe
                             ngrokSession = Session.withAuthtoken(authtoken).connect();
-                            ngrokListener = ngrokSession.httpEndpoint().listen();
-                            ngrokListener.forwardHttp("localhost", port);
-                            String url = ngrokListener.url();
+                            URL forwardUrl = new URL("http://localhost:" + port);
+                            ngrokForwarder = ngrokSession.forwardHttp(ngrokSession.httpEndpoint(), forwardUrl);
+                            String url = ngrokForwarder.getUrl();
                             runOnUiThread(() -> result.success(url));
                         } catch (Exception e) {
                             runOnUiThread(() -> result.error("NGROK_ERROR", e.getMessage(), null));
@@ -126,7 +127,7 @@ public class MainActivity extends AudioServiceActivity {
     }
 
     private void stopNgrok() {
-        try { if (ngrokListener != null) { ngrokListener.close(); ngrokListener = null; } } catch (Exception ignored) {}
+        try { if (ngrokForwarder != null) { ngrokForwarder.close(); ngrokForwarder = null; } } catch (Exception ignored) {}
         try { if (ngrokSession != null) { ngrokSession.close(); ngrokSession = null; } } catch (Exception ignored) {}
     }
 
