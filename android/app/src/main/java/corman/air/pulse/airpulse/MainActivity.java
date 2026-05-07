@@ -15,15 +15,26 @@ import io.flutter.plugin.common.MethodChannel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import com.ngrok.Session;
+import com.ngrok.Http;
 
 public class MainActivity extends AudioServiceActivity {
-    private static final String VOLUME_CHANNEL = "com.airpulse/volume";
+    private static final String VOLUME_CHANNEL  = "com.airpulse/volume";
     private static final String LIBRARY_CHANNEL = "com.airpulse/library";
+    private static final String NGROK_CHANNEL   = "com.airpulse/ngrok";
     private static final int REQUEST_DELETE = 42;
 
     private VolumeListener volumeListener;
     private MethodChannel volumeChannel;
     private MethodChannel.Result pendingDeleteResult;
+
+    // ngrok state
+    private Session ngrokSession;
+    private Http.Listener ngrokListener;
+    private final ExecutorService ngrokExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +86,48 @@ public class MainActivity extends AudioServiceActivity {
                 result.notImplemented();
             }
         });
+
+        // ── Canal ngrok (túnel HTTPS) ─────────────────────────────────────────
+        MethodChannel ngrokChannel = new MethodChannel(
+                flutterEngine.getDartExecutor().getBinaryMessenger(), NGROK_CHANNEL);
+        ngrokChannel.setMethodCallHandler((call, result) -> {
+            switch (call.method) {
+                case "startTunnel": {
+                    Integer port = call.argument("port");
+                    String authtoken = call.argument("authtoken");
+                    if (port == null || authtoken == null) {
+                        result.error("INVALID_ARGS", "port and authtoken required", null);
+                        return;
+                    }
+                    ngrokExecutor.execute(() -> {
+                        try {
+                            stopNgrok(); // cierra túnel previo si existe
+                            ngrokSession = Session.withAuthtoken(authtoken).connect();
+                            ngrokListener = ngrokSession.httpEndpoint().listen();
+                            ngrokListener.forwardHttp("localhost", port);
+                            String url = ngrokListener.url();
+                            runOnUiThread(() -> result.success(url));
+                        } catch (Exception e) {
+                            runOnUiThread(() -> result.error("NGROK_ERROR", e.getMessage(), null));
+                        }
+                    });
+                    break;
+                }
+                case "stopTunnel":
+                    ngrokExecutor.execute(() -> {
+                        stopNgrok();
+                        runOnUiThread(() -> result.success(null));
+                    });
+                    break;
+                default:
+                    result.notImplemented();
+            }
+        });
+    }
+
+    private void stopNgrok() {
+        try { if (ngrokListener != null) { ngrokListener.close(); ngrokListener = null; } } catch (Exception ignored) {}
+        try { if (ngrokSession != null) { ngrokSession.close(); ngrokSession = null; } } catch (Exception ignored) {}
     }
 
     private void deleteSongsNative(List<String> filePaths, List<String> songIds,

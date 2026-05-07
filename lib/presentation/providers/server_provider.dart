@@ -4,6 +4,7 @@ import '../../domain/entities/server_session.dart';
 import '../../domain/entities/song.dart';
 import '../../services/audio_service.dart';
 import '../../services/local_server_service.dart';
+import '../../services/ngrok_service.dart';
 import '../../services/qr_service.dart';
 import '../../services/qr_session_service.dart';
 
@@ -12,6 +13,7 @@ class ServerProvider extends ChangeNotifier {
   final AudioService _audioService;
   // ignore: unused_field
   final QRService _qrService;
+  final NgrokService _ngrok = NgrokService();
 
   ServerSession? _session;
   bool _isStarting = false;
@@ -161,12 +163,22 @@ class ServerProvider extends ChangeNotifier {
           map.addAll(state);
         },
       );
-      if (userId != null && _session?.serverUrl != null) {
+
+      // Intentar abrir túnel ngrok HTTPS para evitar Mixed Content desde HTTPS
+      final ngrokUrl = await _ngrok.startTunnel(port);
+      final publicUrl = ngrokUrl ?? _session?.serverUrl;
+
+      if (userId != null && publicUrl != null) {
         await QrSessionService().publishServerSession(
           userId: userId,
-          serverUrl: _session!.serverUrl,
+          serverUrl: publicUrl,
           sessionId: _session!.sessionId,
         );
+      }
+
+      // Actualizar la sesión con la URL pública (ngrok o local)
+      if (_session != null && publicUrl != null && publicUrl != _session!.serverUrl) {
+        _session = _session!.copyWith(publicUrl: publicUrl);
       }
     } catch (e) {
       _error = e.toString();
@@ -177,6 +189,7 @@ class ServerProvider extends ChangeNotifier {
   }
 
   Future<void> stopServer() async {
+    await _ngrok.stopTunnel();
     if (_activeUserId != null) {
       await QrSessionService().clearServerSession(_activeUserId!);
       _activeUserId = null;

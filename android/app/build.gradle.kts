@@ -41,3 +41,7 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    implementation("com.ngrok:ngrok-java:0.7.0")
+}
