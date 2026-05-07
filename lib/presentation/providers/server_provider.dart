@@ -166,19 +166,20 @@ class ServerProvider extends ChangeNotifier {
 
       // Intentar abrir túnel ngrok HTTPS para evitar Mixed Content desde HTTPS
       final ngrokUrl = await _ngrok.startTunnel(port);
-      final publicUrl = ngrokUrl ?? _session?.serverUrl;
 
-      if (userId != null && publicUrl != null) {
+      // Solo publicar en Firebase si tenemos URL HTTPS (ngrok).
+      // La IP local no sirve para clientes web en HTTPS (Mixed Content).
+      if (userId != null && ngrokUrl != null) {
         await QrSessionService().publishServerSession(
           userId: userId,
-          serverUrl: publicUrl,
+          serverUrl: ngrokUrl,
           sessionId: _session!.sessionId,
         );
       }
 
-      // Actualizar la sesión con la URL pública (ngrok o local)
-      if (_session != null && publicUrl != null && publicUrl != _session!.serverUrl) {
-        _session = _session!.copyWith(publicUrl: publicUrl);
+      // Actualizar la sesión con la URL pública ngrok si está disponible
+      if (_session != null && ngrokUrl != null) {
+        _session = _session!.copyWith(publicUrl: ngrokUrl);
       }
     } catch (e) {
       _error = e.toString();

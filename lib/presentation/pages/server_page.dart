@@ -384,9 +384,12 @@ class _QRLinkPageState extends State<_QRLinkPage> {
               );
             }
 
-            // Escribir también la URL del servidor en la sesión QR para que
-            // la web pueda conectarse directamente sin un segundo escaneo.
-            final serverUrl = serverProvider.serverUrl;
+            // Solo enviar serverUrl si es HTTPS (ngrok).
+            // La IP local causa Mixed Content en la web HTTPS (GitHub Pages).
+            final rawUrl = serverProvider.session?.publicUrl;
+            final serverUrl = (rawUrl != null && rawUrl.startsWith('https://'))
+                ? rawUrl
+                : null;
             await service.approveWebSession(sessionId, user, serverUrl: serverUrl);
             await Future.delayed(const Duration(seconds: 2));
             await service.deleteSession(sessionId);
