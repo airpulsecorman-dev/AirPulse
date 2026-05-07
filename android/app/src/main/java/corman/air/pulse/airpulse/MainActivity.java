@@ -22,8 +22,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AudioServiceActivity {
+    private static boolean ngrokLibLoaded = false;
+    private static UnsatisfiedLinkError ngrokLibError = null;
+
     static {
-        System.loadLibrary("ngrok_java");
+        try {
+            System.loadLibrary("ngrok_java");
+            ngrokLibLoaded = true;
+        } catch (UnsatisfiedLinkError e) {
+            ngrokLibError = e;
+        }
     }
 
     private static final String VOLUME_CHANNEL = "com.airpulse/volume";
@@ -97,6 +105,12 @@ public class MainActivity extends AudioServiceActivity {
         ngrokChannel.setMethodCallHandler((call, result) -> {
             switch (call.method) {
                 case "startTunnel": {
+                    if (!ngrokLibLoaded) {
+                        result.error("NGROK_UNAVAILABLE",
+                                "ngrok native library not available on this device: " +
+                                (ngrokLibError != null ? ngrokLibError.getMessage() : "unknown"), null);
+                        return;
+                    }
                     Integer port = call.argument("port");
                     String authtoken = call.argument("authtoken");
                     if (port == null || authtoken == null) {

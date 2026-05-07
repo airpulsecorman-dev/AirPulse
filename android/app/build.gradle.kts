@@ -39,8 +39,7 @@ android {
 
     packaging {
         jniLibs {
-            // El .so de ngrok se provee en jniLibs; excluirlo del JAR evita duplicados
-            excludes += listOf("**/libngrok_java.so")
+            pickFirsts += listOf("**/libngrok_java.so")
         }
         resources {
             excludes += listOf("native.properties")
