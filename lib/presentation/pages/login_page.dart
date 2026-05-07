@@ -8,10 +8,21 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../../services/qr_session_service.dart';
 import 'google_onboarding_page.dart';
+import 'web_library_page.dart';
 
 /// Abre [url] en el navegador externo / pestaña nueva.
-/// En web navega a la URL del servidor HTTP local, evitando mixed-content.
+/// Si ya estamos en el servidor HTTP local (misma origin), navega internamente.
 Future<void> _openServerUrl(String url, BuildContext context) async {
+  // Si estamos en el servidor local (http://IP:8765/), navegar internamente
+  // para evitar abrir otra pestaña del mismo origen.
+  if (kIsWeb && Uri.base.scheme == 'http') {
+    if (context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => WebLibraryPage(serverUrl: url)),
+      );
+    }
+    return;
+  }
   final uri = Uri.parse(url);
   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
     if (context.mounted) {
