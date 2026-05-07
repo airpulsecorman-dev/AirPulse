@@ -96,19 +96,10 @@ class _MobileServerPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final server = useServer(context);
-    final library = useLibrary(context);
-    final tabController = useTabController(initialLength: 2);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('AirPulse - Móvil'),
-        bottom: TabBar(
-          controller: tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.qr_code_scanner), text: 'Escanear web'),
-            Tab(icon: Icon(Icons.wifi_tethering), text: 'Compartir música'),
-          ],
-        ),
         actions: [
           if (server.isRunning)
             IconButton(
@@ -118,93 +109,7 @@ class _MobileServerPage extends HookWidget {
             ),
         ],
       ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          // TAB 2: Escanear QR de la web para conectarse como cliente
-          const _QRScannerPage(),
-          // TAB 1: Iniciar servidor para compartir canciones a la web
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (server.error != null) _ErrorBanner(error: server.error!),
-                if (!server.isRunning && !server.isStarting)
-                  _StartServerCard(
-                    onStart: () => server.startServer(
-                      songs: library.songs,
-                      userId: context.read<AuthProvider>().currentUser?.id,
-                    ),
-                  ),
-                if (server.isStarting)
-                  const Center(
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Iniciando servidor…'),
-                      ],
-                    ),
-                  ),
-                if (server.isRunning && server.qrPayload != null)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          QRWidget(
-                            payload: server.qrPayload!,
-                            serverUrl: server.serverUrl ?? '',
-                            clientCount: server.connectedClients.length,
-                          ),
-                          const SizedBox(height: 16),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Icon(Icons.info_outline, size: 18),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Cómo conectar desde la web',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    '1. Abre AirPulse en el navegador web.\n'
-                                    '2. En la pantalla de inicio de sesión ingresa la URL de abajo.\n'
-                                    '3. Toca "Conectar" para ver y reproducir tus canciones desde la web.',
-                                    style: TextStyle(height: 1.6),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (server.serverUrl != null)
-                                    SelectableText(
-                                      server.serverUrl!,
-                                      style: const TextStyle(
-                                        fontFamily: 'monospace',
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      body: const _QRScannerPage(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
@@ -35,9 +36,29 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
   StreamSubscription? _playSub;
   int _wsRetryDelay = 1;
 
+  bool _isMixedContent() {
+    // En web, verifica si la página corre sobre HTTPS pero el servidor es HTTP
+    // kIsWeb está disponible vía flutter/foundation.dart
+    if (!kIsWeb) return false;
+    final pageScheme = Uri.base.scheme;
+    final serverScheme = Uri.tryParse(widget.serverUrl)?.scheme ?? '';
+    return pageScheme == 'https' && serverScheme == 'http';
+  }
+
   @override
   void initState() {
     super.initState();
+    if (_isMixedContent()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _error = 'mixed_content';
+          });
+        }
+      });
+      return;
+    }
     _fetchSongs();
     _connectWebSocket();
     _posSub = _player.positionStream.listen(
@@ -406,29 +427,73 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMixed = error == 'mixed_content';
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off, size: 64, color: Color(0xFF8899AA)),
+            Icon(
+              isMixed ? Icons.https_outlined : Icons.wifi_off,
+              size: 64,
+              color: const Color(0xFF8899AA),
+            ),
             const SizedBox(height: 16),
             Text(
-              error,
+              isMixed
+                  ? 'Conexión bloqueada por seguridad del navegador'
+                  : error,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF8899AA)),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF4D8B),
-                foregroundColor: Colors.white,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
             ),
+            if (isMixed) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Esta web usa HTTPS pero el servidor del móvil usa HTTP.\n'
+                'El navegador bloquea esta conexión por política de seguridad.\n\n'
+                'Para continuar, abre la web directamente desde la IP local:\n',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2A38),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'http://192.168.x.x:8765',
+                  style: TextStyle(
+                    color: Color(0xFFFF4D8B),
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '(usa la IP del móvil que aparece en la pantalla del servidor)',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+              ),
+            ],
+            if (!isMixed) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF4D8B),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
           ],
         ),
       ),

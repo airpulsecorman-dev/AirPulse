@@ -518,9 +518,12 @@ fetchSongs();
   Map<String, String> _corsHeaders() => {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET, POST, OPTIONS, HEAD',
-    'access-control-allow-headers': 'content-type, range',
+    'access-control-allow-headers': 'content-type, range, access-control-request-private-network',
     'access-control-expose-headers':
         'content-range, content-length, accept-ranges',
+    // Private Network Access (Chrome 94+): permite requests desde localhost
+    // y otros orígenes públicos hacia IPs privadas (192.168.x.x)
+    'access-control-allow-private-network': 'true',
   };
 
   Future<String> _getLocalIp() async {
