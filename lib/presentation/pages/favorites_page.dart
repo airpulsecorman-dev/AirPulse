@@ -32,17 +32,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final favorites = context.watch<FavoritesProvider>();
     final auth = context.watch<AuthProvider>();
     final audio = context.watch<AudioProvider>();
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1B2A),
-        elevation: 0,
         title: const Text(
           'Favoritos',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           if (favorites.favorites.isNotEmpty)
             Padding(
@@ -50,7 +47,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: Center(
                 child: Text(
                   '${favorites.favorites.length} canciones',
-                  style: const TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
@@ -61,55 +61,56 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
             )
           : favorites.favorites.isEmpty
-              ? _buildEmptyState()
-              : Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: favorites.favorites.length,
-                        itemBuilder: (context, index) {
-                          final song = favorites.favorites[index];
-                          final isPlaying =
-                              audio.currentSong?.id == song.id && audio.isPlaying;
-                          return _FavoriteTile(
-                            song: song,
-                            isPlaying: isPlaying,
-                            userId: auth.currentUser?.id ?? '',
-                            onTap: () => audio.play(
-                              song,
-                              queue: favorites.favorites,
-                              index: index,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (audio.currentSong != null)
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pushNamed('/player'),
-                        child: PlayerBar(
-                          currentSong: audio.currentSong,
-                          isPlaying: audio.isPlaying,
-                          position: audio.position,
-                          positionStream: audio.positionStream,
-                          repeatMode: audio.repeatMode,
-                          shuffleEnabled: audio.shuffleEnabled,
-                          onPlay: audio.resume,
-                          onPause: audio.pause,
-                          onNext: audio.next,
-                          onPrevious: audio.previous,
-                          onSeek: audio.seek,
-                          onRepeatMode: audio.setRepeatMode,
-                          onShuffle: audio.toggleShuffle,
+          ? _buildEmptyState()
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: favorites.favorites.length,
+                    itemBuilder: (context, index) {
+                      final song = favorites.favorites[index];
+                      final isPlaying =
+                          audio.currentSong?.id == song.id && audio.isPlaying;
+                      return _FavoriteTile(
+                        song: song,
+                        isPlaying: isPlaying,
+                        userId: auth.currentUser?.id ?? '',
+                        onTap: () => audio.play(
+                          song,
+                          queue: favorites.favorites,
+                          index: index,
                         ),
-                      ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
+                if (audio.currentSong != null)
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed('/player'),
+                    child: PlayerBar(
+                      currentSong: audio.currentSong,
+                      isPlaying: audio.isPlaying,
+                      position: audio.position,
+                      positionStream: audio.positionStream,
+                      repeatMode: audio.repeatMode,
+                      shuffleEnabled: audio.shuffleEnabled,
+                      onPlay: audio.resume,
+                      onPause: audio.pause,
+                      onNext: audio.next,
+                      onPrevious: audio.previous,
+                      onSeek: audio.seek,
+                      onRepeatMode: audio.setRepeatMode,
+                      onShuffle: audio.toggleShuffle,
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -119,7 +120,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF1A2D42),
+              color: theme.colorScheme.surfaceContainerHighest,
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
@@ -134,19 +135,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Sin canciones favoritas',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Agrega canciones desde la biblioteca\npresionando el ícono ♥',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 13,
+            ),
           ),
         ],
       ),
@@ -170,6 +174,7 @@ class _FavoriteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favorites = context.watch<FavoritesProvider>();
+    final theme = Theme.of(context);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -188,13 +193,13 @@ class _FavoriteTile extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: const Color(0xFF1A2D42),
+              color: theme.colorScheme.surfaceContainerHighest,
             ),
             child: Icon(
               isPlaying ? Icons.equalizer_rounded : Icons.music_note_rounded,
               color: isPlaying
                   ? const Color(0xFFFF4D8B)
-                  : const Color(0xFF8899AA),
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -204,7 +209,9 @@ class _FavoriteTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          color: isPlaying ? const Color(0xFFFF4D8B) : Colors.white,
+          color: isPlaying
+              ? const Color(0xFFFF4D8B)
+              : theme.colorScheme.onSurface,
           fontWeight: isPlaying ? FontWeight.bold : FontWeight.normal,
         ),
       ),
@@ -212,20 +219,25 @@ class _FavoriteTile extends StatelessWidget {
         '${song.artist} · ${song.album}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+        style: TextStyle(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             formatDuration(song.duration),
-            style: const TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.favorite, color: Color(0xFFFF4D8B)),
-            onPressed: () =>
-                favorites.toggleFavorite(userId, song),
+            onPressed: () => favorites.toggleFavorite(userId, song),
           ),
         ],
       ),
