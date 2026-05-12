@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
 import '../hooks/use_audio.dart';
 import '../providers/favorites_provider.dart';
@@ -55,111 +56,155 @@ void showQueueSheet(BuildContext context, AudioHookResult audio) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (ctx) {
-      final queue = audio.queue;
-      final current = audio.currentSong;
-      return DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.5,
-        maxChildSize: 0.9,
-        builder: (_, controller) => Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(2),
-              ),
+    builder: (ctx) => _QueueSheet(audio: audio),
+  );
+}
+
+class _QueueSheet extends StatefulWidget {
+  final AudioHookResult audio;
+  const _QueueSheet({required this.audio});
+
+  @override
+  State<_QueueSheet> createState() => _QueueSheetState();
+}
+
+class _QueueSheetState extends State<_QueueSheet> {
+  final ScrollController _listController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrent());
+  }
+
+  void _scrollToCurrent() {
+    final queue = widget.audio.queue;
+    final current = widget.audio.currentSong;
+    if (current == null || !_listController.hasClients) return;
+    final index = queue.indexWhere((s) => s.id == current.id);
+    if (index < 0) return;
+    const itemHeight = 72.0;
+    final target = (index * itemHeight).clamp(
+      0.0,
+      _listController.position.maxScrollExtent,
+    );
+    _listController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final audio = widget.audio;
+    final queue = audio.queue;
+    final current = audio.currentSong;
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.5,
+      maxChildSize: 0.9,
+      builder: (ctx, sheetController) => Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(2),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Cola de reproducción',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                controller: controller,
-                itemCount: queue.length,
-                itemBuilder: (_, i) {
-                  final song = queue[i];
-                  final isCurrentSong = song.id == current?.id;
-                  return ListTile(
-                    leading: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SongArtwork(
-                          songId: song.id,
-                          artworkPath: song.artworkPath,
-                          size: 48,
-                          borderRadius: 8,
-                          nullWidget: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Theme.of(ctx).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.music_note,
-                              color: Theme.of(
-                                ctx,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Cola de reproducción',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              controller: _listController,
+              itemCount: queue.length,
+              itemBuilder: (_, i) {
+                final song = queue[i];
+                final isCurrentSong = song.id == current?.id;
+                return ListTile(
+                  leading: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SongArtwork(
+                        songId: song.id,
+                        artworkPath: song.artworkPath,
+                        size: 48,
+                        borderRadius: 8,
+                        nullWidget: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Theme.of(ctx).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.music_note,
+                            color: Theme.of(ctx).colorScheme.onPrimaryContainer,
                           ),
                         ),
-                        if (isCurrentSong)
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.equalizer,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                      ],
-                    ),
-                    title: Text(
-                      song.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: isCurrentSong
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isCurrentSong
-                            ? Theme.of(ctx).colorScheme.primary
-                            : null,
                       ),
+                      if (isCurrentSong)
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.equalizer,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                    ],
+                  ),
+                  title: Text(
+                    song.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: isCurrentSong
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isCurrentSong
+                          ? Theme.of(ctx).colorScheme.primary
+                          : null,
                     ),
-                    subtitle: Text(
-                      song.artist,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    tileColor: isCurrentSong
-                        ? Theme.of(ctx).colorScheme.primary.withOpacity(0.12)
-                        : null,
-                    onTap: () {
-                      audio.play(song, q: queue, index: i);
-                      Navigator.pop(ctx);
-                    },
-                  );
-                },
-              ),
+                  ),
+                  subtitle: Text(
+                    song.artist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  tileColor: isCurrentSong
+                      ? Theme.of(ctx).colorScheme.primary.withOpacity(0.12)
+                      : null,
+                  onTap: () {
+                    audio.play(song, q: queue, index: i);
+                    Navigator.pop(ctx);
+                  },
+                );
+              },
             ),
-          ],
-        ),
-      );
-    },
-  );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class PlayerPage extends HookWidget {
@@ -175,6 +220,12 @@ class PlayerPage extends HookWidget {
     final lyrics = useState<String>('');
     final syncedLines = useState<List<_LrcLine>>([]);
     final songIdForLyrics = useRef<String>('');
+
+    // Cambiar color automáticamente cuando cambia la canción
+    useEffect(() {
+      accentColor.value = _randomPastel();
+      return null;
+    }, [audio.currentSong?.id]);
 
     return Scaffold(
       appBar: AppBar(
@@ -422,21 +473,29 @@ class PlayerPage extends HookWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // Botón de tema pastel
+                          // Botón de compartir canción
                           Container(
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primary,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: IconButton(
-                              tooltip: 'Cambiar color',
+                              tooltip: 'Compartir canción',
                               icon: Icon(
-                                Icons.palette,
+                                Icons.share,
                                 color: theme.colorScheme.onPrimary,
                               ),
-                              onPressed: () {
-                                accentColor.value = _randomPastel();
-                              },
+                              onPressed: audio.currentSong == null
+                                  ? null
+                                  : () {
+                                      final song = audio.currentSong!;
+                                      Share.shareXFiles(
+                                        [XFile(song.filePath)],
+                                        subject: song.title,
+                                        text:
+                                            '🎵 "${song.title}" de ${song.artist}',
+                                      );
+                                    },
                             ),
                           ),
                           IconButton(

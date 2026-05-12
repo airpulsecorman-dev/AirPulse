@@ -328,6 +328,50 @@ class _SongsListState extends State<_SongsList> {
   final Set<String> _selected = {};
   bool get _isSelecting => _selected.isNotEmpty;
 
+  final ScrollController _scrollController = ScrollController();
+  String? _lastScrolledSongId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentSong());
+  }
+
+  @override
+  void didUpdateWidget(_SongsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentSong?.id != _lastScrolledSongId) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToCurrentSong(),
+      );
+    }
+  }
+
+  void _scrollToCurrentSong() {
+    final currentSong = widget.currentSong;
+    if (currentSong == null) return;
+    final index = widget.songs.indexWhere((s) => s.id == currentSong.id);
+    if (index < 0) return;
+    if (!_scrollController.hasClients) return;
+    _lastScrolledSongId = currentSong.id;
+    final itemHeight = 72.0;
+    final targetOffset = (index * itemHeight).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+    _scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _toggleSelection(String id) {
     setState(() {
       if (_selected.contains(id)) {
@@ -454,6 +498,7 @@ class _SongsListState extends State<_SongsList> {
             child: RefreshIndicator(
               onRefresh: widget.onRefresh,
               child: ListView.builder(
+                controller: _scrollController,
                 itemCount: songs.length,
                 itemBuilder: (_, i) {
                   final song = songs[i];
