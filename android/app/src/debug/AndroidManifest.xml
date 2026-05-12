@@ -18,6 +18,10 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <!-- Wake Lock necesario para audio_service -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Nearby Connections requiere INTERNET internamente -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- WiFi Direct para Nearby Connections -->
+    <uses-feature android:name="android.hardware.wifi.direct" android:required="false"/>
     <!-- Cámara (escaneo QR) -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
@@ -29,10 +33,19 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <!-- Notificaciones en Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-        <!-- Reproducción en background / pantalla de bloqueo / notificación -->
+    <!-- Reproducción en background / pantalla de bloqueo / notificación -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <!-- Bluetooth (controles de auriculares) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+<!-- Nearby Connections: Bluetooth + WiFi Direct -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:maxSdkVersion="28" android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_SCAN"/>
+    <uses-permission android:minSdkVersion="32" android:name="android.permission.NEARBY_WIFI_DEVICES"/>
 </manifest>

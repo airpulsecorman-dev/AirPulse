@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
@@ -34,11 +36,41 @@ class SongTile extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.share),
                 title: const Text('Compartir canción'),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  final text =
-                      '🎵 Escucha "${song.title}" de ${song.artist} en AirPulse!';
-                  Share.share(text);
+                  try {
+                    // Copiar al directorio temporal para que FileProvider pueda exponerlo
+                    final cacheDir = await getTemporaryDirectory();
+                    final safeTitle = song.title.replaceAll(
+                      RegExp(r'[/\\:*?"<>|]'),
+                      '_',
+                    );
+                    final safeArtist = song.artist.replaceAll(
+                      RegExp(r'[/\\:*?"<>|]'),
+                      '_',
+                    );
+                    final ext = song.filePath.contains('.')
+                        ? song.filePath.split('.').last
+                        : 'mp3';
+                    final tmpFile = File(
+                      '${cacheDir.path}/$safeTitle - $safeArtist.$ext',
+                    );
+                    await File(song.filePath).copy(tmpFile.path);
+                    await Share.shareXFiles(
+                      [XFile(tmpFile.path, mimeType: 'audio/mpeg')],
+                      text:
+                          '🎵 "${song.title}"\n🎤 ${song.artist}\n💿 ${song.album}\n\nEscúchala en AirPulse!',
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error al compartir: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               if (onMoreTap != null)
@@ -48,7 +80,8 @@ class SongTile extends StatelessWidget {
                     color: isFavorite ? const Color(0xFFFF4D8B) : null,
                   ),
                   title: Text(
-                      isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'),
+                    isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos',
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     onMoreTap!();
@@ -77,8 +110,10 @@ class SongTile extends StatelessWidget {
             backgroundColor: theme.colorScheme.primaryContainer,
             child: isPlaying
                 ? Icon(Icons.equalizer, color: theme.colorScheme.primary)
-                : Icon(Icons.music_note,
-                    color: theme.colorScheme.onPrimaryContainer),
+                : Icon(
+                    Icons.music_note,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
           ),
         ),
       ),
@@ -99,10 +134,7 @@ class SongTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            formatDuration(song.duration),
-            style: theme.textTheme.bodySmall,
-          ),
+          Text(formatDuration(song.duration), style: theme.textTheme.bodySmall),
           IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: () => _showOptions(context),
@@ -110,10 +142,7 @@ class SongTile extends StatelessWidget {
         ],
       ),
       onTap: onTap,
-      tileColor: isPlaying
-          ? theme.colorScheme.primary.withOpacity(0.12)
-          : null,
+      tileColor: isPlaying ? theme.colorScheme.primary.withOpacity(0.12) : null,
     );
   }
 }
-

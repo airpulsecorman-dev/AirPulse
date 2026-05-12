@@ -13,6 +13,7 @@ import '../providers/auth_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../../domain/entities/song.dart';
 import 'album_detail_page.dart';
+import '../widgets/share_options_dialog.dart';
 import 'artist_detail_page.dart';
 import 'terms_page.dart';
 import 'privacy_policy_page.dart';
@@ -31,6 +32,8 @@ class LibraryPage extends HookWidget {
   Widget build(BuildContext context) {
     final library = useLibrary(context);
     final audio = useAudio(context);
+    final favorites = context.watch<FavoritesProvider>();
+    final auth = context.watch<AuthProvider>();
     final theme = Theme.of(context);
     final tabController = useTabController(initialLength: 3);
     final searchController = useTextEditingController();
@@ -92,9 +95,9 @@ class LibraryPage extends HookWidget {
             onPressed: () => Navigator.pushNamed(context, '/favorites'),
           ),
           IconButton(
-            icon: const Icon(Icons.wifi_tethering),
-            tooltip: 'Servidor local',
-            onPressed: () => Navigator.pushNamed(context, '/server'),
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Compartir',
+            onPressed: () => showShareOptionsDialog(context),
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle_outlined),
@@ -280,6 +283,17 @@ class LibraryPage extends HookWidget {
                 onAccentColorChanged: (newColor) {
                   accentColor.value = newColor;
                 },
+                isFavorite:
+                    audio.currentSong != null &&
+                    favorites.isFavorite(audio.currentSong!.id),
+                onToggleFavorite: audio.currentSong == null
+                    ? null
+                    : () {
+                        final userId = auth.currentUser?.id;
+                        if (userId != null) {
+                          favorites.toggleFavorite(userId, audio.currentSong!);
+                        }
+                      },
               ),
             )
           : null,

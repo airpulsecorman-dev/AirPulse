@@ -80,6 +80,9 @@ dependencies:
   network_info_plus: ^6.0.1
   http: ^1.2.2
 
+  # Nearby (Bluetooth + WiFi Direct)
+  nearby_connections: ^4.1.1
+
   # Utils
   uuid: ^4.5.1
   intl: ^0.19.0

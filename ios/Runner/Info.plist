@@ -62,6 +62,18 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<!-- Nearby (Multipeer Connectivity) -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>AirPulse usa la red local para compartir canciones con dispositivos cercanos por WiFi Direct.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_p2p._tcp</string>
+		<string>_nearby._tcp</string>
+	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>AirPulse usa Bluetooth para descubrir y conectarse con dispositivos cercanos y compartir música.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>AirPulse usa Bluetooth para compartir canciones con otros dispositivos.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

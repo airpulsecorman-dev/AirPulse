@@ -26,6 +26,8 @@ class PlayerBar extends StatelessWidget {
   final ValueChanged<RepeatMode> onRepeatMode;
   final VoidCallback onShuffle;
   final ValueChanged<Color>? onAccentColorChanged;
+  final bool isFavorite;
+  final VoidCallback? onToggleFavorite;
 
   const PlayerBar({
     super.key,
@@ -43,6 +45,8 @@ class PlayerBar extends StatelessWidget {
     required this.onRepeatMode,
     required this.onShuffle,
     this.onAccentColorChanged,
+    this.isFavorite = false,
+    this.onToggleFavorite,
   });
 
   @override
@@ -65,6 +69,8 @@ class PlayerBar extends StatelessWidget {
             onSeek: onSeek,
             onRepeatMode: onRepeatMode,
             onShuffle: onShuffle,
+            isFavorite: isFavorite,
+            onToggleFavorite: onToggleFavorite,
           );
         },
       );
@@ -83,6 +89,8 @@ class PlayerBar extends StatelessWidget {
       onRepeatMode: onRepeatMode,
       onShuffle: onShuffle,
       onAccentColorChanged: onAccentColorChanged,
+      isFavorite: isFavorite,
+      onToggleFavorite: onToggleFavorite,
     );
   }
 }
@@ -101,6 +109,8 @@ class _PlayerBarContent extends StatefulWidget {
   final ValueChanged<RepeatMode> onRepeatMode;
   final VoidCallback onShuffle;
   final ValueChanged<Color>? onAccentColorChanged;
+  final bool isFavorite;
+  final VoidCallback? onToggleFavorite;
 
   const _PlayerBarContent({
     required this.currentSong,
@@ -116,6 +126,8 @@ class _PlayerBarContent extends StatefulWidget {
     required this.onRepeatMode,
     required this.onShuffle,
     this.onAccentColorChanged,
+    this.isFavorite = false,
+    this.onToggleFavorite,
   });
 
   @override
@@ -215,26 +227,18 @@ class _PlayerBarContentState extends State<_PlayerBarContent> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Botón de tema pastel
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
+                // Botón de favoritos
+                IconButton(
+                  tooltip: widget.isFavorite
+                      ? 'Quitar de favoritos'
+                      : 'Añadir a favoritos',
+                  icon: Icon(
+                    widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: widget.isFavorite
+                        ? const Color(0xFFFF4D8B)
+                        : theme.colorScheme.onSurface,
                   ),
-                  child: IconButton(
-                    tooltip: 'Cambiar color',
-                    icon: Icon(
-                      Icons.palette,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                    onPressed: () {
-                      final newColor = _randomPastel();
-                      setState(() {
-                        accentColor = newColor;
-                      });
-                      widget.onAccentColorChanged?.call(newColor);
-                    },
-                  ),
+                  onPressed: widget.onToggleFavorite,
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_previous),

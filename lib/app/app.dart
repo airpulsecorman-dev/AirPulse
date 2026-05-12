@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:provider/provider.dart';
 import '../presentation/providers/audio_provider.dart';
 import '../presentation/providers/library_provider.dart';
@@ -17,6 +18,7 @@ import '../presentation/pages/profile_page.dart';
 import '../presentation/pages/edit_profile_page.dart';
 import '../presentation/pages/change_password_page.dart';
 import '../presentation/pages/settings_page.dart';
+import '../presentation/pages/nearby_share_page.dart';
 import '../services/audio_service.dart';
 import '../services/library_service.dart';
 import '../services/local_server_service.dart';
@@ -37,12 +39,30 @@ class AirPulseApp extends StatefulWidget {
 class _AirPulseAppState extends State<AirPulseApp> {
   final _settings = SettingsProvider();
   late final AuthProvider _authProvider;
+  late final FavoritesProvider _favoritesProvider;
 
   @override
   void initState() {
     super.initState();
     _settings.load();
+    _favoritesProvider = FavoritesProvider(FavoritesRepositoryImpl());
     _authProvider = AuthProvider(FirebaseAuthRepositoryImpl());
+    _authProvider.addListener(_onAuthChanged);
+  }
+
+  void _onAuthChanged() {
+    final userId = _authProvider.currentUser?.id;
+    if (_authProvider.status == AuthStatus.authenticated && userId != null) {
+      _favoritesProvider.loadFavorites(userId);
+    } else if (_authProvider.status == AuthStatus.unauthenticated) {
+      _favoritesProvider.clear();
+    }
+  }
+
+  @override
+  void dispose() {
+    _authProvider.removeListener(_onAuthChanged);
+    super.dispose();
   }
 
   @override
@@ -51,8 +71,8 @@ class _AirPulseAppState extends State<AirPulseApp> {
       providers: [
         ChangeNotifierProvider<SettingsProvider>.value(value: _settings),
         ChangeNotifierProvider<AuthProvider>.value(value: _authProvider),
-        ChangeNotifierProvider(
-          create: (_) => FavoritesProvider(FavoritesRepositoryImpl()),
+        ChangeNotifierProvider<FavoritesProvider>.value(
+          value: _favoritesProvider,
         ),
         ChangeNotifierProvider(
           create: (_) => AudioProvider(sl<AudioService>()),
@@ -61,7 +81,11 @@ class _AirPulseAppState extends State<AirPulseApp> {
           create: (_) => LibraryProvider(sl<LibraryService>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => ServerProvider(sl<LocalServerService>(), sl<AudioService>(), sl<QRService>()),
+          create: (_) => ServerProvider(
+            sl<LocalServerService>(),
+            sl<AudioService>(),
+            sl<QRService>(),
+          ),
         ),
       ],
       child: Consumer<SettingsProvider>(
@@ -83,24 +107,25 @@ class _AirPulseAppState extends State<AirPulseApp> {
             useMaterial3: true,
           ),
           themeMode: settings.themeMode,
-        home: const _AuthGate(),
-        onGenerateRoute: (settings) {
-          if (settings.name == '/') {
-            return MaterialPageRoute(builder: (_) => const LibraryPage());
-          }
-          return null;
-        },
-        routes: {
-          '/player': (_) => const PlayerPage(),
-          '/server': (_) => const ServerPage(),
-          '/login': (_) => const LoginPage(),
-          '/register': (_) => const RegisterPage(),
-          '/favorites': (_) => const FavoritesPage(),
-          '/profile': (_) => const ProfilePage(),
-          '/edit-profile': (_) => const EditProfilePage(),
-          '/change-password': (_) => const ChangePasswordPage(),
-          '/settings': (_) => const SettingsPage(),
-        },
+          home: const _AuthGate(),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute(builder: (_) => const LibraryPage());
+            }
+            return null;
+          },
+          routes: {
+            '/player': (_) => const PlayerPage(),
+            '/server': (_) => const ServerPage(),
+            '/login': (_) => const LoginPage(),
+            '/register': (_) => const RegisterPage(),
+            '/favorites': (_) => const FavoritesPage(),
+            '/profile': (_) => const ProfilePage(),
+            '/edit-profile': (_) => const EditProfilePage(),
+            '/change-password': (_) => const ChangePasswordPage(),
+            '/settings': (_) => const SettingsPage(),
+            '/nearby-share': (_) => const NearbySharePage(),
+          },
         ),
       ),
     );
@@ -128,10 +153,14 @@ class _AuthGateState extends State<_AuthGate> {
     final sessionId = auth.qrSessionId;
 
     // Solo escuchar en plataformas web/desktop y cuando hay un sessionId de QR
-    if ((kIsWeb || _isDesktop()) && sessionId != null && sessionId != _watchedSessionId) {
+    if ((kIsWeb || _isDesktop()) &&
+        sessionId != null &&
+        sessionId != _watchedSessionId) {
       _disconnectSub?.cancel();
       _watchedSessionId = sessionId;
-      _disconnectSub = _qrService.watchDisconnectCommand(sessionId).listen((shouldDisconnect) async {
+      _disconnectSub = _qrService.watchDisconnectCommand(sessionId).listen((
+        shouldDisconnect,
+      ) async {
         if (!shouldDisconnect || !mounted) return;
         // Limpiar el nodo antes de hacer logout
         await _qrService.clearDisconnectCommand(sessionId);
@@ -140,7 +169,9 @@ class _AuthGateState extends State<_AuthGate> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Tu sesión fue revocada desde el dispositivo móvil.'),
+              content: Text(
+                'Tu sesión fue revocada desde el dispositivo móvil.',
+              ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 5),
             ),
@@ -180,7 +211,7 @@ class _AuthGateState extends State<_AuthGate> {
       return const LibraryPage();
     }
 
-    if (!kIsWeb && auth.status == AuthStatus.unknown) {
+    if (auth.status == AuthStatus.unknown) {
       return const Scaffold(
         backgroundColor: Color(0xFF0D1B2A),
         body: Center(

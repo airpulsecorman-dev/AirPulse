@@ -43,12 +43,41 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
-    final fbUser = _auth.currentUser;
-    if (fbUser == null) return null;
+    // Esperar a que Firebase restaure el estado de autenticación persistido.
+    // currentUser puede ser null en el frame inicial aunque haya sesión activa.
+    // Con un timeout de 5 s por si no hay red (Firebase quedaría colgado).
+    fb.User? fbUser;
     try {
-      return await _fetchUserModel(fbUser.uid);
+      fbUser = await _auth.authStateChanges().first.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => _auth.currentUser,
+      );
     } catch (_) {
-      return null;
+      fbUser = _auth.currentUser;
+    }
+    if (fbUser == null) return null;
+
+    try {
+      return await _fetchUserModel(
+        fbUser.uid,
+      ).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Sin red: devolver usuario mínimo construido desde los datos locales de Auth.
+      return UserModel(
+        id: fbUser.uid,
+        username:
+            fbUser.displayName ?? fbUser.email?.split('@').first ?? fbUser.uid,
+        firstName: '',
+        lastName: '',
+        email: fbUser.email?.toLowerCase() ?? '',
+        createdAt: DateTime.now(),
+        birthDate: DateTime(2000),
+        subscriptionType: SubscriptionType.free,
+        isMinor: false,
+        acceptedTerms: true,
+        acceptedPrivacy: true,
+        acceptedIntellectual: true,
+      );
     }
   }
 
