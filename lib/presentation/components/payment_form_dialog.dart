@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:airpulse/core/utils/Colors.dart';
 import 'package:airpulse/domain/entities/subscription_plan.dart';
 import 'package:airpulse/services/payment_service.dart';
 
@@ -63,7 +64,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.backgroundPricing,
       contentPadding: EdgeInsets.zero,
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.85,
@@ -91,32 +92,32 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ElevatedButton(
             onPressed: _selectedMethod == PaymentMethod.paypal
                 ? () => _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    )
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  )
                 : () => _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    ),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amber,
+              backgroundColor: AppColors.warningAmber,
             ),
             child: const Text(
               'Continuar',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: AppColors.black),
             ),
           )
         else
           ElevatedButton(
             onPressed: _isProcessing ? null : _processPayment,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isProcessing ? Colors.grey : Colors.amber,
+              backgroundColor: _isProcessing
+                  ? AppColors.grey
+                  : AppColors.warningAmber,
             ),
             child: Text(
               _isProcessing ? 'Procesando...' : 'Pagar',
-              style: TextStyle(
-                color: Colors.black,
-              ),
+              style: TextStyle(color: AppColors.black),
             ),
           ),
       ],
@@ -132,16 +133,16 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         children: [
           Text(
             'Método de Pago',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: 8),
           Text(
             'Total: \$${widget.plan.price.toStringAsFixed(2)}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[400],
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppColors.grey400),
           ),
           const SizedBox(height: 24),
           _buildPaymentMethodTile(
@@ -179,25 +180,31 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: _selectedMethod == method ? Colors.amber : Colors.grey[700]!,
+            color: _selectedMethod == method
+                ? AppColors.warningAmber
+                : AppColors.grey700,
             width: _selectedMethod == method ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
           color: _selectedMethod == method
-              ? Colors.amber.withOpacity(0.1)
-              : Colors.transparent,
+              ? AppColors.warningAmber.withOpacity(0.1)
+              : AppColors.transparent,
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: _selectedMethod == method ? Colors.amber : Colors.grey[400],
+              color: _selectedMethod == method
+                  ? AppColors.warningAmber
+                  : AppColors.grey400,
             ),
             const SizedBox(width: 16),
             Text(
               title,
               style: TextStyle(
-                color: _selectedMethod == method ? Colors.amber : Colors.grey[300],
+                color: _selectedMethod == method
+                    ? AppColors.warningAmber
+                    : AppColors.grey300,
                 fontWeight: _selectedMethod == method
                     ? FontWeight.bold
                     : FontWeight.normal,
@@ -205,10 +212,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
             ),
             const Spacer(),
             if (_selectedMethod == method)
-              const Icon(
-                Icons.check_circle,
-                color: Colors.amber,
-              ),
+              const Icon(Icons.check_circle, color: AppColors.warningAmber),
           ],
         ),
       ),
@@ -226,9 +230,9 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
               _selectedMethod == PaymentMethod.creditCard
                   ? 'Datos de Tarjeta de Crédito'
                   : 'Datos de Tarjeta de Débito',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: AppColors.white),
             ),
             const SizedBox(height: 24),
             _buildTextField(
@@ -284,9 +288,9 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         children: [
           Text(
             'Datos de PayPal',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: 24),
           _buildTextField(
@@ -298,14 +302,14 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: AppColors.info.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               'Serás redirigido a PayPal para completar la transacción de forma segura.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blue[300],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.blue300),
             ),
           ),
         ],
@@ -324,7 +328,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[300],
+            color: AppColors.blue300,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -332,21 +336,21 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.white),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[600]),
+            hintStyle: TextStyle(color: AppColors.grey600),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[700]!),
+              borderSide: BorderSide(color: AppColors.grey700),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[700]!),
+              borderSide: BorderSide(color: AppColors.grey700),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.amber),
+              borderSide: const BorderSide(color: AppColors.warningAmber),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -403,7 +407,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result.message),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.successAlt,
             ),
           );
           Navigator.pop(context);
@@ -411,7 +415,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${result.message}'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -421,7 +425,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al procesar pago: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

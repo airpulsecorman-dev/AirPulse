@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/auth_provider.dart';
@@ -158,8 +159,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
     final favoritesProvider = context.watch<FavoritesProvider>();
     final isFavorite = favoritesProvider.isFavorite(widget.song.id);
 
-    final effectiveFavoriteColor =
-        widget.favoriteColor ?? const Color(0xFFFF4D8B);
+    final effectiveFavoriteColor = widget.favoriteColor ?? AppColors.favorite;
 
     final effectiveNormalColor =
         widget.normalColor ??

@@ -18,6 +18,7 @@ import 'artist_detail_page.dart';
 import 'terms_page.dart';
 import 'privacy_policy_page.dart';
 import 'intellectual_property_page.dart';
+import '../../core/utils/Colors.dart';
 
 Color _randomPastel() {
   final rng = Random();
@@ -90,7 +91,7 @@ class LibraryPage extends HookWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: Color(0xFFFF4D8B)),
+            icon: const Icon(Icons.favorite_border, color: AppColors.primary),
             tooltip: 'Favoritos',
             onPressed: () => Navigator.pushNamed(context, '/favorites'),
           ),
@@ -212,11 +213,11 @@ class LibraryPage extends HookWidget {
                   value: 'logout',
                   child: Row(
                     children: [
-                      Icon(Icons.logout, size: 18, color: Colors.red),
+                      Icon(Icons.logout, size: 18, color: AppColors.error),
                       SizedBox(width: 8),
                       Text(
                         'Cerrar sesión',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: AppColors.error),
                       ),
                     ],
                   ),
@@ -397,7 +398,7 @@ class _SongsListState extends State<_SongsList> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             onPressed: () {
               Navigator.pop(context);
               widget.onDeleteSongs(_selected.toList());
@@ -425,17 +426,17 @@ class _SongsListState extends State<_SongsList> {
                 const Icon(
                   Icons.library_music_outlined,
                   size: 72,
-                  color: Color(0xFF8899AA),
+                  color: AppColors.textTertiary,
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'No hay canciones en la biblioteca',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF8899AA)),
+                  style: TextStyle(fontSize: 16, color: AppColors.textTertiary),
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Agrega archivos de audio desde tu dispositivo',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF566D80)),
+                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
@@ -443,8 +444,8 @@ class _SongsListState extends State<_SongsList> {
                   icon: const Icon(Icons.add),
                   label: const Text('Agregar canciones'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF4D8B),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -485,7 +486,9 @@ class _SongsListState extends State<_SongsList> {
                     ),
                     const Spacer(),
                     TextButton.icon(
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                      ),
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Eliminar'),
                       onPressed: () => _confirmDelete(context),
@@ -513,7 +516,7 @@ class _SongsListState extends State<_SongsList> {
                           ? Theme.of(
                               context,
                             ).colorScheme.primary.withValues(alpha: 0.15)
-                          : Colors.transparent,
+                          : AppColors.transparent,
                       child: Row(
                         children: [
                           if (_isSelecting)
@@ -769,7 +772,7 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
           const SizedBox(height: 16),
           Text(error, textAlign: TextAlign.center),
           const SizedBox(height: 16),

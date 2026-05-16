@@ -4,6 +4,7 @@ import '../providers/settings_provider.dart';
 import 'intellectual_property_page.dart';
 import 'privacy_policy_page.dart';
 import 'terms_page.dart';
+import '../../core/utils/Colors.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -181,12 +182,15 @@ class SettingsPage extends StatelessWidget {
                 final label = mb > 0
                     ? 'Caché limpiado (${mb.toStringAsFixed(1)} MB liberados)'
                     : 'Caché limpiado correctamente';
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(label)),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(label)));
               }
             },
-            child: const Text('Limpiar', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Limpiar',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

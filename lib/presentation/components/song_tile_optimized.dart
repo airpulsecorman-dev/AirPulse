@@ -18,6 +18,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
 import 'song_artwork_optimized.dart';
@@ -97,7 +98,7 @@ class _SongTileOptimizedState extends State<SongTileOptimized>
             ListTile(
               leading: Icon(
                 widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: widget.isFavorite ? const Color(0xFFFF4D8B) : null,
+                color: widget.isFavorite ? AppColors.favorite : null,
               ),
               title: Text(
                 widget.isFavorite
@@ -142,7 +143,7 @@ class _SongTileOptimizedState extends State<SongTileOptimized>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al compartir: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

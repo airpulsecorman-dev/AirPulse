@@ -13,6 +13,7 @@ import '../providers/library_provider.dart';
 import '../providers/auth_provider.dart';
 import '../components/qr_widget.dart';
 import '../../services/qr_session_service.dart';
+import '../../core/utils/Colors.dart';
 
 class ServerPage extends HookWidget {
   const ServerPage({super.key});
@@ -302,7 +303,9 @@ class _QRScannerPageState extends State<_QRScannerPage> {
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.errorAccent,
+            ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Desvincular'),
           ),
@@ -430,7 +433,7 @@ class _QRLinkPageState extends State<_QRLinkPage> {
                     'Túnel ngrok no disponible: ${serverProvider.ngrokError}\n'
                     'La web no podrá conectar al servidor.',
                   ),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: AppColors.warning,
                   duration: const Duration(seconds: 6),
                 ),
               );
@@ -512,7 +515,7 @@ class _QRLinkPageState extends State<_QRLinkPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+              const CircularProgressIndicator(color: AppColors.primary),
               const SizedBox(height: 16),
               Text(
                 _connectedUrl?.startsWith('web_auth:') == true
@@ -619,7 +622,11 @@ class _ConnectedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle, size: 80, color: Colors.green),
+            const Icon(
+              Icons.check_circle,
+              size: 80,
+              color: AppColors.successAlt,
+            ),
             const SizedBox(height: 24),
             Text(
               '¡Servidor iniciado!',
@@ -667,7 +674,7 @@ class _ErrorConnectView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             const Text(
               'Error al conectar',
@@ -677,7 +684,7 @@ class _ErrorConnectView extends StatelessWidget {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: const TextStyle(color: AppColors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -740,12 +747,12 @@ class _WebAuthApprovedView extends StatelessWidget {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                color: AppColors.successAlt.withValues(alpha: 0.15),
               ),
               child: const Icon(
                 Icons.check_circle_outline,
                 size: 48,
-                color: Color(0xFF4CAF50),
+                color: AppColors.successAlt,
               ),
             ),
             const SizedBox(height: 20),
@@ -754,20 +761,20 @@ class _WebAuthApprovedView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
             const SizedBox(height: 10),
             const Text(
               'La web ya está iniciando sesión con tu cuenta.\nPuedes cerrar este diálogo.',
-              style: TextStyle(color: Color(0xFF8899AA)),
+              style: TextStyle(color: AppColors.textTertiary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFFF4D8B)),
-                foregroundColor: const Color(0xFFFF4D8B),
+                side: const BorderSide(color: AppColors.primary),
+                foregroundColor: AppColors.primary,
               ),
               icon: const Icon(Icons.qr_code_scanner),
               label: const Text('Escanear otro QR'),
@@ -819,7 +826,7 @@ class _DeviceTile extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.link_off, color: Colors.redAccent),
+          icon: const Icon(Icons.link_off, color: AppColors.error),
           tooltip: 'Desvincular',
           onPressed: onUnlink,
         ),

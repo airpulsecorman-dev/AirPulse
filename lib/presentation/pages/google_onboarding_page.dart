@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import 'terms_page.dart';
 import 'privacy_policy_page.dart';
 import 'intellectual_property_page.dart';
+import '../../core/utils/Colors.dart';
 
 class GoogleOnboardingPage extends StatefulWidget {
   const GoogleOnboardingPage({super.key});
@@ -40,10 +41,10 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFFF4D8B),
-            onPrimary: Colors.white,
-            surface: Color(0xFF1A2D42),
-            onSurface: Colors.white,
+            primary: AppColors.primary,
+            onPrimary: AppColors.white,
+            surface: AppColors.surface,
+            onSurface: AppColors.white,
           ),
         ),
         child: child!,
@@ -54,7 +55,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: const Color(0xFFFF4D8B)),
+      SnackBar(content: Text(msg), backgroundColor: AppColors.primary),
     );
   }
 
@@ -91,7 +92,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
     final user = auth.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: AppColors.backgroundDark,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -110,7 +111,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.white,
                             letterSpacing: 2,
                           ),
                         ),
@@ -121,14 +122,14 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             user.email,
                             style: const TextStyle(
-                              color: Color(0xFF8899AA),
+                              color: AppColors.textTertiary,
                               fontSize: 13,
                             ),
                           ),
@@ -138,7 +139,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                           'Para continuar, completa los siguientes datos.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(0xFF8899AA),
+                            color: AppColors.textTertiary,
                             fontSize: 14,
                           ),
                         ),
@@ -151,7 +152,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                   const Text(
                     'Fecha de nacimiento',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -166,14 +167,14 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A2D42),
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.cake_outlined,
-                            color: Color(0xFF8899AA),
+                            color: AppColors.textTertiary,
                           ),
                           const SizedBox(width: 12),
                           Text(
@@ -182,8 +183,8 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                                 : '${_birthDate!.day.toString().padLeft(2, '0')} / ${_birthDate!.month.toString().padLeft(2, '0')} / ${_birthDate!.year}',
                             style: TextStyle(
                               color: _birthDate == null
-                                  ? const Color(0xFF8899AA)
-                                  : Colors.white,
+                                  ? AppColors.textTertiary
+                                  : AppColors.white,
                               fontSize: 16,
                             ),
                           ),
@@ -198,7 +199,9 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                         Icon(
                           _isMinor ? Icons.child_care : Icons.verified_user,
                           size: 16,
-                          color: _isMinor ? Colors.amber : Colors.greenAccent,
+                          color: _isMinor
+                              ? AppColors.warningAmber
+                              : AppColors.successAccent,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
@@ -208,8 +211,8 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                                 : 'Mayor de edad — puedes elegir tu plan',
                             style: TextStyle(
                               color: _isMinor
-                                  ? Colors.amber
-                                  : Colors.greenAccent,
+                                  ? AppColors.warningAmber
+                                  : AppColors.successAccent,
                               fontSize: 12,
                             ),
                           ),
@@ -266,8 +269,8 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF4D8B),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -279,7 +282,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             )
                           : const Text(
@@ -303,7 +306,7 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
                       },
                       child: const Text(
                         'Cancelar y cerrar sesión',
-                        style: TextStyle(color: Color(0xFF8899AA)),
+                        style: TextStyle(color: AppColors.textTertiary),
                       ),
                     ),
                   ),
@@ -332,21 +335,24 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
           child: Checkbox(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFFFF4D8B),
-            side: const BorderSide(color: Color(0xFF334455)),
+            activeColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.border),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+              style: const TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 13,
+              ),
               children: [
                 TextSpan(text: label),
                 TextSpan(
                   text: linkLabel,
                   style: const TextStyle(
-                    color: Color(0xFFFF4D8B),
+                    color: AppColors.primary,
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()..onTap = onLinkTap,

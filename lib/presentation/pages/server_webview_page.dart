@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../core/utils/Colors.dart';
 
 /// Muestra la URL del servidor local (http://IP:8765) embebida como WebView.
 ///
@@ -96,8 +97,7 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isHttpFromHttps =
-        url.startsWith('http://') &&
-        Uri.base.scheme == 'https';
+        url.startsWith('http://') && Uri.base.scheme == 'https';
 
     return Center(
       child: Padding(
@@ -105,7 +105,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off, size: 56, color: Colors.redAccent),
+            const Icon(Icons.wifi_off, size: 56, color: AppColors.errorAccent),
             const SizedBox(height: 16),
             Text(
               isHttpFromHttps
@@ -118,11 +118,11 @@ class _ErrorView extends StatelessWidget {
             Text(
               isHttpFromHttps
                   ? 'Los navegadores bloquean contenido HTTP dentro de páginas HTTPS.\n'
-                    'Abre el servidor directamente en una nueva pestaña.'
+                        'Abre el servidor directamente en una nueva pestaña.'
                   : 'Verifica que el servidor esté activo en:\n$url',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.grey),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

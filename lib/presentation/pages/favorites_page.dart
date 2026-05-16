@@ -9,6 +9,7 @@ import '../components/player_bar.dart';
 import '../components/favorite_button.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
+import '../../core/utils/Colors.dart';
 
 class FavoritesPage extends HookWidget {
   const FavoritesPage({super.key});
@@ -79,7 +80,7 @@ class FavoritesPage extends HookWidget {
       ),
       body: favorites.isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
           : favorites.favorites.isEmpty
           ? _buildEmptyState(context, theme)
@@ -145,7 +146,7 @@ Widget _buildEmptyState(BuildContext context, ThemeData theme) {
             color: theme.colorScheme.surfaceContainerHighest,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
                 blurRadius: 20,
               ),
             ],
@@ -153,7 +154,7 @@ Widget _buildEmptyState(BuildContext context, ThemeData theme) {
           child: const Icon(
             Icons.favorite_border,
             size: 40,
-            color: Color(0xFFFF4D8B),
+            color: AppColors.primary,
           ),
         ),
         const SizedBox(height: 20),
@@ -218,7 +219,7 @@ class _FavoriteTile extends StatelessWidget {
             child: Icon(
               isPlaying ? Icons.equalizer_rounded : Icons.music_note_rounded,
               color: isPlaying
-                  ? const Color(0xFFFF4D8B)
+                  ? AppColors.primary
                   : theme.colorScheme.onSurfaceVariant,
             ),
           ),
@@ -229,9 +230,7 @@ class _FavoriteTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          color: isPlaying
-              ? const Color(0xFFFF4D8B)
-              : theme.colorScheme.onSurface,
+          color: isPlaying ? AppColors.primary : theme.colorScheme.onSurface,
           fontWeight: isPlaying ? FontWeight.bold : FontWeight.normal,
         ),
       ),

@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../../services/qr_session_service.dart';
 import 'google_onboarding_page.dart';
 import 'server_webview_page.dart';
+import '../../core/utils/Colors.dart';
 
 /// Abre [url] del servidor local en un WebView embebido.
 /// En web (browser) usa iframe — funciona si el esquema coincide (ambos http://).
@@ -75,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Error al iniciar sesión'),
-          backgroundColor: const Color(0xFFFF4D8B),
+          backgroundColor: AppColors.primary,
         ),
       );
     }
@@ -98,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Error con Google'),
-          backgroundColor: const Color(0xFFFF4D8B),
+          backgroundColor: AppColors.primary,
         ),
       );
     }
@@ -109,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
     final auth = context.read<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: AppColors.backgroundDark,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -162,10 +163,10 @@ class _LoginPageState extends State<LoginPage> {
           height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFF1A2D42),
+            color: AppColors.surface,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF4D8B).withValues(alpha: 0.4),
+                color: AppColors.primary.withValues(alpha: 0.4),
                 blurRadius: 24,
               ),
             ],
@@ -173,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
           child: const Icon(
             Icons.music_note_rounded,
             size: 48,
-            color: Color(0xFFFF4D8B),
+            color: AppColors.primary,
           ),
         ),
         const SizedBox(height: 24),
@@ -182,14 +183,14 @@ class _LoginPageState extends State<LoginPage> {
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.white,
             letterSpacing: 2,
           ),
         ),
         const SizedBox(height: 8),
         const Text(
           'Inicia sesión para continuar',
-          style: TextStyle(color: Color(0xFF8899AA), fontSize: 14),
+          style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
         ),
       ],
     );
@@ -205,18 +206,18 @@ class _LoginPageState extends State<LoginPage> {
           child: OutlinedButton.icon(
             onPressed: auth.isLoading ? null : _googleSignIn,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF334455)),
+              side: const BorderSide(color: AppColors.border),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.white,
             ),
             icon: Image.network(
               'https://www.google.com/favicon.ico',
               width: 20,
               height: 20,
               errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.login, color: Colors.white, size: 20),
+                  const Icon(Icons.login, color: AppColors.white, size: 20),
             ),
             label: const Text('Continuar con Google'),
           ),
@@ -224,15 +225,15 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 20),
         const Row(
           children: [
-            Expanded(child: Divider(color: Color(0xFF334455))),
+            Expanded(child: Divider(color: AppColors.border)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'o inicia sesión con correo',
-                style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
               ),
             ),
-            Expanded(child: Divider(color: Color(0xFF334455))),
+            Expanded(child: Divider(color: AppColors.border)),
           ],
         ),
         const SizedBox(height: 20),
@@ -262,7 +263,7 @@ class _LoginPageState extends State<LoginPage> {
                     _obscurePass
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: const Color(0xFF8899AA),
+                    color: AppColors.textTertiary,
                   ),
                   onPressed: () => setState(() => _obscurePass = !_obscurePass),
                 ),
@@ -278,8 +279,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: auth.isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF4D8B),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -291,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : const Text(
@@ -312,14 +313,14 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             const Text(
               '¿No tienes cuenta? ',
-              style: TextStyle(color: Color(0xFF8899AA)),
+              style: TextStyle(color: AppColors.textTertiary),
             ),
             GestureDetector(
               onTap: () => Navigator.of(context).pushNamed('/register'),
               child: const Text(
                 'Regístrate',
                 style: TextStyle(
-                  color: Color(0xFFFF4D8B),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -349,14 +350,14 @@ class _LoginPageState extends State<LoginPage> {
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: AppColors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF8899AA)),
-        prefixIcon: Icon(icon, color: const Color(0xFF8899AA)),
+        labelStyle: const TextStyle(color: AppColors.textTertiary),
+        prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFF1A2D42),
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -367,17 +368,17 @@ class _LoginPageState extends State<LoginPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF4D8B), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF4D8B)),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF4D8B), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        errorStyle: const TextStyle(color: Color(0xFFFF4D8B)),
+        errorStyle: const TextStyle(color: AppColors.primary),
       ),
     );
   }
@@ -474,22 +475,20 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D42),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.smartphone, color: Color(0xFFFF4D8B), size: 32),
+          const Icon(Icons.smartphone, color: AppColors.primary, size: 32),
           const SizedBox(height: 12),
           const Text(
             'Iniciar sesión con el móvil',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.white,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -498,7 +497,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
           const SizedBox(height: 6),
           const Text(
             'Abre AirPulse en tu teléfono y escanea el código.',
-            style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+            style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
@@ -506,7 +505,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
           if (_errorMsg != null)
             _StatusBox(
               icon: Icons.error_outline,
-              color: const Color(0xFFFF4D8B),
+              color: AppColors.primary,
               label: _errorMsg!,
               actionLabel: 'Reintentar',
               onAction: _refresh,
@@ -514,7 +513,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
           else if (_approved)
             const _StatusBox(
               icon: Icons.check_circle_outline,
-              color: Color(0xFF4CAF50),
+              color: AppColors.success,
               label: '¡Aprobado! Entrando…',
             )
           else
@@ -523,7 +522,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: _waiting
@@ -531,8 +530,8 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
                         data: _qrData,
                         version: QrVersions.auto,
                         size: 180,
-                        foregroundColor: const Color(0xFF0D1B2A),
-                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.backgroundDark,
+                        backgroundColor: AppColors.white,
                       )
                     : const SizedBox(
                         width: 180,
@@ -550,11 +549,14 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
                 const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, size: 8, color: Color(0xFF4CAF50)),
+                    Icon(Icons.circle, size: 8, color: AppColors.success),
                     SizedBox(width: 4),
                     Text(
                       'Esperando aprobación…',
-                      style: TextStyle(color: Color(0xFF8899AA), fontSize: 11),
+                      style: TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -563,7 +565,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
                   child: const Text(
                     'Actualizar QR',
                     style: TextStyle(
-                      color: Color(0xFFFF4D8B),
+                      color: AppColors.primary,
                       fontSize: 11,
                       decoration: TextDecoration.underline,
                     ),
@@ -576,7 +578,7 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0D1B2A),
+              color: AppColors.backgroundDark,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Column(
@@ -625,7 +627,7 @@ class _StatusBox extends StatelessWidget {
       width: 180,
       height: 180,
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1B2A),
+        color: AppColors.backgroundDark,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
@@ -655,7 +657,7 @@ class _StatusBox extends StatelessWidget {
                 child: Text(
                   actionLabel!,
                   style: const TextStyle(
-                    color: Color(0xFFFF4D8B),
+                    color: AppColors.primary,
                     fontSize: 11,
                   ),
                 ),
@@ -684,13 +686,13 @@ class _StepItem extends StatelessWidget {
           height: 22,
           alignment: Alignment.center,
           decoration: const BoxDecoration(
-            color: Color(0xFFFF4D8B),
+            color: AppColors.primary,
             shape: BoxShape.circle,
           ),
           child: Text(
             number,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.white,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -702,7 +704,7 @@ class _StepItem extends StatelessWidget {
             text,
             softWrap: true,
             style: const TextStyle(
-              color: Color(0xFF8899AA),
+              color: AppColors.textTertiary,
               fontSize: 13,
               height: 1.4,
             ),

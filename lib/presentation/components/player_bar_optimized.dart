@@ -15,9 +15,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';
-import '../../core/utils/duration_utils.dart';
 import 'song_artwork_optimized.dart';
 
 /// PlayerBar optimizado con rebuilds minimizados
@@ -71,7 +71,7 @@ class PlayerBarOptimized extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: AppColors.blackWithOpacity(0.1),
               blurRadius: 8,
               offset: const Offset(0, -2),
             ),
@@ -160,7 +160,10 @@ class PlayerBarOptimized extends StatelessWidget {
           currentSong!.artist,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.grey.withOpacity(0.6),
+          ),
         ),
       ],
     );
@@ -175,7 +178,7 @@ class PlayerBarOptimized extends StatelessWidget {
           IconButton(
             icon: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? const Color(0xFFFF4D8B) : null,
+              color: isFavorite ? AppColors.favorite : null,
               size: 22,
             ),
             onPressed: onToggleFavorite,
@@ -226,7 +229,7 @@ class _StaticProgressBar extends StatelessWidget {
         height: 2,
         child: LinearProgressIndicator(
           value: progress.clamp(0.0, 1.0),
-          backgroundColor: Colors.grey[300],
+          backgroundColor: AppColors.grey.withOpacity(0.3),
           valueColor: AlwaysStoppedAnimation<Color>(
             Theme.of(context).colorScheme.primary,
           ),

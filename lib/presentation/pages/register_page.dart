@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/utils/Colors.dart';
 import '../providers/auth_provider.dart';
 import 'google_onboarding_page.dart';
 import 'terms_page.dart';
@@ -64,10 +65,10 @@ class _RegisterPageState extends State<RegisterPage> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFFF4D8B),
-            onPrimary: Colors.white,
-            surface: Color(0xFF1A2D42),
-            onSurface: Colors.white,
+            primary: AppColors.primary,
+            onPrimary: AppColors.white,
+            surface: AppColors.surface,
+            onSurface: AppColors.white,
           ),
         ),
         child: child!,
@@ -84,7 +85,8 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     if (!_acceptedTerms || !_acceptedPrivacy || !_acceptedIntellectual) {
       _showError(
-          'Debes aceptar los términos, la política de privacidad y la propiedad intelectual.');
+        'Debes aceptar los términos, la política de privacidad y la propiedad intelectual.',
+      );
       return;
     }
 
@@ -117,8 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
       final user = auth.currentUser;
       if (user != null && !user.acceptedTerms) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (_) => const GoogleOnboardingPage()),
+          MaterialPageRoute(builder: (_) => const GoogleOnboardingPage()),
         );
       } else {
         Navigator.of(context).pushReplacementNamed('/');
@@ -130,7 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: const Color(0xFFFF4D8B)),
+      SnackBar(content: Text(msg), backgroundColor: AppColors.primary),
     );
   }
 
@@ -139,11 +140,11 @@ class _RegisterPageState extends State<RegisterPage> {
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -188,10 +189,10 @@ class _RegisterPageState extends State<RegisterPage> {
           height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFF1A2D42),
+            color: AppColors.surface,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF4D8B).withValues(alpha: 0.4),
+                color: AppColors.primary.withValues(alpha: 0.4),
                 blurRadius: 24,
               ),
             ],
@@ -199,7 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: const Icon(
             Icons.music_note_rounded,
             size: 48,
-            color: Color(0xFFFF4D8B),
+            color: AppColors.primary,
           ),
         ),
         const SizedBox(height: 20),
@@ -208,7 +209,7 @@ class _RegisterPageState extends State<RegisterPage> {
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.white,
             letterSpacing: 2,
           ),
         ),
@@ -216,12 +217,15 @@ class _RegisterPageState extends State<RegisterPage> {
         const Text(
           'Crear cuenta',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.white,
+          ),
         ),
         const SizedBox(height: 4),
         const Text(
           'Únete a AirPulse',
-          style: TextStyle(color: Color(0xFF8899AA), fontSize: 14),
+          style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
         ),
       ],
     );
@@ -237,17 +241,18 @@ class _RegisterPageState extends State<RegisterPage> {
           child: OutlinedButton.icon(
             onPressed: auth.isLoading ? null : _googleRegister,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF334455)),
+              side: const BorderSide(color: AppColors.border),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-              foregroundColor: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              foregroundColor: AppColors.white,
             ),
             icon: Image.network(
               'https://www.google.com/favicon.ico',
               width: 20,
               height: 20,
               errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.login, color: Colors.white, size: 20),
+                  const Icon(Icons.login, color: AppColors.white, size: 20),
             ),
             label: const Text('Continuar con Google'),
           ),
@@ -255,14 +260,15 @@ class _RegisterPageState extends State<RegisterPage> {
         const SizedBox(height: 20),
         const Row(
           children: [
-            Expanded(child: Divider(color: Color(0xFF334455))),
+            Expanded(child: Divider(color: AppColors.border)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Text('o regístrate con correo',
-                  style:
-                      TextStyle(color: Color(0xFF8899AA), fontSize: 12)),
+              child: Text(
+                'o regístrate con correo',
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+              ),
             ),
-            Expanded(child: Divider(color: Color(0xFF334455))),
+            Expanded(child: Divider(color: AppColors.border)),
           ],
         ),
         const SizedBox(height: 20),
@@ -301,7 +307,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 label: 'Nombre de usuario',
                 icon: Icons.alternate_email,
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Ingresa un nombre de usuario';
+                  if (v == null || v.trim().isEmpty)
+                    return 'Ingresa un nombre de usuario';
                   if (v.trim().length < 3) return 'Mínimo 3 caracteres';
                   return null;
                 },
@@ -336,15 +343,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 16),
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A2D42),
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.cake_outlined,
-                          color: Color(0xFF8899AA)),
+                      const Icon(
+                        Icons.cake_outlined,
+                        color: AppColors.textTertiary,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         _birthDate == null
@@ -352,8 +363,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             : '${_birthDate!.day.toString().padLeft(2, '0')} / ${_birthDate!.month.toString().padLeft(2, '0')} / ${_birthDate!.year}',
                         style: TextStyle(
                           color: _birthDate == null
-                              ? const Color(0xFF8899AA)
-                              : Colors.white,
+                              ? AppColors.textTertiary
+                              : AppColors.white,
                           fontSize: 16,
                         ),
                       ),
@@ -369,7 +380,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       Icon(
                         _isMinor ? Icons.child_care : Icons.verified_user,
                         size: 16,
-                        color: _isMinor ? Colors.amber : Colors.greenAccent,
+                        color: _isMinor
+                            ? AppColors.warningAmber
+                            : AppColors.successAccent,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -379,8 +392,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               : 'Mayor de edad — puedes elegir tu plan',
                           style: TextStyle(
                             color: _isMinor
-                                ? Colors.amber
-                                : Colors.greenAccent,
+                                ? AppColors.warningAmber
+                                : AppColors.successAccent,
                             fontSize: 12,
                           ),
                         ),
@@ -399,10 +412,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     _obscurePass
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: const Color(0xFF8899AA),
+                    color: AppColors.textTertiary,
                   ),
-                  onPressed: () =>
-                      setState(() => _obscurePass = !_obscurePass),
+                  onPressed: () => setState(() => _obscurePass = !_obscurePass),
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Ingresa una contraseña';
@@ -421,13 +433,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     _obscureConfirm
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: const Color(0xFF8899AA),
+                    color: AppColors.textTertiary,
                   ),
                   onPressed: () =>
                       setState(() => _obscureConfirm = !_obscureConfirm),
                 ),
                 validator: (v) {
-                  if (v != _passCtrl.text) return 'Las contraseñas no coinciden';
+                  if (v != _passCtrl.text)
+                    return 'Las contraseñas no coinciden';
                   return null;
                 },
               ),
@@ -451,21 +464,20 @@ class _RegisterPageState extends State<RegisterPage> {
                 linkLabel: 'Política de Privacidad',
                 onLinkTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (_) => const PrivacyPolicyPage()),
+                  MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
                 ),
               ),
               const SizedBox(height: 8),
               _buildCheckRow(
                 value: _acceptedIntellectual,
-                onChanged: (v) =>
-                    setState(() => _acceptedIntellectual = v!),
+                onChanged: (v) => setState(() => _acceptedIntellectual = v!),
                 label: 'Acepto la ',
                 linkLabel: 'Política de Propiedad Intelectual',
                 onLinkTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => const IntellectualPropertyPage()),
+                    builder: (_) => const IntellectualPropertyPage(),
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
@@ -475,8 +487,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: ElevatedButton(
                   onPressed: auth.isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF4D8B),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -488,7 +500,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : const Text(
@@ -509,14 +521,14 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             const Text(
               '¿Ya tienes cuenta? ',
-              style: TextStyle(color: Color(0xFF8899AA)),
+              style: TextStyle(color: AppColors.textTertiary),
             ),
             GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: const Text(
                 'Iniciar sesión',
                 style: TextStyle(
-                  color: Color(0xFFFF4D8B),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -544,8 +556,8 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Checkbox(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFFFF4D8B),
-            side: const BorderSide(color: Color(0xFF8899AA)),
+            activeColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.textTertiary),
           ),
         ),
         const SizedBox(width: 8),
@@ -553,13 +565,15 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Text.rich(
             TextSpan(
               text: label,
-              style:
-                  const TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+              style: const TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 13,
+              ),
               children: [
                 TextSpan(
                   text: linkLabel,
                   style: const TextStyle(
-                    color: Color(0xFFFF4D8B),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -587,14 +601,14 @@ class _RegisterPageState extends State<RegisterPage> {
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: AppColors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF8899AA)),
-        prefixIcon: Icon(icon, color: const Color(0xFF8899AA)),
+        labelStyle: const TextStyle(color: AppColors.textTertiary),
+        prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFF1A2D42),
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -605,19 +619,17 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide:
-              const BorderSide(color: Color(0xFFFF4D8B), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF4D8B)),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide:
-              const BorderSide(color: Color(0xFFFF4D8B), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        errorStyle: const TextStyle(color: Color(0xFFFF4D8B)),
+        errorStyle: const TextStyle(color: AppColors.primary),
       ),
     );
   }

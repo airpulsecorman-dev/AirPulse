@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/utils/duration_utils.dart' as dur_utils;
 import '../../data/models/song_model.dart';
 import '../../domain/entities/song.dart';
+import '../../core/utils/Colors.dart';
 
 /// Página web que se conecta al servidor AirPulse del móvil,
 /// lista sus canciones y las reproduce desde el navegador.
@@ -62,11 +63,14 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
     _fetchSongs();
     _connectWebSocket();
     _posSub = _player.positionStream.listen(
-        (p) => setState(() => _position = p));
+      (p) => setState(() => _position = p),
+    );
     _durSub = _player.durationStream.listen(
-        (d) => setState(() => _duration = d ?? Duration.zero));
+      (d) => setState(() => _duration = d ?? Duration.zero),
+    );
     _playSub = _player.playingStream.listen(
-        (playing) => setState(() => _isPlaying = playing));
+      (playing) => setState(() => _isPlaying = playing),
+    );
   }
 
   @override
@@ -104,13 +108,15 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
         // Reintento con backoff: el servidor móvil puede tardar unos segundos en arrancar
         final delay = Duration(seconds: attempt * 2);
         setState(() {
-          _error = 'Conectando al servidor móvil (intento $attempt/$maxAttempts)…';
+          _error =
+              'Conectando al servidor móvil (intento $attempt/$maxAttempts)…';
         });
         await Future.delayed(delay);
         if (mounted) return _fetchSongs(attempt: attempt + 1);
       } else {
         setState(() {
-          _error = 'No se pudo conectar al servidor móvil.\n'
+          _error =
+              'No se pudo conectar al servidor móvil.\n'
               'Verifica que el móvil esté en la misma red y el servidor esté activo.';
           _isLoading = false;
         });
@@ -152,11 +158,9 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
     await _player.play();
 
     // Notificar al móvil vía WebSocket (control remoto)
-    _ws?.sink.add(jsonEncode({
-      'type': 'play',
-      'songId': song.id,
-      'index': index,
-    }));
+    _ws?.sink.add(
+      jsonEncode({'type': 'play', 'songId': song.id, 'index': index}),
+    );
   }
 
   void _sendCommand(String type) {
@@ -168,24 +172,33 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2D42),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.white,
         title: Row(
           children: [
-            const Icon(Icons.music_note_rounded,
-                color: Color(0xFFFF4D8B), size: 22),
+            const Icon(
+              Icons.music_note_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
             const SizedBox(width: 8),
-            const Text('AirPulse',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            const Text(
+              'AirPulse',
+              style: TextStyle(
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 '— ${widget.serverUrl}',
                 style: const TextStyle(
-                    color: Color(0xFF8899AA), fontSize: 13),
+                  color: AppColors.textTertiary,
+                  fontSize: 13,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -207,43 +220,46 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(
-                  color: Color(0xFFFF4D8B)))
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _error != null
-              ? _ErrorView(
-                  error: _error!,
-                  onRetry: () {
-                    setState(() { _isLoading = true; _error = null; });
-                    _fetchSongs();
-                  },
-                )
-              : Column(
-                  children: [
-                    Expanded(child: _buildSongList(theme)),
-                    if (_currentSong != null)
-                      _PlayerBar(
-                        song: _currentSong!,
-                        isPlaying: _isPlaying,
-                        position: _position,
-                        duration: _duration,
-                        onPlay: _player.play,
-                        onPause: _player.pause,
-                        onSeek: (d) => _player.seek(d),
-                        onPrev: () {
-                          final idx = _songs.indexOf(_currentSong!);
-                          if (idx > 0) _playSong(_songs[idx - 1], idx - 1);
-                          _sendCommand('previous');
-                        },
-                        onNext: () {
-                          final idx = _songs.indexOf(_currentSong!);
-                          if (idx < _songs.length - 1) {
-                            _playSong(_songs[idx + 1], idx + 1);
-                          }
-                          _sendCommand('next');
-                        },
-                      ),
-                  ],
-                ),
+          ? _ErrorView(
+              error: _error!,
+              onRetry: () {
+                setState(() {
+                  _isLoading = true;
+                  _error = null;
+                });
+                _fetchSongs();
+              },
+            )
+          : Column(
+              children: [
+                Expanded(child: _buildSongList(theme)),
+                if (_currentSong != null)
+                  _PlayerBar(
+                    song: _currentSong!,
+                    isPlaying: _isPlaying,
+                    position: _position,
+                    duration: _duration,
+                    onPlay: _player.play,
+                    onPause: _player.pause,
+                    onSeek: (d) => _player.seek(d),
+                    onPrev: () {
+                      final idx = _songs.indexOf(_currentSong!);
+                      if (idx > 0) _playSong(_songs[idx - 1], idx - 1);
+                      _sendCommand('previous');
+                    },
+                    onNext: () {
+                      final idx = _songs.indexOf(_currentSong!);
+                      if (idx < _songs.length - 1) {
+                        _playSong(_songs[idx + 1], idx + 1);
+                      }
+                      _sendCommand('next');
+                    },
+                  ),
+              ],
+            ),
     );
   }
 
@@ -253,11 +269,16 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.library_music_outlined,
-                size: 64, color: Color(0xFF8899AA)),
+            const Icon(
+              Icons.library_music_outlined,
+              size: 64,
+              color: AppColors.textTertiary,
+            ),
             const SizedBox(height: 16),
-            Text('No hay canciones en el servidor',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.7))),
+            Text(
+              'No hay canciones en el servidor',
+              style: TextStyle(color: AppColors.white.withValues(alpha: 0.7)),
+            ),
           ],
         ),
       );
@@ -269,39 +290,33 @@ class _WebLibraryPageState extends State<WebLibraryPage> {
         final isActive = _currentSong?.id == song.id;
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: isActive
-                ? const Color(0xFFFF4D8B)
-                : const Color(0xFF1A2D42),
+            backgroundColor: isActive ? AppColors.primary : AppColors.surface,
             child: isActive && _isPlaying
-                ? const Icon(Icons.equalizer,
-                    color: Colors.white, size: 18)
-                : Icon(Icons.music_note,
-                    color: isActive
-                        ? Colors.white
-                        : const Color(0xFF8899AA),
-                    size: 18),
+                ? const Icon(Icons.equalizer, color: AppColors.white, size: 18)
+                : Icon(
+                    Icons.music_note,
+                    color: isActive ? AppColors.white : AppColors.textTertiary,
+                    size: 18,
+                  ),
           ),
           title: Text(
             song.title,
             style: TextStyle(
-              color: isActive ? const Color(0xFFFF4D8B) : Colors.white,
-              fontWeight:
-                  isActive ? FontWeight.bold : FontWeight.normal,
+              color: isActive ? AppColors.primary : AppColors.white,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
             '${song.artist} • ${song.album}',
-            style:
-                const TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+            style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           trailing: Text(
             dur_utils.formatDuration(song.duration),
-            style: const TextStyle(
-                color: Color(0xFF8899AA), fontSize: 12),
+            style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
           ),
           onTap: () => _playSong(song, i),
         );
@@ -335,25 +350,25 @@ class _PlayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = duration.inMilliseconds.toDouble().clamp(1.0, double.infinity);
-    final current =
-        position.inMilliseconds.toDouble().clamp(0.0, total);
+    final total = duration.inMilliseconds.toDouble().clamp(
+      1.0,
+      double.infinity,
+    );
+    final current = position.inMilliseconds.toDouble().clamp(0.0, total);
 
     return Container(
-      color: const Color(0xFF1A2D42),
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: const Color(0xFFFF4D8B),
-              inactiveTrackColor: const Color(0xFF334455),
-              thumbColor: const Color(0xFFFF4D8B),
-              overlayColor:
-                  const Color(0xFFFF4D8B).withValues(alpha: 0.2),
-              thumbShape:
-                  const RoundSliderThumbShape(enabledThumbRadius: 6),
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: AppColors.border,
+              thumbColor: AppColors.primary,
+              overlayColor: AppColors.primary.withValues(alpha: 0.2),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
               trackHeight: 3,
             ),
             child: Slider(
@@ -372,16 +387,19 @@ class _PlayerBar extends StatelessWidget {
                     Text(
                       song.title,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14),
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       song.artist,
                       style: const TextStyle(
-                          color: Color(0xFF8899AA), fontSize: 12),
+                        color: AppColors.textTertiary,
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -391,24 +409,27 @@ class _PlayerBar extends StatelessWidget {
               Text(
                 '${dur_utils.formatDuration(position)} / ${dur_utils.formatDuration(duration)}',
                 style: const TextStyle(
-                    color: Color(0xFF8899AA), fontSize: 11),
+                  color: AppColors.textTertiary,
+                  fontSize: 11,
+                ),
               ),
               const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.skip_previous,
-                    color: Colors.white),
+                icon: const Icon(Icons.skip_previous, color: AppColors.white),
                 onPressed: onPrev,
               ),
               IconButton(
                 icon: Icon(
-                  isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                  color: const Color(0xFFFF4D8B),
+                  isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  color: AppColors.primary,
                   size: 40,
                 ),
                 onPressed: isPlaying ? onPause : onPlay,
               ),
               IconButton(
-                icon: const Icon(Icons.skip_next, color: Colors.white),
+                icon: const Icon(Icons.skip_next, color: AppColors.white),
                 onPressed: onNext,
               ),
             ],
@@ -437,7 +458,7 @@ class _ErrorView extends StatelessWidget {
             Icon(
               isMixed ? Icons.https_outlined : Icons.wifi_off,
               size: 64,
-              color: const Color(0xFF8899AA),
+              color: AppColors.textTertiary,
             ),
             const SizedBox(height: 16),
             Text(
@@ -446,7 +467,7 @@ class _ErrorView extends StatelessWidget {
                   : error,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white70,
+                color: AppColors.textSecondary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -458,18 +479,21 @@ class _ErrorView extends StatelessWidget {
                 'El navegador bloquea esta conexión por política de seguridad.\n\n'
                 'Para continuar, abre la web directamente desde la IP local:\n',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF8899AA), fontSize: 13),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 13),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2A38),
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
                   'http://192.168.x.x:8765',
                   style: TextStyle(
-                    color: Color(0xFFFF4D8B),
+                    color: AppColors.primary,
                     fontFamily: 'monospace',
                     fontSize: 14,
                   ),
@@ -479,7 +503,7 @@ class _ErrorView extends StatelessWidget {
               const Text(
                 '(usa la IP del móvil que aparece en la pantalla del servidor)',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF8899AA), fontSize: 12),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
               ),
             ],
             if (!isMixed) ...[
@@ -487,8 +511,8 @@ class _ErrorView extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF4D8B),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
                 ),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reintentar'),

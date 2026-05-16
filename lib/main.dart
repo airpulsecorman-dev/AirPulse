@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'core/config/env_loader.dart';
+import 'core/utils/Colors.dart';
 import 'core/di/service_locator.dart';
 import 'firebase_options.dart';
 import 'services/audio_handler.dart';
@@ -37,7 +38,7 @@ Future<void> main() async {
       androidShowNotificationBadge: true,
       androidNotificationOngoing: true,
       androidStopForegroundOnPause: true,
-      notificationColor: Color(0xFF1A1A2E),
+      notificationColor: AppColors.backgroundNotification,
     ),
   );
 

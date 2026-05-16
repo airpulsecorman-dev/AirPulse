@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../../core/utils/Colors.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -51,7 +52,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Contraseña cambiada correctamente'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.successAlt,
         ),
       );
       Navigator.pop(context);
@@ -59,7 +60,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Error al cambiar contraseña'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     }
@@ -81,14 +82,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         labelText: label,
         prefixIcon: const Icon(Icons.lock),
         suffixIcon: IconButton(
-          icon: Icon(
-            obscure ? Icons.visibility_off : Icons.visibility,
-          ),
+          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
           onPressed: onToggleObscure,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: theme.colorScheme.surface,
       ),
@@ -199,9 +196,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text('Cambiar Contraseña'),
                 ),
@@ -210,7 +205,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: auth.isLoading ? null : () => Navigator.pop(context),
+                  onPressed: auth.isLoading
+                      ? null
+                      : () => Navigator.pop(context),
                   child: const Text('Cancelar'),
                 ),
               ),
@@ -221,13 +218,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    border: Border.all(color: Colors.red),
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    border: Border.all(color: AppColors.error),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     auth.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: AppColors.error),
                   ),
                 ),
               ],

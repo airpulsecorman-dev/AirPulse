@@ -1,5 +1,6 @@
 import 'dart:math' show Random;
 import 'package:flutter/material.dart';
+import 'package:airpulse/core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
@@ -152,7 +153,9 @@ class _PlayerBarContentState extends State<_PlayerBarContent> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        boxShadow: [BoxShadow(blurRadius: 8, color: Colors.black26)],
+        boxShadow: [
+          BoxShadow(blurRadius: 8, color: AppColors.black.withOpacity(0.26)),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -235,7 +238,7 @@ class _PlayerBarContentState extends State<_PlayerBarContent> {
                   icon: Icon(
                     widget.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: widget.isFavorite
-                        ? const Color(0xFFFF4D8B)
+                        ? AppColors.primary
                         : theme.colorScheme.onSurface,
                   ),
                   onPressed: widget.onToggleFavorite,

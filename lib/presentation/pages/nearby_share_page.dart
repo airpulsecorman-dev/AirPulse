@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/utils/Colors.dart';
 import '../../services/nearby_share_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/library_provider.dart';
@@ -65,14 +66,14 @@ class _NearbySharePageState extends State<NearbySharePage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✅ "${progress.songTitle}" recibida correctamente'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successAlt,
           ),
         );
       } else if (progress.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Error al transferir "${progress.songTitle}"'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -335,7 +336,7 @@ class _SendTab extends StatelessWidget {
                   const Icon(
                     Icons.wifi_tethering,
                     size: 48,
-                    color: Color(0xFFFF4D8B),
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -390,8 +391,8 @@ class _SendTab extends StatelessWidget {
                   leading: Icon(
                     device.connected ? Icons.smartphone : Icons.phone_android,
                     color: device.connected
-                        ? const Color(0xFFFF4D8B)
-                        : Colors.orange,
+                        ? AppColors.primary
+                        : AppColors.warning,
                   ),
                   title: Text(device.name),
                   subtitle: Text(
@@ -500,7 +501,7 @@ class _ReceiveTab extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Icon(Icons.search, size: 48, color: Color(0xFFFF4D8B)),
+                  const Icon(Icons.search, size: 48, color: AppColors.primary),
                   const SizedBox(height: 8),
                   const Text(
                     'Buscar dispositivos cercanos',
@@ -554,8 +555,8 @@ class _ReceiveTab extends StatelessWidget {
                   leading: Icon(
                     device.connected ? Icons.link : Icons.link_off,
                     color: device.connected
-                        ? const Color(0xFFFF4D8B)
-                        : Colors.grey,
+                        ? AppColors.primary
+                        : AppColors.grey,
                   ),
                   title: Text(device.name),
                   subtitle: Text(device.connected ? 'Conectado' : 'Disponible'),
@@ -600,10 +601,10 @@ class _ReceiveTab extends StatelessWidget {
                                 ? Icons.error
                                 : Icons.download,
                             color: t.done
-                                ? Colors.green
+                                ? AppColors.successAlt
                                 : t.error
-                                ? Colors.red
-                                : const Color(0xFFFF4D8B),
+                                ? AppColors.error
+                                : AppColors.primary,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -624,9 +625,9 @@ class _ReceiveTab extends StatelessWidget {
                                 : '${(t.progress * 100).toStringAsFixed(0)}%',
                             style: TextStyle(
                               color: t.done
-                                  ? Colors.green
+                                  ? AppColors.successAlt
                                   : t.error
-                                  ? Colors.red
+                                  ? AppColors.error
                                   : null,
                               fontSize: 12,
                             ),
@@ -637,7 +638,7 @@ class _ReceiveTab extends StatelessWidget {
                         const SizedBox(height: 6),
                         LinearProgressIndicator(
                           value: t.progress,
-                          color: const Color(0xFFFF4D8B),
+                          color: AppColors.primary,
                         ),
                       ],
                     ],
@@ -681,11 +682,7 @@ class _BluetoothTab extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.bluetooth,
-                    size: 52,
-                    color: Color(0xFF2196F3),
-                  ),
+                  const Icon(Icons.bluetooth, size: 52, color: AppColors.info),
                   const SizedBox(height: 10),
                   const Text(
                     'Bluetooth clásico',
@@ -702,17 +699,20 @@ class _BluetoothTab extends StatelessWidget {
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF2196F3),
+                      backgroundColor: AppColors.info,
                     ),
                     onPressed: selectedSongIds.isEmpty
                         ? null
                         : onShareViaBluetooth,
-                    icon: const Icon(Icons.bluetooth_searching, color: Colors.white),
+                    icon: const Icon(
+                      Icons.bluetooth_searching,
+                      color: AppColors.white,
+                    ),
                     label: Text(
                       selectedSongIds.isEmpty
                           ? 'Selecciona canciones abajo'
                           : 'Enviar ${selectedSongIds.length} canción(es)',
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.white),
                     ),
                   ),
                 ],
@@ -754,15 +754,15 @@ class _BluetoothTab extends StatelessWidget {
                   size: 40,
                   borderRadius: 6,
                   nullWidget: CircleAvatar(
-                    backgroundColor: const Color(0xFF2196F3).withOpacity(0.15),
+                    backgroundColor: AppColors.info.withOpacity(0.15),
                     child: const Icon(
                       Icons.music_note,
                       size: 20,
-                      color: Color(0xFF2196F3),
+                      color: AppColors.info,
                     ),
                   ),
                 ),
-                activeColor: const Color(0xFF2196F3),
+                activeColor: AppColors.info,
                 controlAffinity: ListTileControlAffinity.trailing,
               ),
             ),

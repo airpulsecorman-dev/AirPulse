@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:airpulse/core/utils/Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
@@ -94,14 +95,14 @@ class _AirPulseAppState extends State<AirPulseApp> {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6750A4),
+              seedColor: AppColors.themeSeed,
               brightness: Brightness.light,
             ),
             useMaterial3: true,
           ),
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6750A4),
+              seedColor: AppColors.themeSeed,
               brightness: Brightness.dark,
             ),
             useMaterial3: true,
@@ -172,7 +173,7 @@ class _AuthGateState extends State<_AuthGate> {
               content: Text(
                 'Tu sesión fue revocada desde el dispositivo móvil.',
               ),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.warning,
               duration: Duration(seconds: 5),
             ),
           );
@@ -213,9 +214,9 @@ class _AuthGateState extends State<_AuthGate> {
 
     if (auth.status == AuthStatus.unknown) {
       return const Scaffold(
-        backgroundColor: Color(0xFF0D1B2A),
+        backgroundColor: AppColors.backgroundDark,
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }

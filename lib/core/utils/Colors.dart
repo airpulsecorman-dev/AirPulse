@@ -77,6 +77,7 @@ class AppColors {
 
   /// Color de información (Azul)
   static const Color info = Color(0xFF2196F3);
+  static Color get blue300 => Colors.blue.shade300;
 
   // ============================================
   // COLORES INTERACTIVOS
@@ -125,6 +126,12 @@ class AppColors {
 
   /// Gris estándar
   static const Color grey = Colors.grey;
+
+  // Gris adulterado
+  static Color get grey300 => Colors.grey.shade300;
+  static Color get grey400 => Colors.grey.shade400;
+  static Color get grey600 => Colors.grey.shade600;
+  static Color get grey700 => Colors.grey.shade700;
 
   /// QR Foreground (Negro)
   static const Color qrForeground = Color(0xFF000000);

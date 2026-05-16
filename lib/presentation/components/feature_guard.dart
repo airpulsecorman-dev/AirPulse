@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import '../../core/utils/Colors.dart';
 import 'package:airpulse/domain/entities/subscription_plan.dart';
 import 'package:airpulse/presentation/hooks/use_subscription.dart';
 import 'package:airpulse/presentation/pages/pricing_page.dart';
@@ -40,10 +41,7 @@ class FeatureGuard extends HookWidget {
     // Mostrar overlay de bloqueo
     return Stack(
       children: [
-        Opacity(
-          opacity: 0.5,
-          child: child,
-        ),
+        Opacity(opacity: 0.5, child: child),
         Center(
           child: GestureDetector(
             onTap: () {
@@ -55,40 +53,36 @@ class FeatureGuard extends HookWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF16213E),
+                    color: AppColors.backgroundPricing,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.amber, width: 2),
+                    border: Border.all(color: AppColors.warningAmber, width: 2),
                   ),
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.lock,
-                        color: Colors.amber,
-                        size: 48,
-                      ),
+                      Icon(Icons.lock, color: AppColors.warningAmber, size: 48),
                       const SizedBox(height: 16),
                       Text(
                         'Característica Bloqueada',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         featureDisplayName,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[400],
-                            ),
+                          color: AppColors.grey400,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Actualiza tu plan para acceder',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.amber,
-                            ),
+                          color: AppColors.warningAmber,
+                        ),
                       ),
                     ],
                   ),
@@ -120,22 +114,25 @@ class FeatureGuard extends HookWidget {
     }
   }
 
-  void _showUpgradeDialog(BuildContext context, SubscriptionHookState subscription) {
+  void _showUpgradeDialog(
+    BuildContext context,
+    SubscriptionHookState subscription,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF16213E),
+        backgroundColor: AppColors.backgroundPricing,
         title: Text(
           featureDisplayName,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(color: AppColors.white),
         ),
         content: Text(
           'Esta característica requiere un plan de pago.\n\nToca "Ver Planes" para actualizar tu suscripción.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[300],
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.grey300),
         ),
         actions: [
           TextButton(
@@ -153,11 +150,11 @@ class FeatureGuard extends HookWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amber,
+              backgroundColor: AppColors.warningAmber,
             ),
             child: const Text(
               'Ver Planes',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: AppColors.black),
             ),
           ),
         ],
@@ -191,31 +188,28 @@ class FeatureBlocker extends StatelessWidget {
       onTap: onUpgrade,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: AppColors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Stack(
           children: [
-            Opacity(
-              opacity: 0.5,
-              child: child,
-            ),
+            Opacity(opacity: 0.5, child: child),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
                     Icons.lock,
-                    color: Colors.amber,
+                    color: AppColors.warningAmber,
                     size: 32,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Plan Requerido',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: AppColors.warningAmber,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

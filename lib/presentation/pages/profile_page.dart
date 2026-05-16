@@ -13,6 +13,7 @@ import './terms_page.dart';
 import './privacy_policy_page.dart';
 import './intellectual_property_page.dart';
 import '../../domain/entities/subscription_plan.dart';
+import '../../core/utils/Colors.dart';
 
 class ProfilePage extends HookWidget {
   const ProfilePage({super.key});
@@ -132,7 +133,7 @@ class _HeaderProfile extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: AppColors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),

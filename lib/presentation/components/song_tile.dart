@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:airpulse/core/utils/Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -66,7 +67,7 @@ class SongTile extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Error al compartir: $e'),
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppColors.error,
                         ),
                       );
                     }
@@ -77,7 +78,7 @@ class SongTile extends StatelessWidget {
                 ListTile(
                   leading: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? const Color(0xFFFF4D8B) : null,
+                    color: isFavorite ? AppColors.favorite : null,
                   ),
                   title: Text(
                     isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos',

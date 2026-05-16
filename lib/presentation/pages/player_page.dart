@@ -14,6 +14,7 @@ import '../providers/auth_provider.dart';
 import '../../domain/repositories/player_repository.dart';
 import '../../core/utils/duration_utils.dart';
 import '../components/song_artwork.dart';
+import '../../core/utils/Colors.dart';
 
 enum _LyricsState { idle, loading, loaded, error }
 
@@ -117,7 +118,7 @@ class _QueueSheetState extends State<_QueueSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey,
+              color: AppColors.grey,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -161,12 +162,12 @@ class _QueueSheetState extends State<_QueueSheet> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
+                            color: AppColors.black.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
                             Icons.equalizer,
-                            color: Colors.white,
+                            color: AppColors.white,
                             size: 20,
                           ),
                         ),
@@ -230,7 +231,7 @@ class PlayerPage extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ahora suena'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         actions: [
           Builder(
@@ -243,7 +244,7 @@ class PlayerPage extends HookWidget {
               return IconButton(
                 icon: Icon(
                   isFav ? Icons.favorite : Icons.favorite_border,
-                  color: const Color(0xFFFF4D8B),
+                  color: AppColors.primary,
                 ),
                 tooltip: isFav ? 'Quitar de favoritos' : 'Agregar a favoritos',
                 onPressed: audio.currentSong != null

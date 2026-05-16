@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:airpulse/domain/entities/subscription_plan.dart';
 import 'package:airpulse/presentation/hooks/use_subscription.dart';
+import '../../core/utils/Colors.dart';
 
 class PricingPage extends HookWidget {
   final String userId;
 
-  const PricingPage({
-    super.key,
-    required this.userId,
-  });
+  const PricingPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +17,11 @@ class PricingPage extends HookWidget {
       appBar: AppBar(
         title: const Text('Planes de Suscripción'),
         elevation: 0,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.backgroundNotification,
       ),
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.backgroundPricing,
       body: subscription.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -34,25 +30,24 @@ class PricingPage extends HookWidget {
                 Text(
                   'Elige tu plan perfecto',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Tu plan actual: ${subscription.currentPlan?.name ?? 'Cargando...'}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[400],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.grey400),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
                 // Planes
                 ...subscription.plans.asMap().entries.map((entry) {
                   final plan = entry.value;
-                  final isCurrent =
-                      subscription.currentPlan?.type == plan.type;
+                  final isCurrent = subscription.currentPlan?.type == plan.type;
 
                   return Padding(
                     padding: EdgeInsets.only(
@@ -65,11 +60,7 @@ class PricingPage extends HookWidget {
                       isCurrent: isCurrent,
                       isPopular: plan.isPopular,
                       onUpgrade: () {
-                        _showPaymentDialog(
-                          context,
-                          plan,
-                          subscription,
-                        );
+                        _showPaymentDialog(context, plan, subscription);
                       },
                     ),
                   );
@@ -116,7 +107,7 @@ class PricingPage extends HookWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('¡Plan actualizado a ${plan.name}!'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
     });
@@ -142,14 +133,14 @@ class _PlanCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: isPopular
-            ? Border.all(color: Colors.amber, width: 2)
-            : Border.all(color: Colors.grey[700]!, width: 1),
+            ? Border.all(color: AppColors.warningAmber, width: 2)
+            : Border.all(color: AppColors.grey, width: 1),
         borderRadius: BorderRadius.circular(16),
-        color: isPopular ? const Color(0xFF0F3460) : const Color(0xFF0F3460),
+        color: isPopular ? AppColors.surfacePricing : AppColors.surfacePricing,
         boxShadow: isPopular
             ? [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.3),
+                  color: AppColors.warningAmber.withOpacity(0.3),
                   blurRadius: 12,
                   spreadRadius: 0,
                 ),
@@ -163,15 +154,18 @@ class _PlanCard extends StatelessWidget {
               top: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.amber,
+                  color: AppColors.warningAmber,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   'Más Popular',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: AppColors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -183,15 +177,18 @@ class _PlanCard extends StatelessWidget {
               top: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: AppColors.success,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   'Plan Actual',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -207,17 +204,17 @@ class _PlanCard extends StatelessWidget {
                 Text(
                   plan.name,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 // Descripción
                 Text(
                   plan.description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[400],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.grey400),
                 ),
                 const SizedBox(height: 16),
                 // Precio
@@ -229,8 +226,9 @@ class _PlanCard extends StatelessWidget {
                       plan.price == 0
                           ? 'Gratis'
                           : '\$${plan.price.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            color: AppColors.white,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -238,8 +236,8 @@ class _PlanCard extends StatelessWidget {
                       Text(
                         '/mes',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[400],
-                            ),
+                          color: AppColors.grey400,
+                        ),
                       ),
                   ],
                 ),
@@ -252,16 +250,15 @@ class _PlanCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.check_circle,
-                          color: Colors.green[400],
+                          color: AppColors.successAlt,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             feature,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[300],
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.grey300),
                           ),
                         ),
                       ],
@@ -275,15 +272,15 @@ class _PlanCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.green, width: 2),
+                      border: Border.all(color: AppColors.success, width: 2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
                       child: Text(
                         'Plan Actual',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.green,
-                            ),
+                          color: AppColors.success,
+                        ),
                       ),
                     ),
                   )
@@ -291,7 +288,7 @@ class _PlanCard extends StatelessWidget {
                   ElevatedButton(
                     onPressed: onUpgrade,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
+                      backgroundColor: AppColors.warningAmber,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       minimumSize: const Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(
@@ -299,9 +296,11 @@ class _PlanCard extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      plan.price == 0 ? 'Cambiar a Gratuito' : 'Actualizar Plan',
+                      plan.price == 0
+                          ? 'Cambiar a Gratuito'
+                          : 'Actualizar Plan',
                       style: const TextStyle(
-                        color: Colors.black,
+                        color: AppColors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -320,10 +319,7 @@ class _PaymentDialog extends StatefulWidget {
   final SubscriptionPlan plan;
   final Function(PaymentMethod) onPaymentMethod;
 
-  const _PaymentDialog({
-    required this.plan,
-    required this.onPaymentMethod,
-  });
+  const _PaymentDialog({required this.plan, required this.onPaymentMethod});
 
   @override
   State<_PaymentDialog> createState() => _PaymentDialogState();
@@ -335,21 +331,21 @@ class _PaymentDialogState extends State<_PaymentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: AppColors.backgroundPricing,
       title: Text(
         'Selecciona Método de Pago',
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(color: AppColors.white),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Total: \$${widget.plan.price.toStringAsFixed(2)}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[300],
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppColors.grey300),
           ),
           const SizedBox(height: 24),
           _PaymentMethodOption(
@@ -395,13 +391,8 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                   Navigator.pop(context);
                 }
               : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amber,
-          ),
-          child: const Text(
-            'Continuar',
-            style: TextStyle(color: Colors.black),
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.warningAmber),
+          child: const Text('Continuar', style: TextStyle(color: AppColors.black)),
         ),
       ],
     );
@@ -432,34 +423,25 @@ class _PaymentMethodOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: selected ? Colors.amber : Colors.grey[700]!,
+            color: selected ? AppColors.warningAmber : AppColors.grey700,
             width: selected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          color: selected
-              ? Colors.amber.withOpacity(0.1)
-              : Colors.transparent,
+          color: selected ? AppColors.warningAmber.withOpacity(0.1) : AppColors.transparent,
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: selected ? Colors.amber : Colors.grey[400],
-            ),
+            Icon(icon, color: selected ? AppColors.warningAmber : AppColors.grey400),
             const SizedBox(width: 16),
             Text(
               title,
               style: TextStyle(
-                color: selected ? Colors.amber : Colors.grey[300],
+                color: selected ? AppColors.warningAmber : AppColors.grey300,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
             const Spacer(),
-            if (selected)
-              Icon(
-                Icons.check_circle,
-                color: Colors.amber,
-              ),
+            if (selected) Icon(Icons.check_circle, color: AppColors.warningAmber),
           ],
         ),
       ),

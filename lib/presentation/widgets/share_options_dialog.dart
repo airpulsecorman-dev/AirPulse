@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/utils/Colors.dart';
 
 /// Muestra un diálogo con las tres opciones de compartir.
 /// [selectedSongIds] — IDs de canciones ya seleccionadas (para Bluetooth).
@@ -22,7 +23,7 @@ class _ShareOptionsDialog extends StatelessWidget {
     return AlertDialog(
       title: const Row(
         children: [
-          Icon(Icons.share, color: Color(0xFFFF4D8B)),
+          Icon(Icons.share, color: AppColors.share),
           SizedBox(width: 8),
           Flexible(child: Text('Compartir música')),
         ],
@@ -34,7 +35,7 @@ class _ShareOptionsDialog extends StatelessWidget {
           // ── Opción 1: Servidor local ────────────────────────────────────
           _OptionTile(
             icon: Icons.wifi_tethering,
-            iconColor: const Color(0xFF4CAF50),
+            iconColor: AppColors.whatsapp,
             title: 'Servidor local',
             subtitle:
                 'Transmite toda la biblioteca por Wi-Fi a cualquier navegador en la misma red.',
@@ -48,7 +49,7 @@ class _ShareOptionsDialog extends StatelessWidget {
           // ── Opción 2: Compartir por proximidad ─────────────────────────
           _OptionTile(
             icon: Icons.bluetooth_searching,
-            iconColor: const Color(0xFFFF4D8B),
+            iconColor: AppColors.share,
             title: 'Compartir por proximidad',
             subtitle:
                 'Envía canciones a otro dispositivo con AirPulse usando Bluetooth y Wi-Fi Direct.',
@@ -62,7 +63,7 @@ class _ShareOptionsDialog extends StatelessWidget {
           // ── Opción 3: Bluetooth clásico ────────────────────────────────
           _OptionTile(
             icon: Icons.bluetooth,
-            iconColor: const Color(0xFF2196F3),
+            iconColor: AppColors.nearby,
             title: 'Bluetooth clásico',
             subtitle:
                 'Envía archivos a cualquier dispositivo con Bluetooth. Selecciona canciones primero.',
@@ -138,7 +139,7 @@ class _OptionTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            const Icon(Icons.chevron_right, color: AppColors.grey),
           ],
         ),
       ),
