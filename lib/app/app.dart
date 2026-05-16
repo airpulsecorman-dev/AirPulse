@@ -23,11 +23,11 @@ import '../services/audio_service.dart';
 import '../services/library_service.dart';
 import '../services/local_server_service.dart';
 import '../services/qr_service.dart';
-import '../services/qr_session_service.dart';
 import '../core/di/service_locator.dart';
+import '../domain/repositories/favorites_repository.dart';
+import '../services/qr_session_service.dart';
 import '../presentation/providers/settings_provider.dart';
 import '../data/repositories/firebase_auth_repository_impl.dart';
-import '../data/repositories/favorites_repository_impl.dart';
 
 class AirPulseApp extends StatefulWidget {
   const AirPulseApp({super.key});
@@ -45,7 +45,7 @@ class _AirPulseAppState extends State<AirPulseApp> {
   void initState() {
     super.initState();
     _settings.load();
-    _favoritesProvider = FavoritesProvider(FavoritesRepositoryImpl());
+    _favoritesProvider = FavoritesProvider(sl<FavoritesRepository>());
     _authProvider = AuthProvider(FirebaseAuthRepositoryImpl());
     _authProvider.addListener(_onAuthChanged);
   }

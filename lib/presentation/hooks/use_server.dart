@@ -7,7 +7,11 @@ import '../../domain/entities/server_session.dart';
 
 /// Hook para controlar el servidor local y conexión de clientes.
 ServerHookResult useServer(BuildContext context) {
-  final provider = useListenable(context.read<ServerProvider>());
+  // Usar watch en lugar de read para que el hook se actualice cuando cambie el provider
+  final provider = context.watch<ServerProvider>();
+
+  // Asegurar que el widget se reconstruya cuando cambien propiedades relevantes
+  useListenable(provider);
 
   return ServerHookResult(
     session: provider.session,
@@ -34,7 +38,8 @@ class ServerHookResult {
   final List<String> connectedClients;
   final String? serverUrl;
   final String? qrPayload;
-  final Future<void> Function({int port, List<Song> songs, String? userId}) startServer;
+  final Future<void> Function({int port, List<Song> songs, String? userId})
+  startServer;
   final Future<void> Function() stopServer;
   final void Function(Map<String, dynamic>) broadcastPlayerState;
 

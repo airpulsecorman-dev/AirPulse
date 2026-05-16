@@ -20,9 +20,33 @@ class AlbumDetailPage extends HookWidget {
     final favs = context.watch<FavoritesProvider>();
     final userId = context.read<AuthProvider>().currentUser?.id ?? '';
 
+    // ScrollController para desplazar a la canción actual
+    final scrollController = useScrollController();
+
     final artId = album.songs.isNotEmpty
         ? (int.tryParse(album.songs.first.id) ?? 0)
         : (int.tryParse(album.id) ?? 0);
+
+    // Desplazar automáticamente a la canción actual cuando se carga la página
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (audio.currentSong != null && album.songs.isNotEmpty) {
+          final currentIndex = album.songs.indexWhere(
+            (song) => song.id == audio.currentSong!.id,
+          );
+          if (currentIndex != -1 && scrollController.hasClients) {
+            // Calcular la posición aproximada del item (altura promedio de ListTile ~72px)
+            final position = currentIndex * 72.0;
+            scrollController.animateTo(
+              position,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      });
+      return null;
+    }, [audio.currentSong?.id]);
 
     return Scaffold(
       appBar: AppBar(
@@ -85,6 +109,7 @@ class AlbumDetailPage extends HookWidget {
             child: album.songs.isEmpty
                 ? const Center(child: Text('No hay canciones en este álbum'))
                 : ListView.builder(
+                    controller: scrollController,
                     itemCount: album.songs.length,
                     itemBuilder: (_, i) {
                       final song = album.songs[i];

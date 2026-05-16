@@ -7,7 +7,12 @@ import '../../domain/repositories/player_repository.dart';
 
 /// Hook para acceder y controlar la reproducción de audio.
 AudioHookResult useAudio(BuildContext context) {
-  final provider = useListenable(context.read<AudioProvider>());
+  // Usar watch en lugar de read para que el hook se actualice cuando cambie el provider
+  final provider = context.watch<AudioProvider>();
+
+  // Asegurar que el widget se reconstruya cuando cambien propiedades relevantes
+  useListenable(provider);
+
   final currentSong = provider.currentSong;
   final isPlaying = provider.isPlaying;
   final position = provider.position;

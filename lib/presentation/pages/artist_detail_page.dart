@@ -20,9 +20,33 @@ class ArtistDetailPage extends HookWidget {
     final favs = context.watch<FavoritesProvider>();
     final userId = context.read<AuthProvider>().currentUser?.id ?? '';
 
+    // ScrollController para desplazar a la canción actual
+    final scrollController = useScrollController();
+
     final artId = artist.songs.isNotEmpty
         ? (int.tryParse(artist.songs.first.id) ?? 0)
         : (int.tryParse(artist.id) ?? 0);
+
+    // Desplazar automáticamente a la canción actual cuando se carga la página
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (audio.currentSong != null && artist.songs.isNotEmpty) {
+          final currentIndex = artist.songs.indexWhere(
+            (song) => song.id == audio.currentSong!.id,
+          );
+          if (currentIndex != -1 && scrollController.hasClients) {
+            // Calcular la posición aproximada del item (altura promedio de ListTile ~72px)
+            final position = currentIndex * 72.0;
+            scrollController.animateTo(
+              position,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      });
+      return null;
+    }, [audio.currentSong?.id]);
 
     return Scaffold(
       appBar: AppBar(
@@ -70,8 +94,8 @@ class ArtistDetailPage extends HookWidget {
                   child: Text(
                     artist.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 FilledButton.icon(
@@ -98,6 +122,7 @@ class ArtistDetailPage extends HookWidget {
             child: artist.songs.isEmpty
                 ? const Center(child: Text('No hay canciones de este artista'))
                 : ListView.builder(
+                    controller: scrollController,
                     itemCount: artist.songs.length,
                     itemBuilder: (_, i) {
                       final song = artist.songs[i];

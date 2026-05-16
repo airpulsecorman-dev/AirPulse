@@ -1,31 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/audio_provider.dart';
 import '../components/player_bar.dart';
+import '../components/favorite_button.dart';
 import '../../domain/entities/song.dart';
 import '../../core/utils/duration_utils.dart';
 
-class FavoritesPage extends StatefulWidget {
+class FavoritesPage extends HookWidget {
   const FavoritesPage({super.key});
-
-  @override
-  State<FavoritesPage> createState() => _FavoritesPageState();
-}
-
-class _FavoritesPageState extends State<FavoritesPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userId = context.read<AuthProvider>().currentUser?.id;
-      if (userId != null) {
-        context.read<FavoritesProvider>().loadFavorites(userId);
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +19,41 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final auth = context.watch<AuthProvider>();
     final audio = context.watch<AudioProvider>();
     final theme = Theme.of(context);
+
+    // ScrollController para desplazar a la canción actual
+    final scrollController = useScrollController();
+
+    // Cargar favoritos al iniciar
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final userId = auth.currentUser?.id;
+        if (userId != null) {
+          favorites.loadFavorites(userId);
+        }
+      });
+      return null;
+    }, []);
+
+    // Desplazar automáticamente a la canción actual cuando cambia
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (audio.currentSong != null && favorites.favorites.isNotEmpty) {
+          final currentIndex = favorites.favorites.indexWhere(
+            (song) => song.id == audio.currentSong!.id,
+          );
+          if (currentIndex != -1 && scrollController.hasClients) {
+            // Calcular la posición aproximada del item (altura promedio de ListTile ~72px)
+            final position = currentIndex * 72.0;
+            scrollController.animateTo(
+              position,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      });
+      return null;
+    }, [audio.currentSong?.id]);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,11 +82,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: CircularProgressIndicator(color: Color(0xFFFF4D8B)),
             )
           : favorites.favorites.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(context, theme)
           : Column(
               children: [
                 Expanded(
                   child: ListView.builder(
+                    controller: scrollController,
                     padding: const EdgeInsets.only(bottom: 80),
                     itemCount: favorites.favorites.length,
                     itemBuilder: (context, index) {
@@ -108,54 +130,53 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.surfaceContainerHighest,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.favorite_border,
-              size: 40,
-              color: Color(0xFFFF4D8B),
-            ),
+Widget _buildEmptyState(BuildContext context, ThemeData theme) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.colorScheme.surfaceContainerHighest,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF4D8B).withValues(alpha: 0.3),
+                blurRadius: 20,
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Sin canciones favoritas',
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          child: const Icon(
+            Icons.favorite_border,
+            size: 40,
+            color: Color(0xFFFF4D8B),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Agrega canciones desde la biblioteca\npresionando el ícono ♥',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Sin canciones favoritas',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Agrega canciones desde la biblioteca\npresionando el ícono ♥',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _FavoriteTile extends StatelessWidget {
@@ -173,7 +194,6 @@ class _FavoriteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.watch<FavoritesProvider>();
     final theme = Theme.of(context);
 
     return ListTile(
@@ -234,10 +254,18 @@ class _FavoriteTile extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: const Icon(Icons.favorite, color: Color(0xFFFF4D8B)),
-            onPressed: () => favorites.toggleFavorite(userId, song),
+          const SizedBox(width: 8),
+          // Usa el nuevo componente FavoriteButton
+          FavoriteButton(
+            song: song,
+            size: 24,
+            onChanged: (isFavorite) {
+              // Opcional: feedback adicional
+              if (!isFavorite) {
+                // La canción fue eliminada de favoritos
+                // Puedes agregar lógica adicional aquí
+              }
+            },
           ),
         ],
       ),

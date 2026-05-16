@@ -9,7 +9,11 @@ import '../../domain/entities/playlist.dart';
 
 /// Hook para acceder a la biblioteca de música.
 LibraryHookResult useLibrary(BuildContext context) {
-  final provider = useListenable(context.read<LibraryProvider>());
+  // Usar watch en lugar de read para que el hook se actualice cuando cambie el provider
+  final provider = context.watch<LibraryProvider>();
+
+  // Asegurar que el widget se reconstruya cuando cambien propiedades relevantes
+  useListenable(provider);
 
   return LibraryHookResult(
     songs: provider.songs,
