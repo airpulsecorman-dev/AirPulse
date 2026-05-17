@@ -2,6 +2,6 @@ echo "# AirPulse" >> README.md
 git init
 git add README.md
 git commit -m "first commit"
-git branch -M proyecto
-git remote add origin https://github.com/18-anth/AirPulse.git
-git push -u origin proyecto
+git branch -M main
+git remote add origin https://github.com/airpulsecorman-dev/AirPulse.git
+git push -u origin main
