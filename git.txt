@@ -5,3 +5,12 @@ git commit -m "first commit"
 git branch -M main
 git remote add origin https://github.com/airpulsecorman-dev/AirPulse.git
 git push -u origin main
+
+# Agregar segundo remote (airpulsecorman-dev)
+git remote add airpulse https://github.com/airpulsecorman-dev/AirPulse.git
+
+# Configurar token de acceso en el remote
+git remote set-url airpulse "https://<TOKEN>@github.com/airpulsecorman-dev/AirPulse.git"
+
+# Push al segundo remote
+git push -u airpulse main
