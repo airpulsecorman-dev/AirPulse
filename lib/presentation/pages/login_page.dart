@@ -530,7 +530,10 @@ class _WebQRLoginPanelState extends State<_WebQRLoginPanel> {
                         data: _qrData,
                         version: QrVersions.auto,
                         size: 180,
-                        foregroundColor: AppColors.backgroundDark,
+                        eyeStyle: QrEyeStyle(color: AppColors.backgroundDark),
+                        dataModuleStyle: QrDataModuleStyle(
+                          color: AppColors.backgroundDark,
+                        ),
                         backgroundColor: AppColors.white,
                       )
                     : const SizedBox(

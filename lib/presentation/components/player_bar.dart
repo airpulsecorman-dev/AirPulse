@@ -154,7 +154,7 @@ class _PlayerBarContentState extends State<_PlayerBarContent> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         boxShadow: [
-          BoxShadow(blurRadius: 8, color: AppColors.black.withOpacity(0.26)),
+          BoxShadow(blurRadius: 8, color: AppColors.black.withValues(alpha:0.26)),
         ],
       ),
       child: Column(

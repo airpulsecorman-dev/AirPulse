@@ -36,24 +36,17 @@ void main() async {
   // 🚀 PASO 1: Inicialización
   WidgetsFlutterBinding.ensureInitialized();
 
-  print('🚀 Inicializando AirPulse con optimizaciones enterprise...');
-
   // Detectar perfil de rendimiento del dispositivo
   final profile = PerformanceConfig.detectProfile();
   final settings = PerformanceConfig.getSettings(profile);
 
-  print('📊 Perfil detectado: ${profile.name}');
-  print(settings);
-
   // Inicializar Isolates Manager
   final isolatesManager = IsolatesManager();
   await isolatesManager.initialize();
-  print('✅ Isolates Manager inicializado');
 
   // Inicializar Metadata Cache
   final metadataCache = MetadataCacheManager();
   await metadataCache.initialize(memoryCacheSize: settings.metadataCacheSize);
-  print('✅ Metadata Cache inicializado');
 
   // Inicializar Artwork Cache
   final artworkCache = ArtworkCacheManager();
@@ -61,11 +54,9 @@ void main() async {
     maxImageCache: settings.artworkImageCacheSize,
     maxBytesCache: settings.artworkBytesCacheSize,
   );
-  print('✅ Artwork Cache inicializado');
 
   // 🚀 PASO 2: Setup de GetIt (Dependency Injection)
   await setupGetIt();
-  print('✅ Dependency Injection configurado');
 
   // 🚀 PASO 3: Limpiar cache viejo (opcional)
   metadataCache.cleanOldCache(maxAge: Duration(days: 30));
@@ -74,10 +65,7 @@ void main() async {
   final performanceMonitor = perf.PerformanceMonitor();
   if (const bool.fromEnvironment('dart.vm.product') == false) {
     performanceMonitor.startMonitoring();
-    print('✅ Performance Monitor activo (debug mode)');
   }
-
-  print('🎵 AirPulse listo con optimizaciones enterprise!\n');
 
   // Ejecutar app
   runApp(const MyApp());
@@ -175,7 +163,7 @@ class DebugMetricsPanel extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -267,20 +255,15 @@ class _MetricRow extends StatelessWidget {
 
 /// 🧪 Función de testing para validar optimizaciones
 Future<void> testOptimizations() async {
-  print('\n🧪 Ejecutando tests de optimización...\n');
-
   // Test 1: Isolates Manager
-  print('Test 1: Isolates Manager');
   final isolatesManager = IsolatesManager();
   await isolatesManager.initialize();
 
   final result = await isolatesManager.run((int input) async => input * 2, 42);
 
   assert(result == 84, 'Isolates Manager falla');
-  print('  ✅ Isolates Manager funciona correctamente\n');
 
   // Test 2: Metadata Cache
-  print('Test 2: Metadata Cache');
   final metadataCache = MetadataCacheManager();
   await metadataCache.initialize();
 
@@ -288,19 +271,12 @@ Future<void> testOptimizations() async {
   // await metadataCache.put(testSong, timestamp);
   // final cached = await metadataCache.get(path, timestamp);
 
-  print('  ✅ Metadata Cache funciona correctamente\n');
-
   // Test 3: Artwork Cache
-  print('Test 3: Artwork Cache');
   final artworkCache = ArtworkCacheManager();
   artworkCache.initialize();
 
-  final metrics = artworkCache.imageMetrics;
-  print('  📊 Metrics: $metrics');
-  print('  ✅ Artwork Cache funciona correctamente\n');
 
   // Test 4: Performance Monitor
-  print('Test 4: Performance Monitor');
   final monitor = perf.PerformanceMonitor();
   monitor.startMonitoring();
 
@@ -309,10 +285,5 @@ Future<void> testOptimizations() async {
   final metricsReceived = await monitor.metricsStream.first;
   assert(metricsReceived.fps > 0, 'Performance Monitor falla');
 
-  print('  📊 FPS: ${metricsReceived.fps.toStringAsFixed(1)}');
-  print('  ✅ Performance Monitor funciona correctamente\n');
-
   monitor.stopMonitoring();
-
-  print('✅ Todos los tests pasaron!\n');
 }

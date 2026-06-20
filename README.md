@@ -337,7 +337,7 @@ Inyección de dependencias con **GetIt**:
 | Archivo               | Funciones                                                                                                                               |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `duration_utils.dart` | • `formatDuration(Duration)` → `"3:45"`<br>• `playbackProgress(position, duration)` → `0.0-1.0`                                         |
-| `file_utils.dart`     | • `isSupportedAudio(path)` → Valida mp3, flac, aac, ogg, wav, m4a, opus<br>• `readableFileSize(bytes)` → `"3.5 MB"`                     |
+| `file_utils.dart`     | • `isSupportedAudio(path)` → Valida mp3, flac, aac, ogg, wav, m4a, opus <br> • `readableFileSize(bytes)` → `"3.5 MB"`                   |
 | `network_utils.dart`  | • `hasWifiConnection()` → `bool`<br>• `buildStreamUrl(ip, port, songId)` → URL completa<br>• `buildWebSocketUrl(ip, port)` → `ws://...` |
 
 ---
@@ -2012,7 +2012,7 @@ Password: [________________] [👁]
 - Email
 - Plan actual con badge
 
-#### Estadísticas
+#### **Estadísticas
 
 ```bash
 🎵 1,234 canciones reproducidas
@@ -2969,11 +2969,12 @@ Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detal
 - [Ngrok Dashboard](https://dashboard.ngrok.com)
 
 ---
-
-<div align="center">
+´´´bash
+  <div align="center">
 
 ### **Hecho con ❤️ usando Flutter**
 
-⭐ Si te gusta este proyecto, danos una estrella en GitHub ⭐
+  ⭐ Si te gusta este proyecto, danos una estrella en GitHub ⭐
 
-</div>
+  </div>
+´´´

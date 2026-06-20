@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Servicio para sincronizar el volumen del sistema Android con la app.
@@ -31,8 +32,8 @@ class SystemVolumeService {
       // Iniciar el listener en Android
       await platform.invokeMethod('startVolumeListener');
     } catch (e) {
-      print('Error iniciando volume listener: $e');
       _isListening = false;
+      debugPrint('Error starting volume listener: $e');
     }
   }
 
@@ -45,7 +46,7 @@ class SystemVolumeService {
     try {
       await platform.invokeMethod('stopVolumeListener');
     } catch (e) {
-      print('Error deteniendo volume listener: $e');
+      debugPrint('Error stopping volume listener: $e');
     }
   }
 
@@ -56,7 +57,8 @@ class SystemVolumeService {
         'volume': volume.clamp(0.0, 1.0),
       });
     } catch (e) {
-      print('Error setting volume: $e');
+      // Manejar error si es necesario
+      debugPrint('Error setting volume: $e');
     }
   }
 

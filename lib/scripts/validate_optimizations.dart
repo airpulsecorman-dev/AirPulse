@@ -10,8 +10,6 @@ library;
 import 'dart:io';
 
 void main() async {
-  print('🔍 Validando optimizaciones de AirPulse...\n');
-
   final results = <String, bool>{};
 
   // 1. Validar archivos críticos
@@ -24,36 +22,23 @@ void main() async {
   results['Configuración'] = await _validateConfig();
 
   // Resumen
-  print('\n' + '=' * 60);
-  print('📊 RESUMEN DE VALIDACIÓN');
-  print('=' * 60);
 
   int passedCount = 0;
   int total = results.length;
 
   results.forEach((test, testPassed) {
     final icon = testPassed ? '✅' : '❌';
-    print('$icon $test');
     if (testPassed) passedCount++;
   });
 
-  print('\n' + '=' * 60);
-  print('Resultado: $passedCount/$total tests pasados');
-
   if (passedCount == total) {
-    print('✅ ¡Todas las optimizaciones están correctamente instaladas!');
-    print('\n🚀 AirPulse está listo para rendimiento enterprise.');
     exit(0);
   } else {
-    print('❌ Algunas optimizaciones faltan o tienen errores.');
-    print('\n📖 Revisa PERFORMANCE_OPTIMIZATION_GUIDE.md para más detalles.');
     exit(1);
   }
 }
 
 Future<bool> _validateFiles() async {
-  print('📁 Validando archivos críticos...');
-
   final criticalFiles = [
     'lib/core/services/isolates_manager.dart',
     'lib/core/managers/metadata_cache_manager.dart',
@@ -77,9 +62,7 @@ Future<bool> _validateFiles() async {
     final exists = await file.exists();
 
     if (exists) {
-      print('  ✅ $path');
     } else {
-      print('  ❌ $path (FALTA)');
       allExist = false;
     }
   }
@@ -88,8 +71,6 @@ Future<bool> _validateFiles() async {
 }
 
 Future<bool> _validateImports() async {
-  print('\n📦 Validando imports...');
-
   final checks = <String, bool>{};
 
   // Verificar que isolates_manager tenga imports necesarios
@@ -114,15 +95,12 @@ Future<bool> _validateImports() async {
 
   checks.forEach((name, valid) {
     final icon = valid ? '✅' : '❌';
-    print('  $icon $name');
   });
 
   return allValid;
 }
 
 Future<bool> _validateConfig() async {
-  print('\n⚙️  Validando configuración...');
-
   bool valid = true;
 
   // Verificar pubspec.yaml tiene dependencias necesarias
@@ -141,10 +119,7 @@ Future<bool> _validateConfig() async {
 
     for (final dep in deps) {
       if (content.contains(dep)) {
-        print('  ✅ Dependencia: $dep');
-      } else {
-        print('  ⚠️  Dependencia faltante: $dep');
-      }
+      } else {}
     }
   }
 

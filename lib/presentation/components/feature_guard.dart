@@ -188,7 +188,7 @@ class FeatureBlocker extends StatelessWidget {
       onTap: onUpgrade,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.black.withOpacity(0.3),
+          color: AppColors.black.withValues(alpha:0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Stack(

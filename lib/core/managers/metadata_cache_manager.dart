@@ -17,7 +17,6 @@ library;
 
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import '../../domain/entities/song.dart';
 import '../../data/models/song_model.dart';
 import 'cache_manager.dart';
@@ -49,7 +48,7 @@ class MetadataCacheManager {
   /// Inicializa la base de datos
   Future<void> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'metadata_cache.db');
+    final path = '$dbPath/metadata_cache.db';
 
     _db = await openDatabase(
       path,

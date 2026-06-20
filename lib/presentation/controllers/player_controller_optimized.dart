@@ -37,8 +37,8 @@ class PlayerControllerOptimized extends ChangeNotifier {
   bool _isPlaying = false;
   Duration _position = Duration.zero;
   double _volume = 1.0;
-  RepeatMode _repeatMode = RepeatMode.none;
-  bool _shuffleEnabled = false;
+  final RepeatMode _repeatMode = RepeatMode.none;
+  final bool _shuffleEnabled = false;
   List<Song> _queue = [];
 
   // Listeners específicos

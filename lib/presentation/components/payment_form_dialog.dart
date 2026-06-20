@@ -187,7 +187,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ),
           borderRadius: BorderRadius.circular(8),
           color: _selectedMethod == method
-              ? AppColors.warningAmber.withOpacity(0.1)
+              ? AppColors.warningAmber.withValues(alpha:0.1)
               : AppColors.transparent,
         ),
         child: Row(
@@ -302,7 +302,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.1),
+              color: AppColors.info.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

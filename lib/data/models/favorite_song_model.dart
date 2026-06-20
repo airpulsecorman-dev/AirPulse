@@ -39,7 +39,7 @@ class FavoriteSongModel {
 
   /// Crea un modelo desde una fila de SQLite
   ///
-  /// Convierte los tipos de datos de SQLite (Map<String, dynamic>)
+  /// Convierte los tipos de datos de SQLite (Map< String, dynamic>)
   /// a un objeto FavoriteSongModel tipado
   factory FavoriteSongModel.fromMap(Map<String, dynamic> map) {
     return FavoriteSongModel(

@@ -1,6 +1,7 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 
-/// Clase centralizada para todos los colores de la aplicación AirPulse
 class AppColors {
   // ============================================
   // COLORES PRIMARIOS Y BRAND
@@ -145,21 +146,21 @@ class AppColors {
 
   /// Obtener color primario con opacidad personalizada
   static Color primaryWithOpacity(double opacity) {
-    return primary.withOpacity(opacity);
+    return primary.withValues(alpha: opacity);
   }
 
   /// Obtener color de superficie con opacidad personalizada
   static Color surfaceWithOpacity(double opacity) {
-    return surface.withOpacity(opacity);
+    return surface.withValues(alpha: opacity);
   }
 
   /// Obtener color blanco con opacidad personalizada
   static Color whiteWithOpacity(double opacity) {
-    return white.withOpacity(opacity);
+    return white.withValues(alpha: opacity);
   }
 
   /// Obtener color negro con opacidad personalizada
   static Color blackWithOpacity(double opacity) {
-    return black.withOpacity(opacity);
+    return black.withValues(alpha: opacity);
   }
 }

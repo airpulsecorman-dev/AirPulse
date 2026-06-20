@@ -163,7 +163,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
 
     final effectiveNormalColor =
         widget.normalColor ??
-        theme.colorScheme.onSurfaceVariant.withOpacity(0.6);
+        theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
     final iconColor = isFavorite
         ? effectiveFavoriteColor
@@ -174,7 +174,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
       child: Icon(
         isFavorite ? Icons.favorite : Icons.favorite_border,
         size: widget.size,
-        color: _isProcessing ? iconColor.withOpacity(0.5) : iconColor,
+        color: _isProcessing ? iconColor.withValues(alpha: 0.5) : iconColor,
       ),
     );
 
@@ -184,7 +184,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
         decoration: BoxDecoration(
           color:
               widget.backgroundColor ??
-              theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: button,
@@ -275,7 +275,7 @@ class FavoriteFloatingButton extends StatelessWidget {
       song: song,
       size: 28,
       showBackground: true,
-      backgroundColor: theme.colorScheme.surface.withOpacity(0.9),
+      backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.9),
       padding: const EdgeInsets.all(12),
       onChanged: onChanged,
     );

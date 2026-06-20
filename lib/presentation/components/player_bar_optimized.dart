@@ -162,7 +162,7 @@ class PlayerBarOptimized extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.grey.withOpacity(0.6),
+            color: AppColors.grey.withValues(alpha:0.6),
           ),
         ),
       ],
@@ -229,7 +229,7 @@ class _StaticProgressBar extends StatelessWidget {
         height: 2,
         child: LinearProgressIndicator(
           value: progress.clamp(0.0, 1.0),
-          backgroundColor: AppColors.grey.withOpacity(0.3),
+          backgroundColor: AppColors.grey.withValues(alpha:0.3),
           valueColor: AlwaysStoppedAnimation<Color>(
             Theme.of(context).colorScheme.primary,
           ),

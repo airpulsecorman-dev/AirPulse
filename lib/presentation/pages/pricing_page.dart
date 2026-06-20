@@ -140,7 +140,7 @@ class _PlanCard extends StatelessWidget {
         boxShadow: isPopular
             ? [
                 BoxShadow(
-                  color: AppColors.warningAmber.withOpacity(0.3),
+                  color: AppColors.warningAmber.withValues(alpha: 0.3),
                   blurRadius: 12,
                   spreadRadius: 0,
                 ),
@@ -391,8 +391,13 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                   Navigator.pop(context);
                 }
               : null,
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.warningAmber),
-          child: const Text('Continuar', style: TextStyle(color: AppColors.black)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.warningAmber,
+          ),
+          child: const Text(
+            'Continuar',
+            style: TextStyle(color: AppColors.black),
+          ),
         ),
       ],
     );
@@ -427,11 +432,16 @@ class _PaymentMethodOption extends StatelessWidget {
             width: selected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          color: selected ? AppColors.warningAmber.withOpacity(0.1) : AppColors.transparent,
+          color: selected
+              ? AppColors.warningAmber.withValues(alpha: 0.1)
+              : AppColors.transparent,
         ),
         child: Row(
           children: [
-            Icon(icon, color: selected ? AppColors.warningAmber : AppColors.grey400),
+            Icon(
+              icon,
+              color: selected ? AppColors.warningAmber : AppColors.grey400,
+            ),
             const SizedBox(width: 16),
             Text(
               title,
@@ -441,7 +451,8 @@ class _PaymentMethodOption extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            if (selected) Icon(Icons.check_circle, color: AppColors.warningAmber),
+            if (selected)
+              Icon(Icons.check_circle, color: AppColors.warningAmber),
           ],
         ),
       ),

@@ -15,7 +15,8 @@ class QRService {
       data: payload,
       version: QrVersions.auto,
       size: size,
-      foregroundColor: foregroundColor,
+      eyeStyle: QrEyeStyle(color: foregroundColor),
+      dataModuleStyle: QrDataModuleStyle(color: foregroundColor),
       backgroundColor: backgroundColor,
       errorCorrectionLevel: QrErrorCorrectLevel.M,
     );

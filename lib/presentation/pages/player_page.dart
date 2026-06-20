@@ -162,7 +162,7 @@ class _QueueSheetState extends State<_QueueSheet> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: AppColors.black.withOpacity(0.4),
+                            color: AppColors.black.withValues(alpha: 0.4),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -192,7 +192,9 @@ class _QueueSheetState extends State<_QueueSheet> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   tileColor: isCurrentSong
-                      ? Theme.of(ctx).colorScheme.primary.withOpacity(0.12)
+                      ? Theme.of(
+                          ctx,
+                        ).colorScheme.primary.withValues(alpha: 0.12)
                       : null,
                   onTap: () {
                     audio.play(song, q: queue, index: i);

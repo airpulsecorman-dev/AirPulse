@@ -754,7 +754,7 @@ class _BluetoothTab extends StatelessWidget {
                   size: 40,
                   borderRadius: 6,
                   nullWidget: CircleAvatar(
-                    backgroundColor: AppColors.info.withOpacity(0.15),
+                    backgroundColor: AppColors.info.withValues(alpha:0.15),
                     child: const Icon(
                       Icons.music_note,
                       size: 20,

@@ -89,8 +89,9 @@ class AudioProviderOptimized extends ChangeNotifier {
   // ============================================================================
 
   void _handleSongChange(Song? song) {
-    if (_currentSong?.id == song?.id)
+    if (_currentSong?.id == song?.id) {
       return; // 🚀 Evitar rebuild si es la misma
+    }
     _currentSong = song;
     notifyListeners(); // ✅ Solo notifica cuando REALMENTE cambió
   }

@@ -369,7 +369,7 @@ Future<List<Song>> _readMetadataBatchIsolate(List<_FileInfo> files) async {
       String? artworkPath;
 
       try {
-        final metadata = await readMetadata(file, getImage: true);
+        final metadata = readMetadata(file, getImage: true);
         if (metadata.title != null && metadata.title!.isNotEmpty) {
           title = metadata.title!;
         }

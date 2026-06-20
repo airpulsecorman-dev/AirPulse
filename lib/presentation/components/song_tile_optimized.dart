@@ -165,7 +165,7 @@ class _SongTileOptimizedState extends State<SongTileOptimized>
         trailing: _buildTrailing(theme),
         onTap: widget.onTap,
         tileColor: widget.isPlaying
-            ? theme.colorScheme.primary.withOpacity(0.12)
+            ? theme.colorScheme.primary.withValues(alpha:0.12)
             : null,
       ),
     );

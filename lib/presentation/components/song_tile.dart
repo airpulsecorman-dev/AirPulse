@@ -143,7 +143,7 @@ class SongTile extends StatelessWidget {
         ],
       ),
       onTap: onTap,
-      tileColor: isPlaying ? theme.colorScheme.primary.withOpacity(0.12) : null,
+      tileColor: isPlaying ? theme.colorScheme.primary.withValues(alpha:0.12) : null,
     );
   }
 }

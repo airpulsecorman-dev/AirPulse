@@ -13,7 +13,6 @@
 /// @enterprise
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Manager de paginación para listas grandes

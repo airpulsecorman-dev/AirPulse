@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/favorites_repository.dart';
 import '../models/favorite_song_model.dart';
@@ -160,7 +162,9 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
           await _database.deleteFavorite(userId, favorite.songId);
         } catch (e) {
           // Log error pero continúa con la validación
-          print('Error al eliminar favorito inválido ${favorite.songId}: $e');
+          if (kDebugMode) {
+            print('Error al eliminar favorito inválido ${favorite.songId}: $e');
+          }
         }
       }
     }

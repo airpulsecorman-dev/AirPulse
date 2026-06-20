@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -81,35 +82,45 @@ class FavoritesDatabase {
     try {
       await db.execute('PRAGMA foreign_keys = ON');
     } catch (e) {
-      print('Error configurando foreign_keys: $e');
+      if (kDebugMode) {
+        print('Error configurando foreign_keys: $e');
+      }
     }
 
     try {
       // Write-Ahead Logging para mejor concurrencia
       await db.rawQuery('PRAGMA journal_mode = WAL');
     } catch (e) {
-      print('Error configurando journal_mode: $e');
+      if (kDebugMode) {
+        print('Error configurando journal_mode: $e');
+      }
     }
 
     try {
       // Balance entre seguridad y rendimiento
       await db.execute('PRAGMA synchronous = NORMAL');
     } catch (e) {
-      print('Error configurando synchronous: $e');
+      if (kDebugMode) {
+        print('Error configurando synchronous: $e');
+      }
     }
 
     try {
       // Cache de 10MB
       await db.execute('PRAGMA cache_size = 10000');
     } catch (e) {
-      print('Error configurando cache_size: $e');
+      if (kDebugMode) {
+        print('Error configurando cache_size: $e');
+      }
     }
 
     try {
       // Tablas temporales en memoria
       await db.execute('PRAGMA temp_store = MEMORY');
     } catch (e) {
-      print('Error configurando temp_store: $e');
+      if (kDebugMode) {
+        print('Error configurando temp_store: $e');
+      }
     }
   }
 

@@ -307,8 +307,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 label: 'Nombre de usuario',
                 icon: Icons.alternate_email,
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty)
+                  if (v == null || v.trim().isEmpty) {
                     return 'Ingresa un nombre de usuario';
+                  }
                   if (v.trim().length < 3) return 'Mínimo 3 caracteres';
                   return null;
                 },
@@ -439,8 +440,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       setState(() => _obscureConfirm = !_obscureConfirm),
                 ),
                 validator: (v) {
-                  if (v != _passCtrl.text)
+                  if (v != _passCtrl.text) {
                     return 'Las contraseñas no coinciden';
+                  }
                   return null;
                 },
               ),

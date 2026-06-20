@@ -33,8 +33,8 @@ class _SubscriptionHook extends Hook<SubscriptionHookState> {
   const _SubscriptionHook(this.userId);
 
   @override
-  HookState<SubscriptionHookState, Hook<SubscriptionHookState>>
-      createState() => _SubscriptionHookState();
+  HookState<SubscriptionHookState, Hook<SubscriptionHookState>> createState() =>
+      _SubscriptionHookState();
 }
 
 class _SubscriptionHookState
@@ -81,7 +81,9 @@ class _SubscriptionHookState
       );
       _currentPlanState.value = currentPlan;
     } catch (e) {
-      print('Error loading plans: $e');
+      if (kDebugMode) {
+        print('Error loading plans: $e');
+      }
     } finally {
       _isLoadingState.value = false;
     }
@@ -97,7 +99,9 @@ class _SubscriptionHookState
       await _loadPlans();
       return true;
     } catch (e) {
-      print('Error upgrading plan: $e');
+      if (kDebugMode) {
+        print('Error upgrading plan: $e');
+      }
       return false;
     } finally {
       _isLoadingState.value = false;
@@ -110,7 +114,9 @@ class _SubscriptionHookState
       await _cancelSubscriptionUseCase(hook.userId);
       await _loadPlans();
     } catch (e) {
-      print('Error canceling subscription: $e');
+      if (kDebugMode) {
+        print('Error canceling subscription: $e');
+      }
     } finally {
       _isLoadingState.value = false;
     }
