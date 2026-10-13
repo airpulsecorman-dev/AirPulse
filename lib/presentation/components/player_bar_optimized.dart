@@ -14,7 +14,7 @@
 /// @optimized
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RepeatMode;
 import '../../core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';

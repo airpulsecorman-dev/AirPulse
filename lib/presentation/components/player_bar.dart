@@ -1,5 +1,5 @@
 import 'dart:math' show Random;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:airpulse/core/utils/Colors.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/repositories/player_repository.dart';

@@ -12,7 +12,7 @@
 /// @optimized
 library;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide RepeatMode;
 import 'package:provider/provider.dart';
 import '../providers/audio_provider_optimized.dart';
 import '../../domain/entities/song.dart';
