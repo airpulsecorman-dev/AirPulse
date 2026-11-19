@@ -53,6 +53,8 @@ void main() {
       expect(item.extras?['filePath'], '/music/song.mp3');
       expect(item.extras?['songId'], 'track-42');
       expect(item.extras?['type'], 'song');
+      expect(item.playable, isTrue);
+      expect(item.displayDescription, 'Artist • Album');
       expect(item.duration, const Duration(minutes: 2, seconds: 30));
     });
   });

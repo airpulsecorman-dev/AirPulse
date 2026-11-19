@@ -176,6 +176,8 @@ class AirPulseAudioHandler extends BaseAudioHandler
       album: song.album,
       duration: song.duration,
       artUri: artUri,
+      playable: true,
+      displayDescription: '${song.artist} • ${song.album}',
       extras: {'filePath': song.filePath, 'songId': song.id, 'type': 'song'},
     );
   }
@@ -271,6 +273,8 @@ class AirPulseAudioHandler extends BaseAudioHandler
       album: song.album,
       duration: song.duration,
       artUri: artUri,
+      playable: true,
+      displayDescription: '${song.artist} • ${song.album}',
       extras: extras,
     );
   }
