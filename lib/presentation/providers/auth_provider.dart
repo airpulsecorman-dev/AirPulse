@@ -7,6 +7,7 @@ import '../../domain/usecases/auth_usecases.dart';
 
 const _kQrSessionKey = 'qr_session_user';
 const _kQrSessionIdKey = 'qr_session_id';
+const _kCachedUserKey = 'cached_auth_user';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -30,9 +31,10 @@ class AuthProvider extends ChangeNotifier {
   String? get qrSessionId => _qrSessionId;
 
   Future<void> _init() async {
-    // En web: intentar restaurar sesión QR persistida en localStorage
+    final prefs = await SharedPreferences.getInstance();
+
+    // Restaurar una sesión QR persistida (web y escritorio).
     if (kIsWeb) {
-      final prefs = await SharedPreferences.getInstance();
       final json = prefs.getString(_kQrSessionKey);
       if (json != null) {
         try {
@@ -59,12 +61,76 @@ class AuthProvider extends ChangeNotifier {
       }
     }
 
+    // Caché independiente de Firebase: permite abrir la app después de
+    // cerrar el proceso desde Android recientes o después de reiniciar.
+    final cachedJson = prefs.getString(_kCachedUserKey);
+    if (cachedJson != null) {
+      try {
+        final map = Map<String, dynamic>.from(jsonDecode(cachedJson) as Map);
+        _currentUser = User(
+          id: map['id'] as String,
+          username: map['username'] as String,
+          firstName: map['firstName'] as String? ?? '',
+          lastName: map['lastName'] as String? ?? '',
+          email: map['email'] as String,
+          cedula: map['cedula'] as String?,
+          avatarPath: map['avatarPath'] as String?,
+          createdAt: DateTime.parse(
+            map['createdAt'] as String? ??
+                DateTime.now().toIso8601String(),
+          ),
+          birthDate: DateTime.parse(
+            map['birthDate'] as String? ??
+                DateTime(2000).toIso8601String(),
+          ),
+          subscriptionType: SubscriptionType.values.firstWhere(
+            (type) => type.name == (map['subscriptionType'] as String? ?? 'free'),
+            orElse: () => SubscriptionType.free,
+          ),
+          isMinor: map['isMinor'] as bool? ?? false,
+          acceptedTerms: map['acceptedTerms'] as bool? ?? false,
+          acceptedPrivacy: map['acceptedPrivacy'] as bool? ?? false,
+          acceptedIntellectual:
+              map['acceptedIntellectual'] as bool? ?? false,
+        );
+        _status = AuthStatus.authenticated;
+        notifyListeners();
+      } catch (_) {
+        await prefs.remove(_kCachedUserKey);
+      }
+    }
+
     final user = await GetCurrentUserUseCase(_repo).call();
     _currentUser = user;
+    if (user != null) {
+      await _cacheUser(user);
+    } else {
+      await prefs.remove(_kCachedUserKey);
+    }
     _status = user != null
         ? AuthStatus.authenticated
         : AuthStatus.unauthenticated;
     notifyListeners();
+  }
+
+  Future<void> _cacheUser(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kCachedUserKey, jsonEncode({
+      'id': user.id,
+      'username': user.username,
+      'firstName': user.firstName,
+      'lastName': user.lastName,
+      'email': user.email,
+      'cedula': user.cedula,
+      'avatarPath': user.avatarPath,
+      'createdAt': user.createdAt.toIso8601String(),
+      'birthDate': user.birthDate.toIso8601String(),
+      'subscriptionType': user.subscriptionType.name,
+      'isMinor': user.isMinor,
+      'acceptedTerms': user.acceptedTerms,
+      'acceptedPrivacy': user.acceptedPrivacy,
+      'acceptedIntellectual': user.acceptedIntellectual,
+    }));
   }
 
   Future<bool> login({required String email, required String password}) async {
@@ -75,6 +141,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = await LoginUseCase(
         _repo,
       ).call(email: email, password: password);
+      await _cacheUser(_currentUser!);
       _status = AuthStatus.authenticated;
       return true;
     } catch (e) {
@@ -114,6 +181,7 @@ class AuthProvider extends ChangeNotifier {
         acceptedPrivacy: acceptedPrivacy,
         acceptedIntellectual: acceptedIntellectual,
       );
+      await _cacheUser(_currentUser!);
       _status = AuthStatus.authenticated;
       return true;
     } catch (e) {
@@ -131,6 +199,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _currentUser = await GoogleSignInUseCase(_repo).call();
+      await _cacheUser(_currentUser!);
       _status = AuthStatus.authenticated;
       return true;
     } catch (e) {
@@ -167,32 +236,30 @@ class AuthProvider extends ChangeNotifier {
       isMinor: false,
     );
     _status = AuthStatus.authenticated;
-    // Persistir en localStorage para sobrevivir recargas del navegador
-    if (kIsWeb) {
-      SharedPreferences.getInstance().then((prefs) {
-        prefs.setString(_kQrSessionKey, jsonEncode({
-          'id': uid,
-          'email': email,
-          'username': _currentUser!.username,
-          'firstName': firstName,
-          'lastName': lastName,
-          'avatarPath': avatarPath,
-        }));
-        if (sessionId != null) {
-          prefs.setString(_kQrSessionIdKey, sessionId);
-        }
-      });
-    }
+    // Persistir la sesión también en Android/iOS al matar el proceso.
+    SharedPreferences.getInstance().then((prefs) async {
+      await prefs.setString(_kQrSessionKey, jsonEncode({
+        'id': uid,
+        'email': email,
+        'username': _currentUser!.username,
+        'firstName': firstName,
+        'lastName': lastName,
+        'avatarPath': avatarPath,
+      }));
+      await _cacheUser(_currentUser!);
+      if (sessionId != null) {
+        await prefs.setString(_kQrSessionIdKey, sessionId);
+      }
+    });
     notifyListeners();
   }
 
   Future<void> logout() async {
     await LogoutUseCase(_repo).call();
-    if (kIsWeb) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_kQrSessionKey);
-      await prefs.remove(_kQrSessionIdKey);
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kCachedUserKey);
+    await prefs.remove(_kQrSessionKey);
+    await prefs.remove(_kQrSessionIdKey);
     _qrSessionId = null;
     _currentUser = null;
     _status = AuthStatus.unauthenticated;
@@ -217,6 +284,7 @@ class AuthProvider extends ChangeNotifier {
         acceptedPrivacy: acceptedPrivacy,
         acceptedIntellectual: acceptedIntellectual,
       );
+      await _cacheUser(_currentUser!);
       return true;
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -246,6 +314,7 @@ class AuthProvider extends ChangeNotifier {
         username: username,
         email: email,
       );
+      await _cacheUser(_currentUser!);
       return true;
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
