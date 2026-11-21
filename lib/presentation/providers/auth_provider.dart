@@ -32,6 +32,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
+    var cachedSessionAvailable = false;
 
     // Restaurar una sesión QR persistida (web y escritorio).
     if (kIsWeb) {
@@ -93,6 +94,7 @@ class AuthProvider extends ChangeNotifier {
           acceptedIntellectual:
               map['acceptedIntellectual'] as bool? ?? false,
         );
+        cachedSessionAvailable = true;
         _status = AuthStatus.authenticated;
         notifyListeners();
       } catch (_) {
@@ -101,15 +103,19 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final user = await GetCurrentUserUseCase(_repo).call();
-    _currentUser = user;
     if (user != null) {
+      _currentUser = user;
       await _cacheUser(user);
-    } else {
+      _status = AuthStatus.authenticated;
+    } else if (!cachedSessionAvailable) {
+      _currentUser = null;
       await prefs.remove(_kCachedUserKey);
+      _status = AuthStatus.unauthenticated;
+    } else {
+      // Mantener la caché si Firebase aún no había terminado de restaurar.
+      // El usuario puede haber salido del proceso desde Aplicaciones recientes.
+      _status = AuthStatus.authenticated;
     }
-    _status = user != null
-        ? AuthStatus.authenticated
-        : AuthStatus.unauthenticated;
     notifyListeners();
   }
 

@@ -61,7 +61,9 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     // Con un timeout de 5 s por si no hay red (Firebase quedaría colgado).
     fb.User? fbUser;
     try {
-      fbUser = await _auth.authStateChanges().first.timeout(
+      fbUser = await _auth.authStateChanges().firstWhere(
+        (user) => user != null,
+      ).timeout(
         const Duration(seconds: 5),
         onTimeout: () => _auth.currentUser,
       );
