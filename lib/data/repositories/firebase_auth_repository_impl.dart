@@ -14,6 +14,17 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
     clientId: kIsWeb ? EnvLoader.get('GOOGLE_CLIENT_ID') : null,
   );
 
+  Future<void> _ensureSessionPersistence() async {
+    if (!kIsWeb) return;
+
+    try {
+      await _auth.setPersistence(fb.Persistence.LOCAL);
+    } on fb.FirebaseAuthException catch (_) {
+      // Firebase conserva LOCAL por defecto en web. Continuar con la
+      // persistencia disponible si el navegador rechaza el ajuste.
+    }
+  }
+
   // ────────────────────────────────────────────────────────────────────────────
   // Helpers
   // ────────────────────────────────────────────────────────────────────────────
@@ -43,6 +54,8 @@ class FirebaseAuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
+    await _ensureSessionPersistence();
+
     // Esperar a que Firebase restaure el estado de autenticación persistido.
     // currentUser puede ser null en el frame inicial aunque haya sesión activa.
     // Con un timeout de 5 s por si no hay red (Firebase quedaría colgado).
