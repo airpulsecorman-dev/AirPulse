@@ -18,8 +18,12 @@ class LibraryController extends ChangeNotifier {
   bool _isLoading = false;
   bool _refreshPending = false;
   Completer<void>? _pendingRefreshCompleter;
+  Completer<void>? _pendingLoadCompleter;
   String? _error;
   bool _disposed = false;
+  bool _cancelled = false;
+  bool _hasSuccessfulLoad = false;
+  int _loadGeneration = 0;
   String _searchQuery = '';
 
   List<Song> get filteredSongs {
@@ -40,6 +44,16 @@ class LibraryController extends ChangeNotifier {
   List<Playlist> get playlists => _playlists;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isCancelled => _cancelled;
+  String get loadStatus => _disposed && _cancelled
+      ? 'cancelled'
+      : _isLoading
+      ? 'loading'
+      : _error != null
+      ? 'failed'
+      : _hasSuccessfulLoad
+      ? 'success'
+      : 'idle';
   String get searchQuery => _searchQuery;
 
   Future<void> initialize() async {
@@ -48,55 +62,99 @@ class LibraryController extends ChangeNotifier {
     await _refreshAll();
   }
 
-  Future<void> refreshAll() async {
-    if (_disposed) return;
+  Future<void> refreshAll() {
+    if (_disposed) {
+      _cancelled = true;
+      return Future<void>.value();
+    }
     if (_isLoading) {
       _refreshPending = true;
       _pendingRefreshCompleter ??= Completer<void>();
       return _pendingRefreshCompleter!.future;
     }
-    await _refreshAll();
+    final completer = Completer<void>();
+    _pendingLoadCompleter = completer;
+    _refreshAll();
+    return completer.future;
   }
 
   Future<void> _refreshAll() async {
+    if (_disposed) return;
+    final generation = ++_loadGeneration;
     _isLoading = true;
+    _cancelled = false;
     _error = null;
     if (!_disposed) notifyListeners();
 
     do {
+      if (_disposed || generation != _loadGeneration) break;
       _refreshPending = false;
       _error = null;
       try {
         final songs = await _libraryService.getAllSongs();
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _allSongs = songs;
         final albums = await _libraryService.getAllAlbums(_allSongs);
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _albums = albums;
         final artists = await _libraryService.getAllArtists(_allSongs);
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _artists = artists;
         final playlists = await _libraryService.getAllPlaylists();
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _playlists = playlists;
+        if (generation == _loadGeneration && !_disposed) {
+          _hasSuccessfulLoad = true;
+        }
       } catch (e) {
-        if (!_disposed) _error = e.toString();
+        if (!_disposed && generation == _loadGeneration) {
+          _error = e.toString();
+        }
       }
     } while (_refreshPending);
 
+    if (_disposed) {
+      _cancelled = true;
+      _isLoading = false;
+      _completePendingRefresh();
+      _completePendingLoad();
+      return;
+    }
+    if (generation != _loadGeneration) {
+      _completePendingLoad();
+      return;
+    }
+
     _isLoading = false;
-    final pendingCompleter = _pendingRefreshCompleter;
-    _pendingRefreshCompleter = null;
-    pendingCompleter?.complete();
+    _completePendingRefresh();
+    _completePendingLoad();
     if (!_disposed) notifyListeners();
   }
 
+  void _completePendingLoad() {
+    final pendingCompleter = _pendingLoadCompleter;
+    _pendingLoadCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
+  }
+
+  void _completePendingRefresh() {
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
+  }
+
   void search(String query) {
+    if (_disposed) return;
     _searchQuery = query;
     notifyListeners();
   }
 
   void clearSearch() {
+    if (_disposed) return;
     _searchQuery = '';
     notifyListeners();
   }
@@ -126,13 +184,12 @@ class LibraryController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _cancelled = true;
     _isLoading = false;
     _refreshPending = false;
-    final pendingCompleter = _pendingRefreshCompleter;
-    _pendingRefreshCompleter = null;
-    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
-      pendingCompleter.complete();
-    }
+    _loadGeneration++;
+    _completePendingRefresh();
+    _completePendingLoad();
     super.dispose();
   }
 }

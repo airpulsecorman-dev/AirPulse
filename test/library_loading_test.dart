@@ -181,6 +181,9 @@ class RefreshHarness {
   final Future<void> Function() refresh;
   final bool Function() isLoading;
   final String? Function() error;
+  final bool Function() isCancelled;
+  final String Function() loadStatus;
+  final void Function() dispose;
   final int Function() fetchCount;
   final Future<void> Function(int) waitForFetchCount;
   final void Function(int, List<Song>) completeFetch;
@@ -190,6 +193,9 @@ class RefreshHarness {
     required this.refresh,
     required this.isLoading,
     required this.error,
+    required this.isCancelled,
+    required this.loadStatus,
+    required this.dispose,
     required this.fetchCount,
     required this.waitForFetchCount,
     required this.completeFetch,
@@ -217,6 +223,9 @@ List<RefreshHarness> createRefreshHarnesses() {
       refresh: normalProvider.loadLibrary,
       isLoading: () => normalProvider.isLoading,
       error: () => normalProvider.error,
+      isCancelled: () => normalProvider.isCancelled,
+      loadStatus: () => normalProvider.loadStatus,
+      dispose: normalProvider.dispose,
       fetchCount: () => normalProviderService.songFetchCount,
       waitForFetchCount: normalProviderService.waitForFetchCount,
       completeFetch: normalProviderService.completeFetch,
@@ -226,6 +235,9 @@ List<RefreshHarness> createRefreshHarnesses() {
       refresh: optimizedProvider.loadLibrary,
       isLoading: () => optimizedProvider.isLoading,
       error: () => optimizedProvider.error,
+      isCancelled: () => optimizedProvider.isCancelled,
+      loadStatus: () => optimizedProvider.loadStatus,
+      dispose: optimizedProvider.dispose,
       fetchCount: () => optimizedProviderService.songFetchCount,
       waitForFetchCount: optimizedProviderService.waitForFetchCount,
       completeFetch: optimizedProviderService.completeFetch,
@@ -235,6 +247,9 @@ List<RefreshHarness> createRefreshHarnesses() {
       refresh: normalController.refreshAll,
       isLoading: () => normalController.isLoading,
       error: () => normalController.error,
+      isCancelled: () => normalController.isCancelled,
+      loadStatus: () => normalController.loadStatus,
+      dispose: normalController.dispose,
       fetchCount: () => normalControllerService.songFetchCount,
       waitForFetchCount: normalControllerService.waitForFetchCount,
       completeFetch: normalControllerService.completeFetch,
@@ -244,6 +259,9 @@ List<RefreshHarness> createRefreshHarnesses() {
       refresh: optimizedController.refreshAll,
       isLoading: () => optimizedController.isLoading,
       error: () => optimizedController.error,
+      isCancelled: () => optimizedController.isCancelled,
+      loadStatus: () => optimizedController.loadStatus,
+      dispose: optimizedController.dispose,
       fetchCount: () => optimizedControllerService.songFetchCount,
       waitForFetchCount: optimizedControllerService.waitForFetchCount,
       completeFetch: optimizedControllerService.completeFetch,
@@ -592,6 +610,130 @@ void main() {
       await firstOptimizedController;
       expect(optimizedController.isLoading, isFalse);
       expect(loadingNotifications, controllerBeforeDispose);
+    },
+  );
+
+  test(
+    'future contract reports success, failure, and retry deterministically',
+    () async {
+      for (final harness in createRefreshHarnesses()) {
+        final success = harness.refresh();
+        await harness.waitForFetchCount(1);
+        harness.completeFetch(1, [makeSong(1)]);
+        await success;
+        expect(harness.error(), isNull);
+        expect(harness.isCancelled(), isFalse);
+        expect(harness.loadStatus(), 'success');
+        expect(harness.isLoading(), isFalse);
+
+        final failure = harness.refresh();
+        await harness.waitForFetchCount(2);
+        harness.failFetch(2, Exception('contract failure'));
+        await failure;
+        expect(harness.error(), contains('contract failure'));
+        expect(harness.isCancelled(), isFalse);
+        expect(harness.loadStatus(), 'failed');
+        expect(harness.isLoading(), isFalse);
+
+        final retry = harness.refresh();
+        await harness.waitForFetchCount(3);
+        harness.completeFetch(3, [makeSong(3)]);
+        await retry;
+        expect(harness.error(), isNull);
+        expect(harness.isCancelled(), isFalse);
+        expect(harness.loadStatus(), 'success');
+        expect(harness.isLoading(), isFalse);
+      }
+    },
+  );
+
+  test(
+    'dispose completes every shared refresh consumer as cancelled',
+    () async {
+      for (final harness in createRefreshHarnesses()) {
+        final first = harness.refresh();
+        await harness.waitForFetchCount(1);
+        final consumer2 = harness.refresh();
+        final consumer3 = harness.refresh();
+        final consumer4 = harness.refresh();
+
+        harness.dispose();
+        await Future.wait([first, consumer2, consumer3, consumer4]);
+
+        expect(harness.isLoading(), isFalse);
+        expect(harness.isCancelled(), isTrue);
+        expect(harness.loadStatus(), 'cancelled');
+        expect(harness.error(), isNull);
+      }
+    },
+  );
+
+  test('dispose during pending reload cancels both load cycles', () async {
+    for (final harness in createRefreshHarnesses()) {
+      final first = harness.refresh();
+      await harness.waitForFetchCount(1);
+      final reload = harness.refresh();
+
+      harness.completeFetch(1, [makeSong(1)]);
+      await harness.waitForFetchCount(2);
+      expect(harness.isLoading(), isTrue);
+
+      harness.dispose();
+      await Future.wait([first, reload]);
+
+      expect(harness.isLoading(), isFalse);
+      expect(harness.isCancelled(), isTrue);
+      expect(harness.loadStatus(), 'cancelled');
+    }
+  });
+
+  test(
+    'dispose during failed operation reports cancellation, not success',
+    () async {
+      for (final harness in createRefreshHarnesses()) {
+        final future = harness.refresh();
+        await harness.waitForFetchCount(1);
+        harness.dispose();
+        harness.failFetch(1, Exception('disposed failure'));
+        await future;
+
+        expect(harness.isLoading(), isFalse);
+        expect(harness.isCancelled(), isTrue);
+        expect(harness.loadStatus(), 'cancelled');
+        expect(harness.error(), isNull);
+      }
+    },
+  );
+
+  test(
+    'loading transitions and Completers remain correct across retries',
+    () async {
+      for (final harness in createRefreshHarnesses()) {
+        final first = harness.refresh();
+        expect(harness.isLoading(), isTrue);
+        await harness.waitForFetchCount(1);
+        final refreshA = harness.refresh();
+        final refreshB = harness.refresh();
+
+        harness.failFetch(1, Exception('first failure'));
+        await harness.waitForFetchCount(2);
+        expect(harness.isLoading(), isTrue);
+        expect(harness.error(), isNull);
+
+        harness.completeFetch(2, [makeSong(2)]);
+        await Future.wait([first, refreshA, refreshB]);
+        expect(harness.isLoading(), isFalse);
+        expect(harness.error(), isNull);
+        expect(harness.loadStatus(), 'success');
+
+        final retry = harness.refresh();
+        await harness.waitForFetchCount(3);
+        harness.failFetch(3, Exception('late failure'));
+        await retry;
+        expect(harness.isLoading(), isFalse);
+        expect(harness.error(), contains('late failure'));
+        expect(harness.loadStatus(), 'failed');
+      }
     },
   );
 }

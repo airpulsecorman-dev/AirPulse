@@ -45,8 +45,12 @@ class LibraryControllerOptimized extends ChangeNotifier {
   bool _isLoading = false;
   bool _refreshPending = false;
   Completer<void>? _pendingRefreshCompleter;
+  Completer<void>? _pendingLoadCompleter;
   String? _error;
   bool _disposed = false;
+  bool _cancelled = false;
+  bool _hasSuccessfulLoad = false;
+  int _loadGeneration = 0;
   String _searchQuery = '';
 
   // Progress tracking
@@ -74,6 +78,16 @@ class LibraryControllerOptimized extends ChangeNotifier {
   List<Playlist> get playlists => _playlists;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isCancelled => _cancelled;
+  String get loadStatus => _disposed && _cancelled
+      ? 'cancelled'
+      : _isLoading
+      ? 'loading'
+      : _error != null
+      ? 'failed'
+      : _hasSuccessfulLoad
+      ? 'success'
+      : 'idle';
   String get searchQuery => _searchQuery;
   int get loadProgress => _loadProgress;
   int get loadTotal => _loadTotal;
@@ -88,65 +102,105 @@ class LibraryControllerOptimized extends ChangeNotifier {
   }
 
   /// 🚀 Refresca todo con progress
-  Future<void> refreshAll() async {
-    if (_disposed) return;
+  Future<void> refreshAll() {
+    if (_disposed) {
+      _cancelled = true;
+      return Future<void>.value();
+    }
     if (_isLoading) {
       _refreshPending = true;
       _pendingRefreshCompleter ??= Completer<void>();
       return _pendingRefreshCompleter!.future;
     }
-    await _refreshAll();
+    final completer = Completer<void>();
+    _pendingLoadCompleter = completer;
+    _refreshAll();
+    return completer.future;
   }
 
   Future<void> _refreshAll() async {
     if (_disposed) return;
+    final generation = ++_loadGeneration;
     _setLoading(true);
+    _cancelled = false;
     _error = null;
     if (!_disposed) _notifyLoadingListeners();
 
     do {
+      if (_disposed || generation != _loadGeneration) break;
       _refreshPending = false;
       _error = null;
       try {
         final songs = await _libraryService.getAllSongs(
           onProgress: (current, total) {
-            if (_disposed) return;
+            if (_disposed || generation != _loadGeneration) return;
             _loadProgress = current;
             _loadTotal = total;
             _notifyProgressListeners();
           },
         );
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _allSongs = songs;
 
         _filteredSongs = _allSongs;
         final albums = await _libraryService.getAllAlbums(_allSongs);
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _albums = albums;
         final artists = await _libraryService.getAllArtists(_allSongs);
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _artists = artists;
         final playlists = await _libraryService.getAllPlaylists();
-        if (_disposed) break;
+        if (_disposed || generation != _loadGeneration) break;
         _playlists = playlists;
+        if (generation == _loadGeneration && !_disposed) {
+          _hasSuccessfulLoad = true;
+        }
         if (!_disposed) _notifySongsListeners();
       } catch (e) {
-        if (!_disposed) {
+        if (!_disposed && generation == _loadGeneration) {
           _error = e.toString();
           debugPrint('[LibraryController] Error: $e');
         }
       }
     } while (_refreshPending);
 
+    if (_disposed) {
+      _cancelled = true;
+      _setLoading(false);
+      _completePendingRefresh();
+      _completePendingLoad();
+      return;
+    }
+    if (generation != _loadGeneration) {
+      _completePendingLoad();
+      return;
+    }
+
     _setLoading(false);
+    _completePendingRefresh();
+    _completePendingLoad();
+    if (!_disposed) _notifyLoadingListeners();
+  }
+
+  void _completePendingLoad() {
+    final pendingCompleter = _pendingLoadCompleter;
+    _pendingLoadCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
+  }
+
+  void _completePendingRefresh() {
     final pendingCompleter = _pendingRefreshCompleter;
     _pendingRefreshCompleter = null;
-    pendingCompleter?.complete();
-    if (!_disposed) _notifyLoadingListeners();
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
   }
 
   /// 🚀 Búsqueda con debounce
   void search(String query) {
+    if (_disposed) return;
     _searchQuery = query;
 
     // Debounce search para no filtrar en cada keystroke
@@ -172,6 +226,7 @@ class LibraryControllerOptimized extends ChangeNotifier {
   }
 
   void clearSearch() {
+    if (_disposed) return;
     _searchQuery = '';
     _filteredSongs = _allSongs;
     _notifySearchListeners();
@@ -272,13 +327,12 @@ class LibraryControllerOptimized extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _cancelled = true;
     _isLoading = false;
     _refreshPending = false;
-    final pendingCompleter = _pendingRefreshCompleter;
-    _pendingRefreshCompleter = null;
-    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
-      pendingCompleter.complete();
-    }
+    _loadGeneration++;
+    _completePendingRefresh();
+    _completePendingLoad();
     _searchDebouncer.dispose();
     _songsListeners.clear();
     _searchListeners.clear();
