@@ -298,8 +298,9 @@ class PlayerPage extends HookWidget {
                             if (page != 1) return;
                             final song = audio.currentSong!;
                             if (songIdForLyrics.value == song.id &&
-                                lyricsState.value != _LyricsState.idle)
+                                lyricsState.value != _LyricsState.idle) {
                               return;
+                            }
                             songIdForLyrics.value = song.id;
                             syncedLines.value = [];
                             lyrics.value = '';

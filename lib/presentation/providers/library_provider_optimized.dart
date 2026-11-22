@@ -37,7 +37,10 @@ class LibraryProviderOptimized extends ChangeNotifier {
   List<Artist> _artists = [];
   List<Playlist> _playlists = [];
   bool _isLoading = false;
+  bool _refreshPending = false;
+  Completer<void>? _pendingRefreshCompleter;
   bool _permissionsRequested = false;
+  bool _disposed = false;
   String? _error;
   String _searchQuery = '';
 
@@ -121,6 +124,7 @@ class LibraryProviderOptimized extends ChangeNotifier {
   /// Carga más items (pagination)
   Future<void> loadMore() async {
     await _paginationManager?.loadMore();
+    if (_disposed) return;
     notifyListeners();
   }
 
@@ -130,31 +134,54 @@ class LibraryProviderOptimized extends ChangeNotifier {
   }
 
   Future<void> loadLibrary() async {
-    if (_isLoading) return;
+    if (_disposed) return;
+    if (_isLoading) {
+      _refreshPending = true;
+      _pendingRefreshCompleter ??= Completer<void>();
+      return _pendingRefreshCompleter!.future;
+    }
 
+    await _runLoadLoop();
+  }
+
+  Future<void> _runLoadLoop() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
 
-    try {
-      if (!_permissionsRequested) {
-        _permissionsRequested = true;
-        await _libraryService.requestPermissions();
+    do {
+      _refreshPending = false;
+      _error = null;
+      try {
+        if (!_permissionsRequested) {
+          _permissionsRequested = true;
+          await _libraryService.requestPermissions();
+          if (_disposed) break;
+        }
+
+        final songs = await _libraryService.getAllSongs();
+        if (_disposed) break;
+        _allSongs = songs;
+        final albums = await _libraryService.getAllAlbums(_allSongs);
+        if (_disposed) break;
+        _albums = albums;
+        final artists = await _libraryService.getAllArtists(_allSongs);
+        if (_disposed) break;
+        _artists = artists;
+        final playlists = await _libraryService.getAllPlaylists();
+        if (_disposed) break;
+        _playlists = playlists;
+        if (!_disposed) initializePagination();
+      } catch (e) {
+        if (!_disposed) _error = e.toString();
       }
+    } while (_refreshPending);
 
-      _allSongs = await _libraryService.getAllSongs();
-      _albums = await _libraryService.getAllAlbums(_allSongs);
-      _artists = await _libraryService.getAllArtists(_allSongs);
-      _playlists = await _libraryService.getAllPlaylists();
-
-      // Inicializar paginación
-      initializePagination();
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    _isLoading = false;
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    pendingCompleter?.complete();
+    if (!_disposed) notifyListeners();
   }
 
   /// 🚀 OPTIMIZACIÓN: Búsqueda con debounce y compute
@@ -201,11 +228,13 @@ class LibraryProviderOptimized extends ChangeNotifier {
           songs: _allSongs,
           query: query,
         );
+        if (_disposed) return;
 
         _cachedFilteredSongs = filtered;
         _lastFilteredQuery = query;
         _filteredCache.put(q, filtered);
       } catch (e) {
+        if (_disposed) return;
         debugPrint('Error filtering songs: $e');
         _cachedFilteredSongs = _filterSongsSync(query);
       }
@@ -215,7 +244,7 @@ class LibraryProviderOptimized extends ChangeNotifier {
       _filteredCache.put(q, _cachedFilteredSongs!);
     }
 
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   /// Filtrado síncrono (para listas pequeñas)
@@ -245,23 +274,27 @@ class LibraryProviderOptimized extends ChangeNotifier {
 
   Future<void> createPlaylist(String name) async {
     final playlist = await _libraryService.createPlaylist(name);
+    if (_disposed) return;
     _playlists = [..._playlists, playlist];
     notifyListeners();
   }
 
   Future<void> addSongToPlaylist(String playlistId, Song song) async {
     await _libraryService.addSongToPlaylist(playlistId, song);
+    if (_disposed) return;
     await _refreshPlaylists();
   }
 
   Future<void> deletePlaylist(String id) async {
     await _libraryService.deletePlaylist(id);
+    if (_disposed) return;
     _playlists = _playlists.where((p) => p.id != id).toList();
     notifyListeners();
   }
 
   Future<void> _refreshPlaylists() async {
     _playlists = await _libraryService.getAllPlaylists();
+    if (_disposed) return;
     notifyListeners();
   }
 
@@ -271,7 +304,8 @@ class LibraryProviderOptimized extends ChangeNotifier {
 
   Future<void> addSongsFromFiles() async {
     // Implementación existente...
-    await loadLibrary();
+    if (_isLoading) return;
+    await _runLoadLoop();
   }
 
   Future<void> deleteSongs(List<String> songIds) async {
@@ -279,7 +313,9 @@ class LibraryProviderOptimized extends ChangeNotifier {
         .where((s) => songIds.contains(s.id))
         .toList();
     await _libraryService.deleteSongsFromDevice(songsToDelete);
-    await loadLibrary();
+    if (_disposed) return;
+    if (_isLoading) return;
+    await _runLoadLoop();
   }
 
   // ============================================================================
@@ -288,6 +324,14 @@ class LibraryProviderOptimized extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _isLoading = false;
+    _refreshPending = false;
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
     _searchDebouncer?.cancel();
     _paginationManager?.dispose();
     _filteredCache.clear();

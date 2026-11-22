@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -15,7 +16,10 @@ class LibraryProvider extends ChangeNotifier {
   List<Artist> _artists = [];
   List<Playlist> _playlists = [];
   bool _isLoading = false;
+  bool _refreshPending = false;
+  Completer<void>? _pendingRefreshCompleter;
   bool _permissionsRequested = false;
+  bool _disposed = false;
   String? _error;
   String _searchQuery = '';
 
@@ -56,25 +60,52 @@ class LibraryProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   Future<void> loadLibrary() async {
-    if (_isLoading) return;
+    if (_disposed) return;
+    if (_isLoading) {
+      _refreshPending = true;
+      _pendingRefreshCompleter ??= Completer<void>();
+      return _pendingRefreshCompleter!.future;
+    }
+
+    await _runLoadLoop();
+  }
+
+  Future<void> _runLoadLoop() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
-    try {
-      if (!_permissionsRequested) {
-        _permissionsRequested = true;
-        await _libraryService.requestPermissions();
+    if (!_disposed) notifyListeners();
+
+    do {
+      _refreshPending = false;
+      _error = null;
+      try {
+        if (!_permissionsRequested) {
+          _permissionsRequested = true;
+          await _libraryService.requestPermissions();
+          if (_disposed) break;
+        }
+        final songs = await _libraryService.getAllSongs();
+        if (_disposed) break;
+        _songs = songs;
+        final albums = await _libraryService.getAllAlbums(_songs);
+        if (_disposed) break;
+        _albums = albums;
+        final artists = await _libraryService.getAllArtists(_songs);
+        if (_disposed) break;
+        _artists = artists;
+        final playlists = await _libraryService.getAllPlaylists();
+        if (_disposed) break;
+        _playlists = playlists;
+      } catch (e) {
+        if (!_disposed) _error = e.toString();
       }
-      _songs = await _libraryService.getAllSongs();
-      _albums = await _libraryService.getAllAlbums(_songs);
-      _artists = await _libraryService.getAllArtists(_songs);
-      _playlists = await _libraryService.getAllPlaylists();
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    } while (_refreshPending);
+
+    _isLoading = false;
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    pendingCompleter?.complete();
+    if (!_disposed) notifyListeners();
   }
 
   void setSearchQuery(String query) {
@@ -84,12 +115,14 @@ class LibraryProvider extends ChangeNotifier {
 
   Future<void> createPlaylist(String name) async {
     final playlist = await _libraryService.createPlaylist(name);
+    if (_disposed) return;
     _playlists = [..._playlists, playlist];
     notifyListeners();
   }
 
   Future<void> addSongToPlaylist(String playlistId, Song song) async {
     await _libraryService.addSongToPlaylist(playlistId, song);
+    if (_disposed) return;
     await _refreshPlaylists();
   }
 
@@ -98,6 +131,7 @@ class LibraryProvider extends ChangeNotifier {
       allowMultiple: true,
       type: FileType.audio,
     );
+    if (_disposed) return;
     if (result == null || result.files.isEmpty) return;
 
     const uuid = Uuid();
@@ -121,6 +155,7 @@ class LibraryProvider extends ChangeNotifier {
 
   Future<void> deletePlaylist(String playlistId) async {
     await _libraryService.deletePlaylist(playlistId);
+    if (_disposed) return;
     _playlists = _playlists.where((p) => p.id != playlistId).toList();
     notifyListeners();
   }
@@ -129,12 +164,27 @@ class LibraryProvider extends ChangeNotifier {
     final idSet = ids.toSet();
     final toDelete = _songs.where((s) => idSet.contains(s.id)).toList();
     await _libraryService.deleteSongsFromDevice(toDelete);
+    if (_disposed) return;
     _songs = _songs.where((s) => !idSet.contains(s.id)).toList();
     notifyListeners();
   }
 
   Future<void> _refreshPlaylists() async {
     _playlists = await _libraryService.getAllPlaylists();
+    if (_disposed) return;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _isLoading = false;
+    _refreshPending = false;
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
+    super.dispose();
   }
 }

@@ -22,6 +22,7 @@
 /// @optimized
 library;
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/entities/album.dart';
@@ -42,7 +43,10 @@ class LibraryControllerOptimized extends ChangeNotifier {
   List<Playlist> _playlists = [];
 
   bool _isLoading = false;
+  bool _refreshPending = false;
+  Completer<void>? _pendingRefreshCompleter;
   String? _error;
+  bool _disposed = false;
   String _searchQuery = '';
 
   // Progress tracking
@@ -79,39 +83,66 @@ class LibraryControllerOptimized extends ChangeNotifier {
   /// 🚀 Inicializa con progress tracking
   Future<void> initialize() async {
     await _libraryService.requestPermissions();
-    await refreshAll();
+    if (_disposed) return;
+    await _refreshAll();
   }
 
   /// 🚀 Refresca todo con progress
   Future<void> refreshAll() async {
-    if (_isLoading) return;
+    if (_disposed) return;
+    if (_isLoading) {
+      _refreshPending = true;
+      _pendingRefreshCompleter ??= Completer<void>();
+      return _pendingRefreshCompleter!.future;
+    }
+    await _refreshAll();
+  }
+
+  Future<void> _refreshAll() async {
+    if (_disposed) return;
     _setLoading(true);
     _error = null;
-    _notifyLoadingListeners();
+    if (!_disposed) _notifyLoadingListeners();
 
-    try {
-      // Cargar canciones con progress callback
-      _allSongs = await _libraryService.getAllSongs(
-        onProgress: (current, total) {
-          _loadProgress = current;
-          _loadTotal = total;
-          _notifyProgressListeners();
-        },
-      );
+    do {
+      _refreshPending = false;
+      _error = null;
+      try {
+        final songs = await _libraryService.getAllSongs(
+          onProgress: (current, total) {
+            if (_disposed) return;
+            _loadProgress = current;
+            _loadTotal = total;
+            _notifyProgressListeners();
+          },
+        );
+        if (_disposed) break;
+        _allSongs = songs;
 
-      _filteredSongs = _allSongs;
-      _albums = await _libraryService.getAllAlbums(_allSongs);
-      _artists = await _libraryService.getAllArtists(_allSongs);
-      _playlists = await _libraryService.getAllPlaylists();
+        _filteredSongs = _allSongs;
+        final albums = await _libraryService.getAllAlbums(_allSongs);
+        if (_disposed) break;
+        _albums = albums;
+        final artists = await _libraryService.getAllArtists(_allSongs);
+        if (_disposed) break;
+        _artists = artists;
+        final playlists = await _libraryService.getAllPlaylists();
+        if (_disposed) break;
+        _playlists = playlists;
+        if (!_disposed) _notifySongsListeners();
+      } catch (e) {
+        if (!_disposed) {
+          _error = e.toString();
+          debugPrint('[LibraryController] Error: $e');
+        }
+      }
+    } while (_refreshPending);
 
-      _notifySongsListeners();
-    } catch (e) {
-      _error = e.toString();
-      debugPrint('[LibraryController] Error: $e');
-    } finally {
-      _setLoading(false);
-      _notifyLoadingListeners();
-    }
+    _setLoading(false);
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    pendingCompleter?.complete();
+    if (!_disposed) _notifyLoadingListeners();
   }
 
   /// 🚀 Búsqueda con debounce
@@ -148,18 +179,22 @@ class LibraryControllerOptimized extends ChangeNotifier {
 
   Future<void> createPlaylist(String name) async {
     final playlist = await _libraryService.createPlaylist(name);
+    if (_disposed) return;
     _playlists = [..._playlists, playlist];
     notifyListeners(); // Solo para playlists
   }
 
   Future<void> addToPlaylist(String playlistId, Song song) async {
     await _libraryService.addSongToPlaylist(playlistId, song);
+    if (_disposed) return;
     _playlists = await _libraryService.getAllPlaylists();
+    if (_disposed) return;
     notifyListeners(); // Solo para playlists
   }
 
   Future<void> deletePlaylist(String id) async {
     await _libraryService.deletePlaylist(id);
+    if (_disposed) return;
     _playlists = _playlists.where((p) => p.id != id).toList();
     notifyListeners(); // Solo para playlists
   }
@@ -236,6 +271,14 @@ class LibraryControllerOptimized extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _isLoading = false;
+    _refreshPending = false;
+    final pendingCompleter = _pendingRefreshCompleter;
+    _pendingRefreshCompleter = null;
+    if (pendingCompleter != null && !pendingCompleter.isCompleted) {
+      pendingCompleter.complete();
+    }
     _searchDebouncer.dispose();
     _songsListeners.clear();
     _searchListeners.clear();

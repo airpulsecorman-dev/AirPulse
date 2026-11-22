@@ -106,7 +106,7 @@ class ArtworkCacheManager {
 
   /// Obtiene placeholder optimizado
   Widget getPlaceholder(Color color, IconData icon) {
-    final key = '${color.value}_${icon.hashCode}';
+    final key = '${color.toARGB32()}_${icon.hashCode}';
 
     return _placeholders.putIfAbsent(
       key,
