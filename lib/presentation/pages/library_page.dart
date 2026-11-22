@@ -265,37 +265,38 @@ class LibraryPage extends HookWidget {
               ],
             ),
       bottomNavigationBar: audio.currentSong != null
-          ? GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/player'),
-              child: PlayerBar(
-                currentSong: audio.currentSong,
-                isPlaying: audio.isPlaying,
-                position: audio.position,
-                positionStream: audio.positionStream,
-                repeatMode: audio.repeatMode,
-                shuffleEnabled: audio.shuffleEnabled,
-                onPlay: audio.resume,
-                onPause: audio.pause,
-                onNext: audio.next,
-                onPrevious: audio.previous,
-                onSeek: audio.seek,
-                onRepeatMode: audio.setRepeatMode,
-                onShuffle: audio.toggleShuffle,
-                onAccentColorChanged: (newColor) {
-                  accentColor.value = newColor;
-                },
-                isFavorite:
-                    audio.currentSong != null &&
-                    favorites.isFavorite(audio.currentSong!.id),
-                onToggleFavorite: audio.currentSong == null
-                    ? null
-                    : () {
-                        final userId = auth.currentUser?.id;
-                        if (userId != null) {
-                          favorites.toggleFavorite(userId, audio.currentSong!);
-                        }
-                      },
-              ),
+          ? PlayerBar(
+              currentSong: audio.currentSong,
+              isPlaying: audio.isPlaying,
+              position: audio.position,
+              positionStream: audio.positionStream,
+              repeatMode: audio.repeatMode,
+              shuffleEnabled: audio.shuffleEnabled,
+              onPlay: audio.resume,
+              onPause: audio.pause,
+              onNext: audio.next,
+              onPrevious: audio.previous,
+              onSeek: audio.seek,
+              onRepeatMode: audio.setRepeatMode,
+              onShuffle: audio.toggleShuffle,
+              onAccentColorChanged: (newColor) {
+                accentColor.value = newColor;
+              },
+              isFavorite:
+                  audio.currentSong != null &&
+                  favorites.isFavorite(audio.currentSong!.id),
+              onToggleFavorite: audio.currentSong == null
+                  ? null
+                  : () {
+                      final userId = auth.currentUser?.id;
+                      if (userId != null) {
+                        favorites.toggleFavorite(userId, audio.currentSong!);
+                      }
+                    },
+              onTap: () {
+                if (ModalRoute.of(context)?.settings.name == '/player') return;
+                Navigator.pushNamed(context, '/player');
+              },
             )
           : null,
     );
@@ -508,9 +509,6 @@ class _SongsListState extends State<_SongsList> {
                   final isSelected = _selected.contains(song.id);
                   return InkWell(
                     onLongPress: () => _toggleSelection(song.id),
-                    onTap: _isSelecting
-                        ? () => _toggleSelection(song.id)
-                        : () => widget.onSongTap(song),
                     child: ColoredBox(
                       color: isSelected
                           ? Theme.of(

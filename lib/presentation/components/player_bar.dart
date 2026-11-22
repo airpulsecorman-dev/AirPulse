@@ -29,6 +29,7 @@ class PlayerBar extends StatelessWidget {
   final ValueChanged<Color>? onAccentColorChanged;
   final bool isFavorite;
   final VoidCallback? onToggleFavorite;
+  final VoidCallback? onTap;
 
   const PlayerBar({
     super.key,
@@ -48,6 +49,7 @@ class PlayerBar extends StatelessWidget {
     this.onAccentColorChanged,
     this.isFavorite = false,
     this.onToggleFavorite,
+    this.onTap,
   });
 
   @override
@@ -72,6 +74,7 @@ class PlayerBar extends StatelessWidget {
             onShuffle: onShuffle,
             isFavorite: isFavorite,
             onToggleFavorite: onToggleFavorite,
+            onTap: onTap,
           );
         },
       );
@@ -92,6 +95,7 @@ class PlayerBar extends StatelessWidget {
       onAccentColorChanged: onAccentColorChanged,
       isFavorite: isFavorite,
       onToggleFavorite: onToggleFavorite,
+      onTap: onTap,
     );
   }
 }
@@ -112,6 +116,7 @@ class _PlayerBarContent extends StatefulWidget {
   final ValueChanged<Color>? onAccentColorChanged;
   final bool isFavorite;
   final VoidCallback? onToggleFavorite;
+  final VoidCallback? onTap;
 
   const _PlayerBarContent({
     required this.currentSong,
@@ -129,6 +134,7 @@ class _PlayerBarContent extends StatefulWidget {
     this.onAccentColorChanged,
     this.isFavorite = false,
     this.onToggleFavorite,
+    this.onTap,
   });
 
   @override
@@ -154,48 +160,55 @@ class _PlayerBarContentState extends State<_PlayerBarContent> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         boxShadow: [
-          BoxShadow(blurRadius: 8, color: AppColors.black.withValues(alpha:0.26)),
+          BoxShadow(
+            blurRadius: 8,
+            color: AppColors.black.withValues(alpha: 0.26),
+          ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Artwork circular
-                SongArtwork(
-                  songId: widget.currentSong?.id ?? '',
-                  artworkPath: widget.currentSong?.artworkPath,
-                  size: 40,
-                  borderRadius: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.currentSong?.title ?? '—',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.currentSong?.artist ?? '—',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Artwork circular
+                  SongArtwork(
+                    songId: widget.currentSong?.id ?? '',
+                    artworkPath: widget.currentSong?.artworkPath,
+                    size: 40,
+                    borderRadius: 20,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.currentSong?.title ?? '—',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          widget.currentSong?.artist ?? '—',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Progress bar
