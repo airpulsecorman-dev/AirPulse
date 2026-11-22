@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class ControlledCycleRunner implements LibraryLoadCycleRunner {
   final List<Completer<void>> _cycles = <Completer<void>>[];
-  final List<Completer<void>> _waiters = <Completer<void>>[];
+  final Map<int, Completer<void>> _waiters = <int, Completer<void>>{};
   int cycleCount = 0;
 
   @override
@@ -14,11 +14,11 @@ class ControlledCycleRunner implements LibraryLoadCycleRunner {
     cycleCount++;
     final completer = Completer<void>();
     _cycles.add(completer);
-    for (final waiter in List<Completer<void>>.from(_waiters)) {
-      if (cycleCount >= _waiters.indexOf(waiter) + 1) {
-        waiter.complete();
-        _waiters.remove(waiter);
-      }
+    final targets = _waiters.keys
+        .where((target) => cycleCount >= target)
+        .toList();
+    for (final target in targets) {
+      _waiters.remove(target)!.complete();
     }
     return completer.future;
   }
@@ -28,7 +28,7 @@ class ControlledCycleRunner implements LibraryLoadCycleRunner {
       return Future<void>.value();
     }
     final completer = Completer<void>();
-    _waiters.add(completer);
+    _waiters[count] = completer;
     return completer.future;
   }
 
@@ -118,11 +118,9 @@ void main() {
       await runner.waitForCycleCount(1);
       final loaded = coordinator.load();
       runner.succeed(1);
-      await runner.waitForCycleCount(2);
-      runner.succeed(2);
 
       final results = await Future.wait([refreshed, loaded]);
-      expect(runner.cycleCount, 2);
+      expect(runner.cycleCount, 1);
       expect(results[0].cycleId, results[1].cycleId);
     });
 
