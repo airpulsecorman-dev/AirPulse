@@ -44,6 +44,23 @@ class ControlledCycleRunner implements LibraryLoadCycleRunner {
   }
 }
 
+class SynchronousThrowingCycleRunner implements LibraryLoadCycleRunner {
+  SynchronousThrowingCycleRunner({
+    required this.error,
+    required this.stackTrace,
+  });
+
+  final Object error;
+  final StackTrace stackTrace;
+  int cycleCount = 0;
+
+  @override
+  Future<void> runCycle() {
+    cycleCount++;
+    Error.throwWithStackTrace(error, stackTrace);
+  }
+}
+
 void main() {
   group('LibraryLoadCoordinator', () {
     test('normal load succeeds', () async {
@@ -428,6 +445,118 @@ void main() {
       expect((await old).status, LibraryLoadResultStatus.cancelled);
       expect(coordinator.pendingOperationCount, 0);
     });
+
+    test('sync runCycle exception preserves error and stackTrace', () async {
+      final error = StateError('synchronous read failure');
+      final stackTrace = StackTrace.current;
+      final runner = SynchronousThrowingCycleRunner(
+        error: error,
+        stackTrace: stackTrace,
+      );
+      final coordinator = LibraryLoadCoordinator(runner: runner);
+
+      final result = await coordinator.load();
+
+      expect(runner.cycleCount, 1);
+      expect(result.status, LibraryLoadResultStatus.failed);
+      expect(result.failureReason, LibraryLoadFailureReason.readException);
+      expect(result.error, same(error));
+      expect(result.errorMessage, error.toString());
+      expect(result.stackTrace, same(stackTrace));
+      expect(coordinator.pendingOperationCount, 0);
+    });
+
+    test(
+      'late error after timeout does not replace timeout or rethrow',
+      () async {
+        final runner = ControlledCycleRunner();
+        final coordinator = LibraryLoadCoordinator(
+          runner: runner,
+          cycleTimeout: Duration.zero,
+        );
+
+        final future = coordinator.load();
+        await runner.waitForCycleCount(1);
+        final timeoutResult = await future;
+        final lateError = StateError('late read failure');
+        runner.fail(1, lateError);
+        await Future<void>.value();
+
+        final result = await future;
+        expect(timeoutResult.status, LibraryLoadResultStatus.failed);
+        expect(timeoutResult.error, isA<TimeoutException>());
+        expect(result.status, LibraryLoadResultStatus.failed);
+        expect(result.error, isA<TimeoutException>());
+        expect(result.error, isNot(same(lateError)));
+        expect(coordinator.pendingOperationCount, 0);
+      },
+    );
+
+    test(
+      'dispose twice during pending operation cancels operations independently',
+      () async {
+        final runner = ControlledCycleRunner();
+        final coordinator = LibraryLoadCoordinator(runner: runner);
+
+        final first = coordinator.load();
+        final second = coordinator.load();
+        await runner.waitForCycleCount(1);
+
+        expect(() => coordinator.dispose(), returnsNormally);
+        expect(() => coordinator.dispose(), returnsNormally);
+
+        final results = await Future.wait([first, second]);
+        runner.succeed(1);
+        await Future<void>.value();
+
+        expect(
+          results.every(
+            (result) => result.status == LibraryLoadResultStatus.cancelled,
+          ),
+          isTrue,
+        );
+        expect(results[0], isNot(same(results[1])));
+        expect(results[0].operationId, isNot(results[1].operationId));
+        expect(results[0].cycleId, results[1].cycleId);
+        expect(coordinator.pendingOperationCount, 0);
+
+        expect(() => coordinator.dispose(), returnsNormally);
+        final postDisposeLoad = await coordinator.load();
+        final postDisposeRefresh = await coordinator.refresh();
+        expect(postDisposeLoad.status, LibraryLoadResultStatus.cancelled);
+        expect(postDisposeRefresh.status, LibraryLoadResultStatus.cancelled);
+        expect(runner.cycleCount, 1);
+        expect(coordinator.pendingOperationCount, 0);
+        expect(coordinator.isDisposed, isTrue);
+      },
+    );
+
+    test(
+      'timeout cleanup starts independent subsequent load without repetition',
+      () async {
+        final runner = ControlledCycleRunner();
+        final coordinator = LibraryLoadCoordinator(
+          runner: runner,
+          cycleTimeout: Duration.zero,
+        );
+
+        final timedOut = await coordinator.load();
+
+        expect(timedOut.status, LibraryLoadResultStatus.failed);
+        expect(timedOut.error, isA<TimeoutException>());
+        expect(coordinator.pendingOperationCount, 0);
+
+        final next = coordinator.load();
+        await runner.waitForCycleCount(2);
+        runner.succeed(2);
+        final nextResult = await next;
+
+        expect(nextResult.status, LibraryLoadResultStatus.success);
+        expect(nextResult.cycleId, isNot(timedOut.cycleId));
+        expect(runner.cycleCount, 2);
+        expect(coordinator.pendingOperationCount, 0);
+      },
+    );
 
     test('refreshes have no duplicate execution', () async {
       final runner = ControlledCycleRunner();
