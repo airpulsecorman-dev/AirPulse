@@ -33,15 +33,45 @@ class LibraryLoadResult {
     if (cycleId.trim().isEmpty) {
       throw ArgumentError.value(cycleId, 'cycleId', 'Must not be empty');
     }
-    if (status == LibraryLoadResultStatus.success && failureReason != null) {
-      throw ArgumentError(
-        'A successful library load cannot have a failureReason',
-      );
+    if (status == LibraryLoadResultStatus.success) {
+      if (failureReason != null) {
+        throw ArgumentError(
+          'A successful library load cannot have a failureReason',
+        );
+      }
+      if (error != null) {
+        throw ArgumentError('A successful library load cannot have an error');
+      }
+      if (errorMessage != null) {
+        throw ArgumentError(
+          'A successful library load cannot have an errorMessage',
+        );
+      }
+      if (stackTrace != null) {
+        throw ArgumentError(
+          'A successful library load cannot have a stackTrace',
+        );
+      }
     }
-    if (status == LibraryLoadResultStatus.cancelled && failureReason != null) {
-      throw ArgumentError(
-        'A cancelled library load cannot have a failureReason',
-      );
+    if (status == LibraryLoadResultStatus.cancelled) {
+      if (failureReason != null) {
+        throw ArgumentError(
+          'A cancelled library load cannot have a failureReason',
+        );
+      }
+      if (error != null) {
+        throw ArgumentError('A cancelled library load cannot have an error');
+      }
+      if (errorMessage != null) {
+        throw ArgumentError(
+          'A cancelled library load cannot have an errorMessage',
+        );
+      }
+      if (stackTrace != null) {
+        throw ArgumentError(
+          'A cancelled library load cannot have a stackTrace',
+        );
+      }
     }
     if (status == LibraryLoadResultStatus.failed && failureReason == null) {
       throw ArgumentError('A failed library load must have a failureReason');
