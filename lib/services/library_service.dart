@@ -6,15 +6,18 @@ import '../data/repositories/library_repository_impl.dart';
 import '../data/sources/local/library_local_source.dart';
 
 class LibraryService {
-  final LibraryRepositoryImpl _repo =
-      LibraryRepositoryImpl(LibraryLocalSource());
+  final LibraryRepositoryImpl _repo = LibraryRepositoryImpl(
+    LibraryLocalSource(),
+  );
 
   Future<bool> requestPermissions() =>
       LibraryLocalSource().requestPermissions();
 
   Future<List<Song>> getAllSongs() => _repo.getAllSongs();
-  Future<List<Album>> getAllAlbums() => _repo.getAllAlbums();
-  Future<List<Artist>> getAllArtists() => _repo.getAllArtists();
+  Future<List<Album>> getAllAlbums([List<Song>? songs]) =>
+      _repo.getAllAlbums(songs);
+  Future<List<Artist>> getAllArtists([List<Song>? songs]) =>
+      _repo.getAllArtists(songs);
   Future<List<Playlist>> getAllPlaylists() => _repo.getAllPlaylists();
   Future<List<Song>> searchSongs(String query) => _repo.searchSongs(query);
   Future<Playlist> createPlaylist(String name) => _repo.createPlaylist(name);

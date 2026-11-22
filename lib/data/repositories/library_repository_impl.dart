@@ -24,27 +24,29 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<List<Album>> getAllAlbums() async {
-    final songs = await getAllSongs();
+  Future<List<Album>> getAllAlbums([List<Song>? songs]) async {
+    final resolvedSongs = songs ?? await getAllSongs();
     final albumMap = <String, List<Song>>{};
-    for (final song in songs) {
+    for (final song in resolvedSongs) {
       albumMap.putIfAbsent(song.album, () => []).add(song);
     }
     return albumMap.entries
-        .map((e) => Album(
-              id: e.key,
-              title: e.key,
-              artist: e.value.first.artist,
-              songs: e.value,
-            ))
+        .map(
+          (e) => Album(
+            id: e.key,
+            title: e.key,
+            artist: e.value.first.artist,
+            songs: e.value,
+          ),
+        )
         .toList();
   }
 
   @override
-  Future<List<Artist>> getAllArtists() async {
-    final songs = await getAllSongs();
+  Future<List<Artist>> getAllArtists([List<Song>? songs]) async {
+    final resolvedSongs = songs ?? await getAllSongs();
     final artistMap = <String, List<Song>>{};
-    for (final song in songs) {
+    for (final song in resolvedSongs) {
       artistMap.putIfAbsent(song.artist, () => []).add(song);
     }
     return artistMap.entries

@@ -84,6 +84,7 @@ class LibraryControllerOptimized extends ChangeNotifier {
 
   /// 🚀 Refresca todo con progress
   Future<void> refreshAll() async {
+    if (_isLoading) return;
     _setLoading(true);
     _error = null;
     _notifyLoadingListeners();
@@ -99,8 +100,8 @@ class LibraryControllerOptimized extends ChangeNotifier {
       );
 
       _filteredSongs = _allSongs;
-      _albums = await _libraryService.getAllAlbums();
-      _artists = await _libraryService.getAllArtists();
+      _albums = await _libraryService.getAllAlbums(_allSongs);
+      _artists = await _libraryService.getAllArtists(_allSongs);
       _playlists = await _libraryService.getAllPlaylists();
 
       _notifySongsListeners();

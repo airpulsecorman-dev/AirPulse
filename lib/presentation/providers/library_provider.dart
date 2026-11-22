@@ -66,8 +66,8 @@ class LibraryProvider extends ChangeNotifier {
         await _libraryService.requestPermissions();
       }
       _songs = await _libraryService.getAllSongs();
-      _albums = await _libraryService.getAllAlbums();
-      _artists = await _libraryService.getAllArtists();
+      _albums = await _libraryService.getAllAlbums(_songs);
+      _artists = await _libraryService.getAllArtists(_songs);
       _playlists = await _libraryService.getAllPlaylists();
     } catch (e) {
       _error = e.toString();

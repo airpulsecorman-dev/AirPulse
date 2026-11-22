@@ -5,8 +5,8 @@ import '../entities/playlist.dart';
 
 abstract class LibraryRepository {
   Future<List<Song>> getAllSongs();
-  Future<List<Album>> getAllAlbums();
-  Future<List<Artist>> getAllArtists();
+  Future<List<Album>> getAllAlbums([List<Song>? songs]);
+  Future<List<Artist>> getAllArtists([List<Song>? songs]);
   Future<List<Playlist>> getAllPlaylists();
   Future<List<Song>> searchSongs(String query);
   Future<Song?> getSongById(String id);

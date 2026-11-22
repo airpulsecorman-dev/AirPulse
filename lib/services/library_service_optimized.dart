@@ -34,8 +34,10 @@ class LibraryServiceOptimized {
     return _source.fetchSongs(onProgress: onProgress);
   }
 
-  Future<List<Album>> getAllAlbums() => _repo.getAllAlbums();
-  Future<List<Artist>> getAllArtists() => _repo.getAllArtists();
+  Future<List<Album>> getAllAlbums([List<Song>? songs]) =>
+      _repo.getAllAlbums(songs);
+  Future<List<Artist>> getAllArtists([List<Song>? songs]) =>
+      _repo.getAllArtists(songs);
   Future<List<Playlist>> getAllPlaylists() => _repo.getAllPlaylists();
   Future<List<Song>> searchSongs(String query) => _repo.searchSongs(query);
   Future<Playlist> createPlaylist(String name) => _repo.createPlaylist(name);

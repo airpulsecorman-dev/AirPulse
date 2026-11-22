@@ -22,10 +22,12 @@ class LibraryController extends ChangeNotifier {
     if (_searchQuery.isEmpty) return _allSongs;
     final q = _searchQuery.toLowerCase();
     return _allSongs
-        .where((s) =>
-            s.title.toLowerCase().contains(q) ||
-            s.artist.toLowerCase().contains(q) ||
-            s.album.toLowerCase().contains(q))
+        .where(
+          (s) =>
+              s.title.toLowerCase().contains(q) ||
+              s.artist.toLowerCase().contains(q) ||
+              s.album.toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -42,13 +44,14 @@ class LibraryController extends ChangeNotifier {
   }
 
   Future<void> refreshAll() async {
+    if (_isLoading) return;
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
       _allSongs = await _libraryService.getAllSongs();
-      _albums = await _libraryService.getAllAlbums();
-      _artists = await _libraryService.getAllArtists();
+      _albums = await _libraryService.getAllAlbums(_allSongs);
+      _artists = await _libraryService.getAllArtists(_allSongs);
       _playlists = await _libraryService.getAllPlaylists();
     } catch (e) {
       _error = e.toString();

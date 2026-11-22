@@ -142,18 +142,10 @@ class LibraryProviderOptimized extends ChangeNotifier {
         await _libraryService.requestPermissions();
       }
 
-      // 🚀 OPTIMIZACIÓN: Cargar en paralelo cuando sea posible
-      final results = await Future.wait([
-        _libraryService.getAllSongs(),
-        _libraryService.getAllAlbums(),
-        _libraryService.getAllArtists(),
-        _libraryService.getAllPlaylists(),
-      ]);
-
-      _allSongs = results[0] as List<Song>;
-      _albums = results[1] as List<Album>;
-      _artists = results[2] as List<Artist>;
-      _playlists = results[3] as List<Playlist>;
+      _allSongs = await _libraryService.getAllSongs();
+      _albums = await _libraryService.getAllAlbums(_allSongs);
+      _artists = await _libraryService.getAllArtists(_allSongs);
+      _playlists = await _libraryService.getAllPlaylists();
 
       // Inicializar paginación
       initializePagination();
